@@ -179,7 +179,18 @@ local function _hasfield(field, tab)
    if type(tab) == "table" and rawget(tab, field) then
       return true, tab[field]
    elseif getmetatable(tab) then
-      return _hasfield(field, getmetatable(tab))
+      local _M = getmetatable(tab)
+      if type(_M.__index) == "table" then
+         return _hasfield(field, getmetatable(tab))
+      elseif type(_M.__index) == "function" then
+         local result = _M.__index(tab, field)
+         if result ~= nil then
+            return true, result
+         else
+            return false
+      else
+         return false
+      end
    else
       return false
    end
