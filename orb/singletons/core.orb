@@ -180,14 +180,19 @@ local function _hasfield(field, tab)
       return true, tab[field]
    elseif getmetatable(tab) then
       local _M = getmetatable(tab)
-      if type(_M.__index) == "table" then
-         return _hasfield(field, _M.__index)
-      elseif type(_M.__index) == "function" then
-         local result = _M.__index(tab, field)
+      local maybeIndex = rawget(_M, "__index")
+      if type(maybeIndex) == "table" then
+         return _hasfield(field, maybeIndex)
+      elseif type(maybeIndex) == "function" then
+         local success, result = pcall(maybeIndex, tab, field)
+         if not success then
+            return false
+         end
          if result ~= nil then
             return true, result
          else
             return false
+         end
       else
          return false
       end
@@ -606,6 +611,26 @@ local function lines(str)
 end
 
 core.lines = lines
+#/lua
+
+
+*** to_repr(str)
+
+makes a __repr-able table which returns the actual string without markup and
+respecting line breaks.
+
+#!lua
+local function _str__repr(str_tab)
+    return str_tab[1]
+end
+
+local _str_M = {__repr = _str__repr}
+
+function core.to_repr(str)
+   str = tostring(str)
+   return setmetatable({str}, {__index = _str_M})
+end
+
 #/lua
 
 
