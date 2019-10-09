@@ -241,6 +241,29 @@ end
 core.clone = _clone
 #/lua
 
+*** isarray(tab)
+
+Determines if =tab= is an array, i.e. a table whose only keys are a contiguous
+range of integers starting at 1.
+
+This seems potentially unsafe--pairs() technically may return keys in any order.
+In practice integer keys seem to be returned first and in-order, and certainly
+*if* there are only integer keys I imagine this holds true no matter what. If
+there are non-integer keys, well, things being out of order will cause us to
+fail fast, which is a good thing, so...bonus, I guess.
+
+#!lua
+
+function core.isarray(tab)
+   local i = 1
+   for k,_ in pairs(tab) do
+      if k ~= i then return false end
+      i = i + 1
+   end
+   return true
+end
+
+#/lua
 
 *** arrayof(tab)
 
