@@ -609,29 +609,25 @@ local function cleave(str, pat)
    if at then
       return sub(str, 1, at - 1), sub(str, at + 1)
    else
-      return nil
+      return str, nil
    end
 end
 core.cleave = cleave
 #/lua
 
 #!lua
-local yield, wrap = assert(coroutine.yield), assert(coroutine.wrap)
-
-local function _lines(str)
-   if str == "" or not str then return nil end
-   local line, rem = cleave(str, "\n")
-   if line then
-      yield(line)
-   else
-      yield(str)
-   end
-   _lines(rem)
-end
 
 local function lines(str)
-  return coroutine.wrap(function() return _lines(str) end)
+   local remain = str
+   return function()
+      while remain do
+         local line
+         line, remain = cleave(remain, "\n")
+         return line
+      end
+   end
 end
+
 
 core.lines = lines
 #/lua
