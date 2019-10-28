@@ -106,10 +106,16 @@ local sub = assert(string.sub)
 
 function core.hasmetamethod(tab, mmethod)
    assert(type(mmethod) == "string", "metamethod must be a string")
+   assert(type(tab) == "table",
+          "first argument to hasmetamethod must be a table")
+   local M = getmetatable(tab)
+   if not M then
+      return false
+   end
    if sub(mmethod,1,2) == "__" then
-      return type(tab) == "table" and tab[mmethod]
+      return rawget(M, mmethod)
    else
-      return type(tab) == "table" and tab["__" ..mmethod]
+      return rawget(M, "__" .. mmethod)
    end
 end
 #/lua
@@ -152,6 +158,40 @@ end
 
 function core.readOnly(tab)
    return setmetatable({}, {__index = tab, __newindex = RO_M__newindex})
+end
+#/lua
+
+
+** Coroutine extensions
+
+
+*** safeWrap(f, ...)
+
+This is to avoid the =cannot resume dead coroutine= error in using stock
+=wrap=.
+
+Due to the way =coroutine.resume= works, this is limited to five return
+values.
+
+#!lua
+local create, status, resume = coroutine.create,
+                                coroutine.status,
+                                coroutine.resume
+
+function core.safeWrap(f)
+   wrapped_fn = create(f)
+   return function(...)
+      if status(wrapped_fn) == "dead" then
+         return nil
+      end
+      local success, a, b, c, d, e
+      success, a, b, c, d, e =  resume(wrapped_fn, ...)
+      if success then
+         return a, b, c, d, e
+      else
+         error(a)
+      end
+   end
 end
 #/lua
 
