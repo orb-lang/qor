@@ -90,21 +90,25 @@ end
 #/lua
 
 
-*** hasmetamethod(tab, mmethod)
+*** hasmetamethod(mmethod, tab)
 
-The function of this is clear: given a table, return =true= if it can receive
-a given metamethod.
+Given a table, return a metamethod if present, otherwise, return =false= or
+=nil=.
 
-The question is, how magical to make it. I'm going with "slightly magical" for
-now.  You can leave off the "__" in checking for a metamethod.
+This is slightly magical, in that you can leave off the ="__"= in the name
+of the metamethod.
 
-A successful lookup returns the result, presumable truthy, otherwise =false=
-for a non-table argument and =nil= for a failed lookup.
+This could be enhanced to work the same way as =hasfield=, so that
+=hasmetamethod.index(tab) returns the index if the table has an "__index"
+metamethod.
+
+I've made the parameter order identical to =hasfield= so as to make this
+practical; for now, it's a bit of fiddling around for little benefit.
 
 #!lua
 local sub = assert(string.sub)
 
-function core.hasmetamethod(tab, mmethod)
+function core.hasmetamethod(mmethod, tab)
    assert(type(mmethod) == "string", "metamethod must be a string")
    assert(type(tab) == "table",
           "first argument to hasmetamethod must be a table")
@@ -173,6 +177,12 @@ This is to avoid the =cannot resume dead coroutine= error in using stock
 Due to the way =coroutine.resume= works, this is limited to five return
 values.
 
+#NB this appears to be correct, but doesn't seem to work in practice;
+in particular, running multiple safeWrapped closures on an event loop
+seems to interfere with the coroutine.
+
+Which is weird.
+
 #!lua
 local create, status, resume = coroutine.create,
                                 coroutine.status,
@@ -183,13 +193,14 @@ function core.safeWrap(f)
    return function(...)
       if status(wrapped_fn) == "dead" then
          return nil
-      end
-      local success, a, b, c, d, e
-      success, a, b, c, d, e =  resume(wrapped_fn, ...)
-      if success then
-         return a, b, c, d, e
       else
-         error(a)
+         local success, a, b, c, d, e
+         success, a, b, c, d, e =  resume(wrapped_fn, ...)
+         if success then
+            return a, b, c, d, e
+         else
+            error(a)
+         end
       end
    end
 end
@@ -658,7 +669,7 @@ core.cleave = cleave
 #!lua
 
 local function lines(str)
-   local remain = str
+   local remain = tostring(str)
    return function()
       while remain do
          local line
