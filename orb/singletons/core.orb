@@ -298,6 +298,12 @@ In practice integer keys seem to be returned first and in-order, and certainly
 there are non-integer keys, well, things being out of order will cause us to
 fail fast, which is a good thing, so...bonus, I guess.
 
+NB: this function bears no resemblance to the actual behavior of Lua, which
+is frankly somewhat horrifying if one goes off-reservation with table
+behavior. (The actual Lua behavior uses a binary search, so some "holes"--
+e.g. {1, nil, 3}--will affect #, while others won't. We are more careful, at
+the cost of some performance.)
+
 #!lua
 
 function core.isarray(tab)
@@ -347,7 +353,7 @@ end
 
 Recursively return all =v= for =key= in all subtables of tab.
 
-#NB: this is not being used and collides with a core library name.
+NB: this is not being used and collides with a core library name.
 
 Should probably be removed.
 
@@ -506,8 +512,6 @@ local format = assert(string.format)
 This takes a string and validates the first character.
 
 Return is either the (valid) length in bytes, or nil and an error string.
-
-#NB deprecated, brought in a whole utf8 library
 
 #!lua
 local function continue(c)
@@ -701,20 +705,37 @@ end
 
 *** codepoints(str)
 
-Returns an array of the utf8 codepoints in =str=, incidentally validating or
-rather filtering the contents into utf8 compliance.
+Returns an array of the utf8 codepoints in =str=.
+
+If =str= is valid utf8, this array will contain all the original codepoints.
+If not, =codepoints= will filter out invalid sequences and make a note of
+where and what is wrong.
 
 #!lua
+local concat = assert(table.concat)
 
 local function split(str, at)
    return sub(str,1, at), sub(str, at + 1)
 end
 
+local cp_M = {}
 
+
+function cp_M.__tostring(codepoints)
+   local answer = codepoints
+   if codepoints.err then
+      answer = {}
+      for i, v in ipairs(codepoints) do
+         local err_here = codepoints.err[i]
+         answer[i] = err_here and err_here.char or v
+      end
+   end
+   return concat(answer)
+end
 
 function core.codepoints(str)
    local utf8 = core.utf8
-   local codes = {}
+   local codes = setmetatable({}, cp_M)
    -- propagate nil
    if not str then return nil end
    -- break on bad type
@@ -723,13 +744,18 @@ function core.codepoints(str)
       local width, err = utf8(str)
       if width then
          local head, tail = split(str, width)
-         codes[#codes + 1] = head
+         insert(codes, head)
          str = tail
       else
-         -- make sure we take a bit off anyway
-         str = sub(str, -1)
-         -- for debugging
-         codes[codes + 1] = { err = err }
+         -- take off a byte and store it
+         local err_packet = { char = sub(str, 1, 1),
+                              err  = err }
+         str = sub(str, 2)
+         codes.err = codes.err or {}
+         insert(codes, "�")
+         -- place the error at the same offset in the
+         -- err table
+         codes.err[#codes] = err_packet
       end
    end
    return codes
