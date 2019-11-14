@@ -507,9 +507,10 @@ local sub = assert(string.sub)
 local format = assert(string.format)
 #/lua
 
-*** utf8(char)
+*** utf8(str, [offset])
 
-This takes a string and validates the first character.
+This takes a string and validates one codepoint, starting at the given
+offset (default of 1).
 
 Return is either the (valid) length in bytes, or nil and an error string.
 
@@ -518,27 +519,30 @@ local function continue(c)
    return c >= 128 and c <= 191
 end
 
-function core.utf8(c)
+function core.utf8(str, offset)
+   offset = offset or 1
    local byte = byte
-   local head = byte(c)
+   local head = byte(str, offset)
    if head < 128 then
       return 1
    elseif head >= 194 and head <= 223 then
-      local two = byte(c, 2)
+      local two = byte(str, offset + 1)
       if continue(two) then
          return 2
       else
          return nil, "utf8: bad second byte"
       end
    elseif head >= 224 and head <= 239 then
-      local two, three = byte(c, 2), byte(c, 3)
+      local two, three = byte(str, offset + 1), byte(str, offset + 2)
       if continue(two) and continue(three) then
          return 3
       else
          return nil, "utf8: bad second and/or third byte"
       end
    elseif head >= 240 and head <= 244 then
-      local two, three, four = byte(c, 2), byte(c, 3), byte(c, 4)
+      local two, three, four = byte(str, offset + 1),
+                               byte(str, offset + 2),
+                               byte(str, offset + 3)
       if continue(two) and continue(three) and continue(four) then
          return 4
       else
@@ -703,13 +707,16 @@ end
 #/lua
 
 
-*** codepoints(str)
+*** codepoints(str, [start], [finish])
 
 Returns an array of the utf8 codepoints in =str=.
 
 If =str= is valid utf8, this array will contain all the original codepoints.
 If not, =codepoints= will filter out invalid sequences and make a note of
 where and what is wrong.
+
+=start= and =finish= are optional integers, specifying offsets into the
+string.
 
 #!lua
 local concat = assert(table.concat)
@@ -733,29 +740,32 @@ function cp_M.__tostring(codepoints)
    return concat(answer)
 end
 
-function core.codepoints(str)
+function core.codepoints(str, start, finish)
+   start = start or 1
+   finish = (finish and finish <= #str) and finish or #str
    local utf8 = core.utf8
-   local codes = setmetatable({}, cp_M)
    -- propagate nil
    if not str then return nil end
    -- break on bad type
    assert(type(str) == "string", "codepoints must be given a string")
-   while #str > 0 do
-      local width, err = utf8(str)
+   local codes = setmetatable({}, cp_M)
+   local index = start
+   while index <= finish do
+      local width, err = utf8(str, index)
       if width then
-         local head, tail = split(str, width)
-         insert(codes, head)
-         str = tail
+         local point = sub(str, index, index + width - 1)
+         insert(codes, point)
+         index = index + width
       else
          -- take off a byte and store it
-         local err_packet = { char = sub(str, 1, 1),
+         local err_packet = { char = sub(str, index, index),
                               err  = err }
-         str = sub(str, 2)
          codes.err = codes.err or {}
          insert(codes, "�")
          -- place the error at the same offset in the
          -- err table
-         codes.err[#codes] = err_packet
+         insert(codes.err, err_packet)
+         index = index + 1
       end
    end
    return codes
