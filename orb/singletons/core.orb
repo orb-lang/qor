@@ -519,14 +519,24 @@ local function continue(c)
    return c >= 128 and c <= 191
 end
 
+local function _offsideErr(str, offset)
+   return nil, "out of bounds: #str: " .. tostring(#str)
+                  .. ", offset: " .. tostring(offset)
+end
 function core.utf8(str, offset)
    offset = offset or 1
    local byte = byte
    local head = byte(str, offset)
+   if not head then
+      return _offsideErr(str, offset)
+   end
    if head < 128 then
       return 1
    elseif head >= 194 and head <= 223 then
       local two = byte(str, offset + 1)
+      if not two then
+         return _offsideErr(str, offset + 1)
+      end
       if continue(two) then
          return 2
       else
@@ -534,6 +544,9 @@ function core.utf8(str, offset)
       end
    elseif head >= 224 and head <= 239 then
       local two, three = byte(str, offset + 1), byte(str, offset + 2)
+      if (not two) or (not three) then
+         return _offsideErr(str, offset + 2)
+      end
       if continue(two) and continue(three) then
          return 3
       else
@@ -543,6 +556,9 @@ function core.utf8(str, offset)
       local two, three, four = byte(str, offset + 1),
                                byte(str, offset + 2),
                                byte(str, offset + 3)
+      if (not two) or (not three) or (not four) then
+         return _offsideErr(str, offset + 3)
+      end
       if continue(two) and continue(three) and continue(four) then
          return 4
       else
