@@ -685,12 +685,15 @@ end
 core.cleave = cleave
 #/lua
 
-#!lua
 
+**** core.lines(str)
+
+Returns an iterator over the lines of a string.
+
+#!lua
 local function lines(str)
    return string.gmatch(str, "[^\n]+")
 end
-
 
 core.lines = lines
 #/lua
