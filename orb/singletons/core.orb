@@ -688,14 +688,7 @@ core.cleave = cleave
 #!lua
 
 local function lines(str)
-   local remain = tostring(str)
-   return function()
-      while remain do
-         local line
-         line, remain = cleave(remain, "\n")
-         return line
-      end
-   end
+   return string.gmatch(str, "[^\n]+")
 end
 
 
