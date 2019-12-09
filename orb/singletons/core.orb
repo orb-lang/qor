@@ -338,9 +338,9 @@ end
 arguments to pass to it.
 
 #!lua
-function core.collect(iter, tab)
+function core.collect(iter, tab, ...)
    local k_tab, v_tab = {}, {}
-   for k, v in iter(tab) do
+   for k, v in iter(tab, ...) do
       k_tab[#k_tab + 1] = k
       v_tab[#v_tab + 1] = v
    end
@@ -732,10 +732,6 @@ string.
 
 #!lua
 local concat = assert(table.concat)
-
-local function split(str, at)
-   return sub(str,1, at), sub(str, at + 1)
-end
 
 local cp_M = {}
 
