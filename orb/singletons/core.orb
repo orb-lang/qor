@@ -287,6 +287,35 @@ end
 core.clone = _clone
 #/lua
 
+
+*** core.deepclone
+
+#!lua
+function core.deepclone(tab)
+   assert(type(tab) == "table",
+          "cannot deepclone value of type " .. type(tab))
+   local dupes = {}
+   local function _deep(val)
+      if type(val) ~= "table" then
+         return val
+      end
+      local copy
+      if dupes[val] then
+         copy = dupes[val]
+      else
+         copy = {}
+         dupes[val] = copy
+         setmetatable(copy, _deep(getmetatable(val)))
+         for k,v in pairs(val) do
+            copy[_deep(k)] = _deep(v)
+         end
+      end
+      return copy
+   end
+   return _deep(tab)
+end
+#/lua
+
 *** isarray(tab)
 
 Determines if =tab= is an array, i.e. a table whose only keys are a contiguous
