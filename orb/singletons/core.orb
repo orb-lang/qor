@@ -290,6 +290,8 @@ core.clone = _clone
 
 *** core.deepclone
 
+Makes a cycle-checked deep copy of a table, including metatables.
+
 #!lua
 function core.deepclone(tab)
    assert(type(tab) == "table",
@@ -305,10 +307,12 @@ function core.deepclone(tab)
       else
          copy = {}
          dupes[val] = copy
-         setmetatable(copy, _deep(getmetatable(val)))
          for k,v in pairs(val) do
             copy[_deep(k)] = _deep(v)
          end
+         -- copy the metatable after, in case it contains
+         -- __index or __newindex behaviors
+         setmetatable(copy, _deep(getmetatable(val)))
       end
       return copy
    end
@@ -334,7 +338,6 @@ e.g. {1, nil, 3}--will affect #, while others won't. We are more careful, at
 the cost of some performance.)
 
 #!lua
-
 function core.isarray(tab)
    local i = 1
    for k,_ in pairs(tab) do
@@ -343,7 +346,6 @@ function core.isarray(tab)
    end
    return true
 end
-
 #/lua
 
 *** arrayof(tab)
