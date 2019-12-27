@@ -726,7 +726,7 @@ function core.lines(str)
     local pos = 1;
     return function()
         if not pos then return nil end
-        local p1, p2 = find( str, "\r?\n", pos )
+        local p1, p2 = find( str, "\n", pos )
         local line
         if p1 then
             line = sub(str, pos, p1 - 1 )
