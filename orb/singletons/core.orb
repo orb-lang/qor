@@ -801,9 +801,8 @@ function core.codepoints(str, start, finish)
                               err  = err }
          codes.err = codes.err or {}
          insert(codes, "�")
-         -- place the error at the same offset in the
-         -- err table
-         insert(codes.err, err_packet)
+         -- place the error at the same offset in the err table
+         codes.err[#codes] = err_packet
          index = index + 1
       end
    end
