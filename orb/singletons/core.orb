@@ -722,11 +722,16 @@ core.cleave = cleave
 Returns an iterator over the lines of a string.
 
 #!lua
-local function lines(str)
-   return string.gmatch(str, "[^\n]+")
+function core.lines(str)
+   local remain = tostring(str)
+   return function()
+      while remain do
+         local line
+         line, remain = cleave(remain, "\n")
+         return line
+      end
+   end
 end
-
-core.lines = lines
 #/lua
 
 
