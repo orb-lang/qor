@@ -108,10 +108,8 @@ practical; for now, it's a bit of fiddling around for little benefit.
 #!lua
 local sub = assert(string.sub)
 
-function core.hasmetamethod(mmethod, tab)
+local function hasmetamethod(mmethod, tab)
    assert(type(mmethod) == "string", "metamethod must be a string")
-   assert(type(tab) == "table",
-          "first argument to hasmetamethod must be a table")
    local M = getmetatable(tab)
    if not M then
       return false
@@ -122,6 +120,8 @@ function core.hasmetamethod(mmethod, tab)
       return rawget(M, "__" .. mmethod)
    end
 end
+
+core.hasmetamethod = hasmetamethod
 #/lua
 
 *** endow(Meta)
@@ -348,6 +348,18 @@ function core.isarray(tab)
 end
 #/lua
 
+*** iscallable(val)
+
+Determines if =val= is callable, i.e. a function
+or something with an __call metamethod.
+
+#!lua
+function core.iscallable(val)
+   return type(val) == "function"
+      or hasmetamethod("call", val)
+end
+#/lua
+
 *** arrayof(tab)
 
 Clones and returns the array portion of a table.
@@ -458,6 +470,31 @@ function core.values(tab)
 end
 #/lua
 
+*** slice(tab, from[, to])
+
+Extracts a slice of =tab=, starting at index =from= and ending at index =to=,
+inclusive. If =to= is ommitted, the size of =tab= is used. Either =from= or
+=to= may be negative, in which case they are relative to the end of the table.
+If =to= is less than =from=, an empty table is returned.
+
+#!lua
+
+function core.slice(tab, from, to)
+   to = to or #tab
+   if from < 0 then
+      from = #tab + 1 + from
+   end
+   if to < 0 then
+      to = #tab + 1 + to
+   end
+   local answer = {}
+   for i = 0, to - from do
+      answer[i + 1] = tab[from + i]
+   end
+   return answer
+end
+
+#/lua
 
 *** splice(tab, index, into)
 
