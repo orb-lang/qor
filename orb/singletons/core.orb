@@ -760,20 +760,24 @@ Returns an iterator over the lines of a string.
 
 #!lua
 function core.lines(str)
-    local pos = 1;
-    return function()
-        if not pos then return nil end
-        local p1, p2 = find( str, "\n", pos )
-        local line
-        if p1 then
-            line = sub(str, pos, p1 - 1 )
-            pos = p2 + 1
-        else
-            line = sub(str, pos )
-            pos = nil
-        end
-        return line
-    end
+   local pos = 1;
+   return function()
+      if not pos then return nil end
+      local p1 = find(str, "[\r\n]", pos)
+      local line
+      if p1 then
+         local p2 = p1
+         if sub(str, p1, p1) == "\r" and sub(str, p1+1, p1+1) == "\n" then
+            p2 = p1 + 1
+         end
+         line = sub(str, pos, p1 - 1 )
+         pos = p2 + 1
+      else
+         line = sub(str, pos )
+         pos = nil
+      end
+      return line
+   end
 end
 #/lua
 
