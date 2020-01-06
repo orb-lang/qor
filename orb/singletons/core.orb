@@ -348,6 +348,30 @@ function core.isarray(tab)
 end
 #/lua
 
+
+*** arraymap(tab, fn)
+
+Iterates the array portion of =tab=, applying =fn= and storing the first
+return value in a new table, which is returned.
+
+Note that =nil= values will break the one-to-one relationship between the
+first table and the returned table.
+
+#!lua
+local insert = assert(table.insert)
+
+function core.arraymap(tab, fn)
+   local ret, ret_val = {}
+   for _, val in ipairs(tab) do
+      ret_val = fn(val) -- necessary to avoid unpacking multiple values
+                        -- in insert
+      insert(ret, ret_val)
+   end
+   return ret
+end
+#/lua
+
+
 *** iscallable(val)
 
 Determines if =val= is callable, i.e. a function
