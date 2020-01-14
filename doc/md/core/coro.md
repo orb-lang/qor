@@ -1,39 +1,36 @@
-* Coroutine Extensions
+# Coroutine Extensions
 
 
-#!lua
+```lua
 local coro = {}
-#/lua
+```
+## 5.2 compatibility
 
 
-** 5.2 compatibility
-
-
-*** pack(...)
+### pack(...)
 
 A 5.2 shim.
 
-#!lua
+```lua
 local function pack(...)
    return { n = select('#', ...), ... }
 end
 coro.pack = pack
-#/lua
+```
+## Coroutine extensions
 
 
-** Coroutine extensions
+### safeWrap(f, ...)
+
+This is to avoid the ``cannot resume dead coroutine`` error in using stock
+``wrap``.
 
 
-*** safeWrap(f, ...)
-
-This is to avoid the =cannot resume dead coroutine= error in using stock
-=wrap=.
-
-Due to the way =coroutine.resume= works, I've limited to five return
-values, since we need to catch the =yield()=s in order to strip the
+Due to the way ``coroutine.resume`` works, I've limited to five return
+values, since we need to catch the ``yield()``s in order to strip the
 success predicate.
 
-#!lua
+```lua
 local create, status, resume = coroutine.create,
                                 coroutine.status,
                                 coroutine.resume
@@ -54,9 +51,7 @@ function coro.safeWrap(f)
       end
    end
 end
-#/lua
-
-
-#!lua
+```
+```lua
 return coro
-#/lua
+```
