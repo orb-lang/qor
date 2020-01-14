@@ -10,6 +10,64 @@ local core = {}
 #/lua
 
 
+** 5.2 compatibility
+
+
+*** pack(...)
+
+A 5.2 shim.
+
+#!lua
+local function pack(...)
+   return { n = select('#', ...), ... }
+end
+core.pack = pack
+#/lua
+
+
+** Function extensions
+
+Various methods to extend the functionality of functions.
+
+
+*** thunk(fn, ...)
+
+Returns a function which, called, will call the function with the given
+arguments.
+
+#!lua
+function core.thunk(fn, ...)
+   local args = pack(...)
+   return function()
+      return fn(unpack(args, 1, args.n))
+   end
+end
+local thunk = core.thunk
+#/lua
+
+
+*** partial(fn, ...)
+
+Partial applicator: takes a function, and fills in the given arguments,
+returning another function which accepts additional arguments:
+
+#!lua-example
+add5 = core.partial(function(a,b)
+                  return a + b
+               end, 5)
+return add5(10) -- returns 15
+#/lua
+
+#!lua
+function core.partial(fn, ...)
+   local args = pack(...)
+   return function(...)
+      return fn(unpack(args, 1, args.n), ...)
+   end
+end
+#/lua
+
+
 ** Meta Object Protocol
 
 This is where we start to design Cluster.
