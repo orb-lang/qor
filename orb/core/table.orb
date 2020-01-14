@@ -7,21 +7,6 @@ local Tab = {}
 #/lua
 
 
-** 5.2 compatibility
-
-
-*** pack(...)
-
-A 5.2 shim.
-
-#!lua
-local function pack(...)
-   return { n = select('#', ...), ... }
-end
-core.pack = pack
-#/lua
-
-
 *** readOnly(tab)
 
 Makes a table read-only, will throw an error if assigned to.
@@ -111,7 +96,7 @@ Tab.clone = _clone
 #/lua
 
 
-*** core.deepclone
+*** Table.deepclone(tab)
 
 Makes a cycle-checked deep copy of a table, including metatables.
 
