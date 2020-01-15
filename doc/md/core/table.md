@@ -114,9 +114,8 @@ function Tab.deepclone(tab)
          end
          -- copy the metatable after, in case it contains
          -- __index or __newindex behaviors
-         setmetatable(copy, _deep(getmetatable(val)))
+         return setmetatable(copy, _deep(getmetatable(val)))
       end
-      return copy
    end
    return _deep(tab)
 end
@@ -154,9 +153,8 @@ function Tab.cloneinstance(tab)
          for k,v in pairs(val) do
             copy[_deep(k)] = _deep(v)
          end
-         setmetatable(copy, getmetatable(val))
+         return setmetatable(copy, getmetatable(val))
       end
-      return copy
    end
    return _deep(tab)
 end
