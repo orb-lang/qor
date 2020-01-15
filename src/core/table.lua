@@ -115,7 +115,7 @@ function Tab.deepclone(tab)
       else
          copy = {}
          dupes[val] = copy
-         for k,v in pairs(val) do
+         for k,v in next, val do
             copy[_deep(k)] = _deep(v)
          end
          -- copy the metatable after, in case it contains
@@ -156,7 +156,7 @@ function Tab.cloneinstance(tab)
       else
          copy = {}
          dupes[val] = copy
-         for k,v in pairs(val) do
+         for k,v in next, val do
             copy[_deep(k)] = _deep(v)
          end
          return setmetatable(copy, getmetatable(val))

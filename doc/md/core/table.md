@@ -109,7 +109,7 @@ function Tab.deepclone(tab)
       else
          copy = {}
          dupes[val] = copy
-         for k,v in pairs(val) do
+         for k,v in next, val do
             copy[_deep(k)] = _deep(v)
          end
          -- copy the metatable after, in case it contains
@@ -120,11 +120,11 @@ function Tab.deepclone(tab)
    return _deep(tab)
 end
 ```
-### cloneinstanc(tab)
+### cloneinstance(tab)
 
 ``deepclone`` is useful to take a snapshot, as of an environment, with the
-assurance that no subsequent action can mutate your clone.  With some caveats
-if you're holding closures with mutable state or userdata.
+assurance that no subsequent action can mutate your clone.  With some caveats,
+if you're holding closures with mutable state, or userdata.
 
 
 ``cloneinstance`` covers a more common use case, where you want a deep clone of
@@ -150,7 +150,7 @@ function Tab.cloneinstance(tab)
       else
          copy = {}
          dupes[val] = copy
-         for k,v in pairs(val) do
+         for k,v in next, val do
             copy[_deep(k)] = _deep(v)
          end
          return setmetatable(copy, getmetatable(val))
