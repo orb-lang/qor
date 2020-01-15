@@ -128,6 +128,46 @@ function Tab.deepclone(tab)
 end
 #/lua
 
+
+*** cloneinstanc(tab)
+
+=deepclone= is useful to take a snapshot, as of an environment, with the
+assurance that no subsequent action can mutate your clone.  With some caveats
+if you're holding closures with mutable state or userdata.
+
+=cloneinstance= covers a more common use case, where you want a deep clone of
+an instance table, which may have circular references and member instances,
+but want to retain the same metatable for each table cloned.
+
+metatables are often used as a poor man's type signature, and this function
+will not break that contract.
+
+#!lua
+function Tab.cloneinstance(tab)
+   assert(type(tab) == "table",
+          "cannot cloneinstance of type " .. type(tab))
+   local dupes = {}
+   local function _deep(val)
+      if type(val) ~= "table" then
+         return val
+      end
+      local copy
+      if dupes[val] then
+         copy = dupes[val]
+      else
+         copy = {}
+         dupes[val] = copy
+         for k,v in pairs(val) do
+            copy[_deep(k)] = _deep(v)
+         end
+         setmetatable(copy, getmetatable(val))
+      end
+      return copy
+   end
+   return _deep(tab)
+end
+#/lua
+
 *** isarray(tab)
 
 Determines if =tab= is an array, i.e. a table whose only keys are a contiguous

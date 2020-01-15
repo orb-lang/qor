@@ -1,26 +1,11 @@
 
 
 
+
+
+
+
 local fn = {}
-
-
-
-
-
-
-
-
-
-
-
-local function pack(...)
-   return { n = select('#', ...), ... }
-end
-fn.pack = pack
-
-
-
-
 
 
 

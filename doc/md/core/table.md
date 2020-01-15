@@ -5,19 +5,6 @@
 local meta = require "core/meta"
 local Tab = {}
 ```
-## 5.2 compatibility
-
-
-### pack(...)
-
-A 5.2 shim.
-
-```lua
-local function pack(...)
-   return { n = select('#', ...), ... }
-end
-core.pack = pack
-```
 ### readOnly(tab)
 
 Makes a table read-only, will throw an error if assigned to.
@@ -103,7 +90,7 @@ local function _clone(tab, depth)
 end
 Tab.clone = _clone
 ```
-### core.deepclone
+### Table.deepclone(tab)
 
 Makes a cycle-checked deep copy of a table, including metatables.
 
@@ -128,6 +115,46 @@ function Tab.deepclone(tab)
          -- copy the metatable after, in case it contains
          -- __index or __newindex behaviors
          setmetatable(copy, _deep(getmetatable(val)))
+      end
+      return copy
+   end
+   return _deep(tab)
+end
+```
+### cloneinstanc(tab)
+
+``deepclone`` is useful to take a snapshot, as of an environment, with the
+assurance that no subsequent action can mutate your clone.  With some caveats
+if you're holding closures with mutable state or userdata.
+
+
+``cloneinstance`` covers a more common use case, where you want a deep clone of
+an instance table, which may have circular references and member instances,
+but want to retain the same metatable for each table cloned.
+
+
+metatables are often used as a poor man's type signature, and this function
+will not break that contract.
+
+```lua
+function Tab.cloneinstance(tab)
+   assert(type(tab) == "table",
+          "cannot cloneinstance of type " .. type(tab))
+   local dupes = {}
+   local function _deep(val)
+      if type(val) ~= "table" then
+         return val
+      end
+      local copy
+      if dupes[val] then
+         copy = dupes[val]
+      else
+         copy = {}
+         dupes[val] = copy
+         for k,v in pairs(val) do
+            copy[_deep(k)] = _deep(v)
+         end
+         setmetatable(copy, getmetatable(val))
       end
       return copy
    end

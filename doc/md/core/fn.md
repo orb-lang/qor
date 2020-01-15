@@ -1,26 +1,12 @@
 # Function Extensions
 
+
+  Various methods to extend the functionality of functions and methods,
+methodically.
+
 ```lua
 local fn = {}
 ```
-## 5.2 compatibility
-
-
-### pack(...)
-
-A 5.2 shim.
-
-```lua
-local function pack(...)
-   return { n = select('#', ...), ... }
-end
-fn.pack = pack
-```
-## Function extensions
-
-Various methods to extend the functionality of functions.
-
-
 ### thunk(fn, ...)
 
 Returns a function which, called, will call the function with the given

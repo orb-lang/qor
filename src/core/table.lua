@@ -12,21 +12,6 @@ local Tab = {}
 
 
 
-
-
-
-local function pack(...)
-   return { n = select('#', ...), ... }
-end
-core.pack = pack
-
-
-
-
-
-
-
-
 local function RO_M__newindex(tab, key, value)
    error("attempt to write value `" .. tostring(value)
          .. "` to read-only table slot `." .. tostring(key) .. "`")
@@ -136,6 +121,46 @@ function Tab.deepclone(tab)
          -- copy the metatable after, in case it contains
          -- __index or __newindex behaviors
          setmetatable(copy, _deep(getmetatable(val)))
+      end
+      return copy
+   end
+   return _deep(tab)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function Tab.cloneinstance(tab)
+   assert(type(tab) == "table",
+          "cannot cloneinstance of type " .. type(tab))
+   local dupes = {}
+   local function _deep(val)
+      if type(val) ~= "table" then
+         return val
+      end
+      local copy
+      if dupes[val] then
+         copy = dupes[val]
+      else
+         copy = {}
+         dupes[val] = copy
+         for k,v in pairs(val) do
+            copy[_deep(k)] = _deep(v)
+         end
+         setmetatable(copy, getmetatable(val))
       end
       return copy
    end
