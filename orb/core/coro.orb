@@ -1,5 +1,8 @@
-** Coroutine extensions
+* Coroutine extensions
 
+#!lua
+local coro = {}
+#/lua
 
 **** thunk
 

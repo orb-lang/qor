@@ -1,6 +1,8 @@
-## Coroutine extensions
+# Coroutine extensions
 
-
+```lua
+local coro = {}
+```
 #### thunk
 
 Trying to keep separation of the base files of ``core``, so we provide here a
