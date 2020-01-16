@@ -12,6 +12,44 @@ local Tab = {}
 
 
 
+
+
+
+
+
+
+
+
+
+local N_M = {}
+N_M.__index = N_M
+
+function N_M.__len(tab)
+   return tab.n
+end
+
+function N_M.__ipairs(tab)
+   local i = 1
+   return function()
+      if i >= tab.n then return nil end
+      i = i + 1
+      return i - 1, tab[i - 1]
+   end
+end
+
+function Tab.n_table(tab, djikstra)
+   tab = tab or {}
+   tab.n = 0
+   return setmetatable(tab, N_M)
+end
+
+
+
+
+
+
+
+
 local function RO_M__newindex(tab, key, value)
    error("attempt to write value `" .. tostring(value)
          .. "` to read-only table slot `." .. tostring(key) .. "`")
@@ -39,20 +77,12 @@ local function _hasfield(field, tab)
          return _hasfield(field, maybeIndex)
       elseif type(maybeIndex) == "function" then
          local success, result = pcall(maybeIndex, tab, field)
-         if not success then
-            return false
-         end
-         if result ~= nil then
+         if success and result ~= nil then
             return true, result
-         else
-            return false
          end
-      else
-         return false
       end
-   else
-      return false
    end
+   return false
 end
 
 local function _hf__index(_, field)
@@ -164,6 +194,7 @@ function Tab.cloneinstance(tab)
    end
    return _deep(tab)
 end
+
 
 
 

@@ -5,6 +5,38 @@
 local meta = require "core/meta"
 local Tab = {}
 ```
+## n_table
+
+  Sometimes we want to be able to include ``nil`` in an array-type table.  The
+usual way to handle this in Lua is with a table that has a ``.n`` field.
+
+
+This is a metatable and constructor which provides a table which behaves in
+that fashion.
+
+```lua
+local N_M = {}
+N_M.__index = N_M
+
+function N_M.__len(tab)
+   return tab.n
+end
+
+function N_M.__ipairs(tab)
+   local i = 1
+   return function()
+      if i >= tab.n then return nil end
+      i = i + 1
+      return i - 1, tab[i - 1]
+   end
+end
+
+function Tab.n_table(tab, djikstra)
+   tab = tab or {}
+   tab.n = 0
+   return setmetatable(tab, N_M)
+end
+```
 ### readOnly(tab)
 
 Makes a table read-only, will throw an error if assigned to.
@@ -35,20 +67,12 @@ local function _hasfield(field, tab)
          return _hasfield(field, maybeIndex)
       elseif type(maybeIndex) == "function" then
          local success, result = pcall(maybeIndex, tab, field)
-         if not success then
-            return false
-         end
-         if result ~= nil then
+         if success and result ~= nil then
             return true, result
-         else
-            return false
          end
-      else
-         return false
       end
-   else
-      return false
    end
+   return false
 end
 
 local function _hf__index(_, field)
