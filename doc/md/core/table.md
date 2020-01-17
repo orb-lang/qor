@@ -234,10 +234,38 @@ function Tab.arraymap(tab, fn)
    return ret
 end
 ```
+### compact(tab, n)
+
+  Makes the array portion of a table compact up to ``n``, by moving any values
+found above ``nils`` downward into the holes.
+
+
+Returns nothing, in common with other functions which mutate a table in-place.
+
+```lua
+function Tab.compact(tab, n)
+   n = assert(n or tab.n, "a numeric value must be provided for non-ntables")
+   local cursor, slot, empty = 1, nil, nil
+   while cursor <= n do
+      slot = tab[cursor]
+      if slot == nil and empty == nil then
+         -- mark the empty position
+         empty = cursor
+      end
+      if slot ~= nil and empty ~= nil then
+         tab[empty] = slot
+         tab[cursor] = nil
+         cursor = empty
+         empty = nil
+      end
+      cursor = cursor + 1
+   end
+end
+```
 ### iscallable(val)
 
-Determines if ``val`` is callable, i.e. a function
-or something with an __call metamethod.
+  Determines if ``val`` is callable, i.e. a function, or something with a
+``__call`` metamethod.
 
 ```lua
 local hasmetamethod = assert(meta.hasmetamethod)

@@ -255,6 +255,35 @@ end
 
 
 
+
+
+function Tab.compact(tab, n)
+   n = assert(n or tab.n, "a numeric value must be provided for non-ntables")
+   local cursor, slot, empty = 1, nil, nil
+   while cursor <= n do
+      slot = tab[cursor]
+      if slot == nil and empty == nil then
+         -- mark the empty position
+         empty = cursor
+      end
+      if slot ~= nil and empty ~= nil then
+         tab[empty] = slot
+         tab[cursor] = nil
+         cursor = empty
+         empty = nil
+      end
+      cursor = cursor + 1
+   end
+end
+
+
+
+
+
+
+
+
+
 local hasmetamethod = assert(meta.hasmetamethod)
 
 function Tab.iscallable(val)
