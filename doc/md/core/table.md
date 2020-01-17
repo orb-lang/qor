@@ -240,6 +240,16 @@ end
 found above ``nils`` downward into the holes.
 
 
+This is recommended as an alternative to a ``remove``-heavy algorithm.  Since it
+moves values at most once, it's faster to cache the value of ``#tab``, remove
+unwanted values, and run ``compact`` once at the end.
+
+
+This is a ``.n`` aware algorithm, and will use it if the second argument is not
+provided.  As the purpose is to shrink a table with holes, we feel that
+providing ``#tab`` as a further fallback is asking for trouble.
+
+
 Returns nothing, in common with other functions which mutate a table in-place.
 
 ```lua
@@ -259,6 +269,9 @@ function Tab.compact(tab, n)
          empty = nil
       end
       cursor = cursor + 1
+   end
+   if tab.n then
+      tab.n = #tab
    end
 end
 ```
