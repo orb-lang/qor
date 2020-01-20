@@ -1,17 +1,22 @@
-** Coroutine extensions
+* Coroutine extensions
 
 
-**** thunk
-
-Trying to keep separation of the base files of =core=, so we provide here a
-localized version of =fn.thunk=.
 
 #!lua
-local function thunk(fn, ...)
-   local args = pack(...)
-   return function()
-      return fn(unpack(args, 1, args.n))
-   end
+local _base = require "core:core/_base"
+local thunk = assert(_base.thunk)
+#/lua
+
+
+** coro table
+
+We put all of the =coroutine= table on =coro=, so it's an enhanced replacement
+for the library:
+
+#!lua
+local coro = {}
+for k,v in next, coroutine do
+   coro[k] = v
 end
 #/lua
 

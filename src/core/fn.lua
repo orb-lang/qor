@@ -5,6 +5,7 @@
 
 
 
+local _base = require "core:core/_base"
 local fn = {}
 
 
@@ -16,13 +17,7 @@ local fn = {}
 
 
 
-function fn.thunk(fn, ...)
-   local args = pack(...)
-   return function()
-      return fn(unpack(args, 1, args.n))
-   end
-end
-local thunk = fn.thunk
+fn.thunk = assert(_base.thunk)
 
 
 
@@ -59,15 +54,7 @@ end
 
 
 
-local format = assert(string.format)
-
-function fn.assertfmt(pred, msg, ...)
-   if pred then
-      return pred
-   else
-      error(format(msg, ...), 2)
-   end
-end
+fn.assertfmt = _base.assertfmt
 
 
 

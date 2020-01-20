@@ -5,6 +5,7 @@
 methodically.
 
 #!lua
+local _base = require "core:core/_base"
 local fn = {}
 #/lua
 
@@ -16,13 +17,7 @@ Returns a function which, called, will call the function with the given
 arguments.
 
 #!lua
-function fn.thunk(fn, ...)
-   local args = pack(...)
-   return function()
-      return fn(unpack(args, 1, args.n))
-   end
-end
-local thunk = fn.thunk
+fn.thunk = assert(_base.thunk)
 #/lua
 
 
@@ -59,15 +54,7 @@ This avoids doing concatenations and conversions on messages that we never
 see in normal use.
 
 #!lua
-local format = assert(string.format)
-
-function fn.assertfmt(pred, msg, ...)
-   if pred then
-      return pred
-   else
-      error(format(msg, ...), 2)
-   end
-end
+fn.assertfmt = _base.assertfmt
 #/lua
 
 #!lua

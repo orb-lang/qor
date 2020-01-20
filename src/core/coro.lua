@@ -3,15 +3,20 @@
 
 
 
+local _base = require "core:core/_base"
+local thunk = assert(_base.thunk)
 
 
 
 
-local function thunk(fn, ...)
-   local args = pack(...)
-   return function()
-      return fn(unpack(args, 1, args.n))
-   end
+
+
+
+
+
+local coro = {}
+for k,v in next, coroutine do
+   coro[k] = v
 end
 
 
