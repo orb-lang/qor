@@ -295,6 +295,27 @@ end
 
 
 
+
+
+function Tab.inverse(tab)
+   local bat = {}
+   for k,v in pairs(tab) do
+      if bat[v] then
+         error("duplicate value on key " .. k)
+      end
+      bat[v] = k
+   end
+   return bat
+end
+
+
+
+
+
+
+
+
+
 local hasmetamethod = assert(meta.hasmetamethod)
 
 function Tab.iscallable(val)

@@ -275,6 +275,26 @@ function Tab.compact(tab, n)
    end
 end
 ```
+### inverse(tab)
+
+Returns a new table, in which all keys of ``tab`` are values of the new table,
+and vice versa.
+
+
+Throws an error if duplicate values are present in the table.
+
+```lua
+function Tab.inverse(tab)
+   local bat = {}
+   for k,v in pairs(tab) do
+      if bat[v] then
+         error("duplicate value on key " .. k)
+      end
+      bat[v] = k
+   end
+   return bat
+end
+```
 ### iscallable(val)
 
   Determines if ``val`` is callable, i.e. a function, or something with a
