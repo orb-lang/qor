@@ -1,7 +1,8 @@
 # Coroutine extensions
 
-
-
+```lua
+local coro = {}
+```
 ```lua
 local _base = require "core:core/_base"
 local thunk = assert(_base.thunk)
