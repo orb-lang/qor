@@ -316,6 +316,33 @@ end
 
 
 
+
+
+function Tab.flatten(tab)
+   local ret, copies = {}, {}
+   local function _flat(t)
+      for _,v in ipairs(t) do
+         if type(v) ~= "table" then
+            ret[#ret + 1] = v
+         else
+            if not copies[v] then
+               copies[v] = true
+               _flat(v)
+            end
+         end
+      end
+   end
+   _flat(tab)
+   return ret
+end
+
+
+
+
+
+
+
+
 local hasmetamethod = assert(meta.hasmetamethod)
 
 function Tab.iscallable(val)

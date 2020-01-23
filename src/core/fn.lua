@@ -51,6 +51,28 @@ end
 
 
 
+function fn.itermap(fn, iter)
+   local ret, res = {}
+   while true do
+      res = pack(fn(iter()))
+      if #res == 0 then
+         return ret
+      else
+         ret[#ret + 1] = res
+      end
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
 
 
 

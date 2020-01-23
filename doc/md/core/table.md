@@ -295,6 +295,33 @@ function Tab.inverse(tab)
    return bat
 end
 ```
+### flatten(tab)
+
+Takes nested tables and flattens the array portion into a single table, which
+is returned.
+
+
+Will decline to follow circular references.
+
+```lua
+function Tab.flatten(tab)
+   local ret, copies = {}, {}
+   local function _flat(t)
+      for _,v in ipairs(t) do
+         if type(v) ~= "table" then
+            ret[#ret + 1] = v
+         else
+            if not copies[v] then
+               copies[v] = true
+               _flat(v)
+            end
+         end
+      end
+   end
+   _flat(tab)
+   return ret
+end
+```
 ### iscallable(val)
 
   Determines if ``val`` is callable, i.e. a function, or something with a

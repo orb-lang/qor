@@ -35,6 +35,27 @@ function fn.partial(fn, ...)
    end
 end
 ```
+### itermap(fn, iter)
+
+Applies ``fn`` to each element returned from ``iter``, in turn.
+
+
+For a consistent interface, all return values are ``pack``ed into one array
+slot of a table, which is returned.
+
+```lua
+function fn.itermap(fn, iter)
+   local ret, res = {}
+   while true do
+      res = pack(fn(iter()))
+      if #res == 0 then
+         return ret
+      else
+         ret[#ret + 1] = res
+      end
+   end
+end
+```
 ## Errors and asserts
 
 
