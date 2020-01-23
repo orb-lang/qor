@@ -318,21 +318,36 @@ end
 
 
 
-function Tab.flatten(tab)
+
+
+
+
+
+
+
+
+
+
+
+function Tab.flatten(tab, level)
    local ret, copies = {}, {}
-   local function _flat(t)
+   local function _flat(t, depth)
+      if level and depth > level then
+         ret[#ret + 1] = t
+         return nil
+      end
       for _,v in ipairs(t) do
          if type(v) ~= "table" then
             ret[#ret + 1] = v
          else
             if not copies[v] then
                copies[v] = true
-               _flat(v)
+               _flat(v, depth + 1)
             end
          end
       end
    end
-   _flat(tab)
+   _flat(tab, 0)
    return ret
 end
 
