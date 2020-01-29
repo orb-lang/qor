@@ -4,6 +4,9 @@
 
 local meta = require "core/meta"
 local Tab = {}
+for k, v in pairs(table) do
+   Tab[k] = v
+end
 
 
 
