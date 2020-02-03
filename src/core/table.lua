@@ -70,14 +70,14 @@ end
 
 
 
-local function _hasfield(field, tab)
+local function _hasfield(tab, field)
    if type(tab) == "table" and rawget(tab, field) then
       return tab[field]
    elseif getmetatable(tab) then
       local _M = getmetatable(tab)
       local maybeIndex = rawget(_M, "__index")
       if type(maybeIndex) == "table" then
-         return _hasfield(field, maybeIndex)
+         return _hasfield(maybeIndex, field)
       elseif type(maybeIndex) == "function" then
          local success, result = pcall(maybeIndex, tab, field)
          if success and result ~= nil then
@@ -90,12 +90,12 @@ end
 
 local function _hf__index(_, field)
    return function(tab)
-      return _hasfield(field, tab)
+      return _hasfield(tab, field)
    end
 end
 
 local function _hf__call(_, tab, field)
-   return _hasfield(field, tab)
+   return _hasfield(tab, field)
 end
 
 Tab.hasfield = setmetatable({}, { __index = _hf__index,
