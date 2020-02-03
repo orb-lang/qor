@@ -54,7 +54,7 @@ function Tab.readOnly(tab)
    return setmetatable({}, {__index = tab, __newindex = RO_M__newindex})
 end
 ```
-### hasfield(field, tab) & hasfield.field(tab)
+### hasfield(tab, field) & hasfield.field(tab)
 
 
 A nicety which can be used both for predication and assignment.

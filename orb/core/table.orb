@@ -64,7 +64,7 @@ end
 #/lua
 
 
-*** hasfield(field, tab) & hasfield.field(tab)
+*** hasfield(tab, field) & hasfield.field(tab)
 
 
 A nicety which can be used both for predication and assignment.
