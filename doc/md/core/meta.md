@@ -150,6 +150,21 @@ That's just a shallow clone, the subtlety is that if the __index was a
 self-table, it now points to ``Meta``, while if Meta was created through
 endowment or inheritance it's now out of the picture.
 
+### instanceof(obj, Class)
+
+Answers whether ``obj`` is an "instance of" ``Class``, which may be either the
+name of a builtin type ("number", "string", etc), or a module return value
+which will be compared against ``obj.idEst``.
+
+```lua
+function meta.instanceof(obj, Class)
+   if type(Class) == "string" then
+      return type(obj) == Class
+   else
+      return type(obj) == "table" and obj.idEst == Class
+   end
+end
+```
 ```lua
 return meta
 ```
