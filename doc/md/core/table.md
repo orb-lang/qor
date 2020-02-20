@@ -141,7 +141,12 @@ function Tab.deepclone(tab)
          end
          -- copy the metatable after, in case it contains
          -- __index or __newindex behaviors
-         return setmetatable(copy, _deep(getmetatable(val)))
+         local _M = _deep(getmetatable(val))
+            if type(_M) == "table" then
+               return setmetatable(copy, _M)
+            else
+            return copy
+         end
       end
    end
    return _deep(tab)
