@@ -7,10 +7,19 @@ local String = {}
 ## String extensions
 
 ```lua
+local assertfmt = require "core:core/_base".assertfmt
 local byte = assert(string.byte)
 local find = assert(string.find)
 local sub = assert(string.sub)
 local format = assert(string.format)
+```
+### assertfmt(predicate, msg, ...)
+
+Not clear this belongs here, but it is as much like ``string.format`` as
+anything else.
+
+```lua
+String.assertfmt = assertfmt
 ```
 ### utf8(str, [offset])
 
@@ -239,68 +248,6 @@ function String.to_repr(str)
    str = tostring(str)
    return setmetatable({str}, {__index = _str_M})
 end
-
-```
-### codepoints(str, [start], [finish])
-
-Returns an array of the utf8 codepoints in ``str``.
-
-
-If ``str`` is valid utf8, this array will contain all the original codepoints.
-If not, ``codepoints`` will filter out invalid sequences and make a note of
-where and what is wrong.
-
-
-``start`` and ``finish`` are optional integers, specifying offsets into the
-string.
-
-```lua
-local concat = assert(table.concat)
-
-local cp_M = {}
-
-
-function cp_M.__tostring(codepoints)
-   local answer = codepoints
-   if codepoints.err then
-      answer = {}
-      for i, v in ipairs(codepoints) do
-         local err_here = codepoints.err[i]
-         answer[i] = err_here and err_here.char or v
-      end
-   end
-   return concat(answer)
-end
-
-function String.codepoints(str, start, finish)
-   start = start or 1
-   finish = (finish and finish <= #str) and finish or #str
-   local utf8 = String.utf8
-   -- propagate nil
-   if not str then return nil end
-   -- break on bad type
-   assert(type(str) == "string", "codepoints must be given a string")
-   local codes = setmetatable({}, cp_M)
-   local index = start
-   while index <= finish do
-      local width, err = utf8(str, index)
-      if width then
-         local point = sub(str, index, index + width - 1)
-         insert(codes, point)
-         index = index + width
-      else
-         -- take off a byte and store it
-         local err_packet = { char = sub(str, index, index),
-                              err  = err }
-         codes.err = codes.err or {}
-         insert(codes, "�")
-         -- place the error at the same offset in the err table
-         codes.err[#codes] = err_packet
-         index = index + 1
-      end
-   end
-   return codes
-end
 ```
 ### String.slurp(filename)
 
@@ -314,59 +261,23 @@ function String.slurp(filename)
   return content
 end
 ```
-## Math/number extensions
+### String.splice(to_split, to_splice, index)
 
-### String.inbounds(value, lower, upper)
-
-Checks if a value is in bounds in the range lower..upper, inclusive. Either
-bound may be omitted, in which case no checking is performed on that end.
+Splices ``to_splice`` into ``to_split`` at index ``index``.
 
 ```lua
-function String.inbounds(value, lower, upper)
-  if lower and value < lower then
-    return false
-  end
-  if upper and value > upper then
-    return false
-  end
-  return true
-end
-```
-### String.bound(value, lower, upper)
+local sub = assert(string.sub)
 
-As ``inbounds``, but answers a value constrained to be within the specified range.
-
-```lua
-function String.bound(value, lower, upper)
-  if lower and value < lower then
-    value = lower
-  end
-  if upper and value > upper then
-    value = upper
-  end
-  return value
-end
-```
-## Errors and asserts
-
-
-### Assertfmt
-
-I'll probably just globally replace assert with this over time.
-
-
-This avoids doing concatenations and conversions on messages that we never
-see in normal use.
-
-```lua
-local format = string.format
-
-function String.assertfmt(pred, msg, ...)
-   if pred then
-      return pred
-   else
-      error(format(msg, ...))
-   end
+function String.splice(to_split, to_splice, index)
+   assert(type(to_split) == "string", "bad argument #1 to splice: "
+           .. "string expected, got %s", type(to_split))
+   assert(type(to_splice) == "string", "bad argument #2 to splice: "
+           .. "string expected, got %s", type(to_splice))
+   assert(type(index) == "number", "bad argument #2 to splice: "
+          .. " number expected, got %s", type(index))
+   assert(index >= 0 and index <= #to_split, "splice index out of bounds")
+   local head, tail = sub(to_split, 1, index), sub(to_split, index + 1)
+   return head .. to_splice .. tail
 end
 ```
 ```lua

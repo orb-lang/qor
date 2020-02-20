@@ -9,10 +9,22 @@ local String = {}
 
 
 
+local assertfmt = require "core:core/_base".assertfmt
 local byte = assert(string.byte)
 local find = assert(string.find)
 local sub = assert(string.sub)
 local format = assert(string.format)
+
+
+
+
+
+
+
+
+
+String.assertfmt = assertfmt
+
 
 
 
@@ -246,68 +258,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
-local concat = assert(table.concat)
-
-local cp_M = {}
-
-
-function cp_M.__tostring(codepoints)
-   local answer = codepoints
-   if codepoints.err then
-      answer = {}
-      for i, v in ipairs(codepoints) do
-         local err_here = codepoints.err[i]
-         answer[i] = err_here and err_here.char or v
-      end
-   end
-   return concat(answer)
-end
-
-function String.codepoints(str, start, finish)
-   start = start or 1
-   finish = (finish and finish <= #str) and finish or #str
-   local utf8 = String.utf8
-   -- propagate nil
-   if not str then return nil end
-   -- break on bad type
-   assert(type(str) == "string", "codepoints must be given a string")
-   local codes = setmetatable({}, cp_M)
-   local index = start
-   while index <= finish do
-      local width, err = utf8(str, index)
-      if width then
-         local point = sub(str, index, index + width - 1)
-         insert(codes, point)
-         index = index + width
-      else
-         -- take off a byte and store it
-         local err_packet = { char = sub(str, index, index),
-                              err  = err }
-         codes.err = codes.err or {}
-         insert(codes, "�")
-         -- place the error at the same offset in the err table
-         codes.err[#codes] = err_packet
-         index = index + 1
-      end
-   end
-   return codes
-end
-
-
-
-
-
-
-
-
 function String.slurp(filename)
   local f = io.open(filename, "rb")
   local content = f:read("*all")
@@ -322,54 +272,18 @@ end
 
 
 
+local sub = assert(string.sub)
 
-
-function String.inbounds(value, lower, upper)
-  if lower and value < lower then
-    return false
-  end
-  if upper and value > upper then
-    return false
-  end
-  return true
-end
-
-
-
-
-
-
-
-function String.bound(value, lower, upper)
-  if lower and value < lower then
-    value = lower
-  end
-  if upper and value > upper then
-    value = upper
-  end
-  return value
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-local format = string.format
-
-function String.assertfmt(pred, msg, ...)
-   if pred then
-      return pred
-   else
-      error(format(msg, ...))
-   end
+function String.splice(to_split, to_splice, index)
+   assert(type(to_split) == "string", "bad argument #1 to splice: "
+           .. "string expected, got %s", type(to_split))
+   assert(type(to_splice) == "string", "bad argument #2 to splice: "
+           .. "string expected, got %s", type(to_splice))
+   assert(type(index) == "number", "bad argument #2 to splice: "
+          .. " number expected, got %s", type(index))
+   assert(index >= 0 and index <= #to_split, "splice index out of bounds")
+   local head, tail = sub(to_split, 1, index), sub(to_split, index + 1)
+   return head .. to_splice .. tail
 end
 
 
