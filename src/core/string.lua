@@ -211,6 +211,19 @@ String.cleave = cleave
 
 
 
+
+
+local find = assert(string.find)
+function String.isidentifier(str)
+   return find(str, "^[a-zA-Z_][a-zA-Z0-9_]+$") == 1
+end
+
+
+
+
+
+
+
 function String.lines(str)
    local pos = 1;
    return function()
