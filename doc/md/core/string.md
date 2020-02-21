@@ -206,6 +206,19 @@ local function cleave(str, pat)
 end
 String.cleave = cleave
 ```
+### isidentifier(str)
+
+Determines if ``str`` is a valid Lua identifier.
+This follows the Lua standard--LuaJIT is actually much more permissive,
+but the rules are potentially quite complicated wrt special Unicode characters
+like ZWJ and NBSP, so let's stick with the simple standard for now.
+
+```lua
+local find = assert(string.find)
+function String.isidentifier(str)
+   return find(str, "^[a-zA-Z_][a-zA-Z0-9_]+$") == 1
+end
+```
 #### String.lines(str)
 
 Returns an iterator over the lines of a string.
