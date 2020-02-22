@@ -139,27 +139,25 @@ function Tab.deepclone(tab)
           "cannot deepclone value of type " .. type(tab))
    local dupes = {}
    local function _deep(val)
-      if type(val) ~= "table" then
-         return val
-      end
       local copy
-      if dupes[val] then
-         copy = dupes[val]
+      if type(val) == "table" then
+         if dupes[val] then
+            copy = dupes[val]
+         else
+            copy = {}
+            dupes[val] = copy
+            for k,v in next, val do
+               copy[_deep(k)] = _deep(v)
+            end
+            -- copy the metatable after, in case it contains
+            -- __index or __newindex behaviors
+            local _M = _deep(getmetatable(val))
+            copy = setmetatable(copy, _M)
+         end
       else
-         copy = {}
-         dupes[val] = copy
-         for k,v in next, val do
-            copy[_deep(k)] = _deep(v)
-         end
-         -- copy the metatable after, in case it contains
-         -- __index or __newindex behaviors
-         local _M = _deep(getmetatable(val))
-            if type(_M) == "table" then
-               return setmetatable(copy, _M)
-            else
-            return copy
-         end
+         copy = val
       end
+      return copy
    end
    return _deep(tab)
 end
