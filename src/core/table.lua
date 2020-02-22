@@ -139,22 +139,23 @@ function Tab.deepclone(tab)
           "cannot deepclone value of type " .. type(tab))
    local dupes = {}
    local function _deep(val)
-      if type(val) ~= "table" then
-         return val
-      end
       local copy
-      if dupes[val] then
-         copy = dupes[val]
-      else
-         copy = {}
-         dupes[val] = copy
-         for k,v in next, val do
-            copy[_deep(k)] = _deep(v)
+      if type(val) == "table" then
+         if dupes[val] then
+            copy = dupes[val]
+         else
+            copy = {}
+            dupes[val] = copy
+            for k,v in next, val do
+               copy[_deep(k)] = _deep(v)
+            end
+            -- copy the metatable after, in case it contains
+            -- __index or __newindex behaviors
+            local _M = _deep(getmetatable(val))
+            copy = setmetatable(copy, _M)
          end
-         -- copy the metatable after, in case it contains
-         -- __index or __newindex behaviors
-         local _M = _deep(getmetatable(val))
-         copy = setmetatable(copy, _M)
+      else
+         copy = val
       end
       return copy
    end
@@ -182,20 +183,22 @@ function Tab.cloneinstance(tab)
           "cannot cloneinstance of type " .. type(tab))
    local dupes = {}
    local function _deep(val)
-      if type(val) ~= "table" then
-         return val
-      end
       local copy
-      if dupes[val] then
-         copy = dupes[val]
-      else
-         copy = {}
-         dupes[val] = copy
-         for k,v in next, val do
-            copy[_deep(k)] = _deep(v)
+      if type(val) == "table" then
+         if dupes[val] then
+            copy = dupes[val]
+         else
+            copy = {}
+            dupes[val] = copy
+            for k,v in next, val do
+               copy[_deep(k)] = _deep(v)
+            end
+            copy = setmetatable(copy, getmetatable(val))
          end
-         return setmetatable(copy, getmetatable(val))
+      else
+         copy = val
       end
+      return copy
    end
    return _deep(tab)
 end
