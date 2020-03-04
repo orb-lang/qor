@@ -89,11 +89,17 @@ with a new function.
 
 Since tables are mutable, all instances of that function are thereby replaced.
 
+#nb this implementation is correct and general, but uses varargs, which are
+somewhat slow, and which LuaJIT may not be able to compile.  We're not using
+it, and it isn't worth the additional complexity without a proven need, but
+a refinement would be to provide fixed argument version for 0 to 5 arguments,
+via an optional second parameter.  This would apply to =patch= as well.
+
 #!lua
 local function _patch(dynamic, fn)
    getmetatable(dynamic).__call = function(_, ...)
-      return fn(...)
-   end
+                                     return fn(...)
+                                  end
 end
 
 local function dyn_newindex()
