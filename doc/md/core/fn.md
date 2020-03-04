@@ -4,8 +4,20 @@
   Various methods to extend the functionality of functions and methods,
 methodically.
 
+
+This is also the home of some core functions which are distinguished by their
+actions, side effects, or effect on control flow, rather than by acting on
+a specific data structure.  Currently this is limited to ``assertfmt``.
+
+
+#### imports
+
 ```lua
 local _base = require "core:core/_base"
+```
+## fn table
+
+```lua
 local fn = {}
 ```
 ### thunk(fn, ...)
@@ -54,6 +66,39 @@ function fn.itermap(fn, iter)
          ret[#ret + 1] = res
       end
    end
+end
+```
+### dynamic(fn)
+
+Because functions are immutable, we can't replace all instances of a function,
+at least not without trawling the entire program with the ``debug`` library
+looking for upvalues and locals.
+
+
+``dynamic`` returns a callable table, which calls the function with the given
+arguments.  It also has a ``patch`` method, which replaces the calling function
+with a new function.
+
+
+Since tables are mutable, all instances of that function are thereby replaced.
+
+```lua
+local function _patch(dynamic, fn)
+   getmetatable(dynamic).__call = function(_, ...)
+      return fn(...)
+   end
+end
+
+local function dyn_newindex()
+   error "Can't assign to a dynamic function"
+end
+
+function fn.dynamic(fn)
+   return setmetatable({}, { __call = function(_, ...)
+                                         return fn(...)
+                                      end,
+                             __index = { patch = _patch },
+                             __newindex = dyn_newindex })
 end
 ```
 ## Errors and asserts
