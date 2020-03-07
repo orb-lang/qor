@@ -160,14 +160,11 @@ local function call_with_hooks(hooked, fn, ...)
 
    if pre and post then
       local new_arg = pack(pre(...))
-      local fn_rets = pack(fn(unpack(new_arg)))
-      return post(unpack(fn_rets), unpack(new_arg))
+      return post(fn(unpack(new_arg)), unpack(new_arg))
    elseif pre then
-      local new_arg = pack(pre(...))
-      return fn(unpack(new_arg))
+      return fn(pre(...))
    elseif post then
-      local fn_rets = pack(fn(...))
-      return post(unpack(fn_rets), ...)
+      return post(fn(...), ...)
    else
       return fn(...)
    end
