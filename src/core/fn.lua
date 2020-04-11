@@ -103,12 +103,12 @@ local _dynamics_registry  = setmetatable({}, {__mode = 'kv'})
 
 function fn.dynamic(fn)
    -- make a unique table as key
-   local attr = {}
+   local uid = {}
    local function dyn_fn(...)
-      return _dynamics_call[attr](...)
+      return _dynamics_call[uid](...)
    end
-   _dynamics_call[attr] = fn
-   _dynamics_registry[dyn_fn] = attr
+   _dynamics_call[uid] = fn
+   _dynamics_registry[dyn_fn] = uid
    return dyn_fn
 end
 
@@ -122,8 +122,8 @@ end
 
 function fn.patch_dynamic(dyn_fn, fn)
    assert(_dynamics_registry[dyn_fn], "cannot patch a non-dynamic function")
-   local attr = _dynamics_registry[dyn_fn]
-   _dynamics_call[attr] = fn
+   local uid = _dynamics_registry[dyn_fn]
+   _dynamics_call[uid] = fn
 end
 
 
