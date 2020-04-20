@@ -68,37 +68,55 @@ function fn.itermap(fn, iter)
    end
 end
 ```
-### dynamic(fn)
+### fn.dynamic(fn)
 
 Because functions are immutable, we can't replace all instances of a function,
 at least not without trawling the entire program with the ``debug`` library
 looking for upvalues and locals.
 
 
-``dynamic`` returns a callable table, which calls the function with the given
-arguments.  It also has a ``patch`` method, which replaces the calling function
-with a new function.
+``dynamic`` sets up a closure, which uses a private attributes table to retrieve
+the passed function and call it.
 
 
-Since tables are mutable, all instances of that function are thereby replaced.
+We create a table as a lightweight unique to index the function with, and
+provide a second method, ``fn.patch_dynamic``, to change the underlying function
+when desired.
+
+
+We use two tables for the registry, because we want the values of the
+``_dynamics_call`` table to retain a reference even if it's the only one, which
+allows anonymous functions to be registered as dynamic or patched in.
+
+
+The net result is a unique function which can be swapped out in all places in
+which it is used.
 
 ```lua
-local function _patch(dynamic, fn)
-   getmetatable(dynamic).__call = function(_, ...)
-                                     return fn(...)
-                                  end
-end
-
-local function dyn_newindex()
-   error "Can't assign to a dynamic function"
-end
+local _dynamics_call = setmetatable({}, {__mode = 'k'})
+local _dynamics_registry  = setmetatable({}, {__mode = 'kv'})
 
 function fn.dynamic(fn)
-   return setmetatable({}, { __call = function(_, ...)
-                                         return fn(...)
-                                      end,
-                             __index = { patch = _patch },
-                             __newindex = dyn_newindex })
+   -- make a unique table as key
+   local uid = {}
+   local function dyn_fn(...)
+      return _dynamics_call[uid](...)
+   end
+   _dynamics_call[uid] = fn
+   _dynamics_registry[dyn_fn] = uid
+   return dyn_fn
+end
+```
+### fn.patch_dynamic(dyn_fn, fn)
+
+Replaces the attribute function with the new function, and updates the table
+accordingly.
+
+```lua
+function fn.patch_dynamic(dyn_fn, fn)
+   assert(_dynamics_registry[dyn_fn], "cannot patch a non-dynamic function")
+   local uid = _dynamics_registry[dyn_fn]
+   _dynamics_call[uid] = fn
 end
 ```
 ### hookable(fn)

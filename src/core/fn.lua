@@ -96,22 +96,34 @@ end
 
 
 
-local function _patch(dynamic, fn)
-   getmetatable(dynamic).__call = function(_, ...)
-                                     return fn(...)
-                                  end
-end
 
-local function dyn_newindex()
-   error "Can't assign to a dynamic function"
-end
+
+local _dynamics_call = setmetatable({}, {__mode = 'k'})
+local _dynamics_registry  = setmetatable({}, {__mode = 'kv'})
 
 function fn.dynamic(fn)
-   return setmetatable({}, { __call = function(_, ...)
-                                         return fn(...)
-                                      end,
-                             __index = { patch = _patch },
-                             __newindex = dyn_newindex })
+   -- make a unique table as key
+   local uid = {}
+   local function dyn_fn(...)
+      return _dynamics_call[uid](...)
+   end
+   _dynamics_call[uid] = fn
+   _dynamics_registry[dyn_fn] = uid
+   return dyn_fn
+end
+
+
+
+
+
+
+
+
+
+function fn.patch_dynamic(dyn_fn, fn)
+   assert(_dynamics_registry[dyn_fn], "cannot patch a non-dynamic function")
+   local uid = _dynamics_registry[dyn_fn]
+   _dynamics_call[uid] = fn
 end
 
 
