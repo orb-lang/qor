@@ -44,6 +44,7 @@ function cluster.meta(Meta)
          end
       end
       setmetatable(tab, Meta)
+      tab.__index = tab
       return tab
    elseif Meta
       and type(Meta) == "table"
