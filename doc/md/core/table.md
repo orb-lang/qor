@@ -512,6 +512,17 @@ function Tab.splice(tab, idx, into)
     return tab
 end
 ```
+### addall(tab, to_add)
+
+Adds all key-value pairs of the ``to_add`` table to ``tab``.
+
+```lua
+function Tab.addall(tab, to_add)
+   for k, v in pairs (to_add) do
+      tab[k] = v
+   end
+end
+```
 ### safeget(tab, key)
 
 This will retrieve a value, given a key, without causing errors if the table

@@ -546,6 +546,19 @@ end
 
 
 
+function Tab.addall(tab, to_add)
+   for k, v in pairs (to_add) do
+      tab[k] = v
+   end
+end
+
+
+
+
+
+
+
+
 function Tab.safeget(tab, key)
    local val = rawget(tab, key)
    if val ~= nil then
