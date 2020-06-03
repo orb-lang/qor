@@ -105,6 +105,36 @@ end
 
 
 
+function String.findall(str, patt)
+   local matches = {}
+   local index = 1
+   local left, right
+   repeat
+     left, right = find(str, patt, index)
+     if left then
+        matches[#matches + 1] = {left, right}
+        index = right + 1
+     end
+   until left == nil
+   if #matches > 0 then
+      return matches
+   else
+      return nil
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

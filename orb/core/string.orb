@@ -95,6 +95,36 @@ end
 #/lua
 
 
+*** findall(str, patt)
+
+Runs =find= repeatedly, returning an array of arrays where =[1]= is the
+beginning of the match, and =[2]= is the end.
+
+Returns =nil= if no match is found.
+
+Should probably take a third parameter to limit the number of matches.
+
+#!lua
+function String.findall(str, patt)
+   local matches = {}
+   local index = 1
+   local left, right
+   repeat
+     left, right = find(str, patt, index)
+     if left then
+        matches[#matches + 1] = {left, right}
+        index = right + 1
+     end
+   until left == nil
+   if #matches > 0 then
+      return matches
+   else
+      return nil
+   end
+end
+#/lua
+
+
 *** typeformat(str, ...)
 
 Background: I want to start using format in errors and assertions.

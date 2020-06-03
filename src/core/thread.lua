@@ -14,7 +14,8 @@ local thread = {}
 
 
 
-local running = assert(coroutine.running)
+local running, yield = assert(coroutine.running),
+                       assert(coroutine.yield)
 
 
 
@@ -32,6 +33,27 @@ local running = assert(coroutine.running)
 function thread.onloop()
    local _, main = running()
    return main and uv.loop_alive()
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+function thread.canyield(...)
+   local _, main = running()
+   if not main then
+      yield(...)
+   else
+      return ...
+   end
 end
 
 

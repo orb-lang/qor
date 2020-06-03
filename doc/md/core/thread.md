@@ -13,7 +13,8 @@ local uv = require "luv"
 local thread = {}
 ```
 ```lua
-local running = assert(coroutine.running)
+local running, yield = assert(coroutine.running),
+                       assert(coroutine.yield)
 
 ```
 ### onloop()
@@ -30,6 +31,26 @@ whether or not we're handling things asynchronously.
 function thread.onloop()
    local _, main = running()
    return main and uv.loop_alive()
+end
+```
+### canyield(...)
+
+If we're inside a coroutine, ``yield`` the values, otherwise, return them.
+
+
+This should let us write functions which are either blocking or non-blocking,
+with some care, by wrapping async operations in 'purple' functions and using
+``canyield`` to mark points where, in the service of e.g. resynchronizing, we
+might want to surrender control.
+
+```lua
+function thread.canyield(...)
+   local _, main = running()
+   if not main then
+      yield(...)
+   else
+      return ...
+   end
 end
 ```
 ```lua
