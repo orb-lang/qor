@@ -453,6 +453,21 @@ end
 
 
 
+
+function Tab.removerange(tab, start, stop)
+   if start > stop then return end
+   local offset = stop - start + 1
+   for i = start, #tab do
+      tab[i] = tab[i + offset]
+   end
+end
+
+
+
+
+
+
+
 function Tab.keys(tab)
    assert(type(tab) == "table", "keys must receive a table")
    local keys = {}
