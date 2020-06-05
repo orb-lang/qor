@@ -2,12 +2,11 @@
 
 
   Various methods to extend the functionality of functions and methods,
-methodically.
-
+methodically\.
 
 This is also the home of some core functions which are distinguished by their
 actions, side effects, or effect on control flow, rather than by acting on
-a specific data structure.  Currently this is limited to ``assertfmt``.
+a specific data structure\.  Currently this is limited to `assertfmt`\.
 
 
 #### imports
@@ -15,20 +14,26 @@ a specific data structure.  Currently this is limited to ``assertfmt``.
 ```lua
 local _base = require "core:core/_base"
 ```
+
+
 ## fn table
 
 ```lua
 local fn = {}
 ```
-### thunk(fn, ...)
+
+
+### thunk\(fn, \.\.\.\)
 
 Returns a function which, called, will call the function with the given
-arguments.
+arguments\.
 
 ```lua
 fn.thunk = assert(_base.thunk)
 ```
-### partial(fn, ...)
+
+
+### partial\(fn, \.\.\.\)
 
 Partial applicator: takes a function, and fills in the given arguments,
 returning another function which accepts additional arguments:
@@ -39,6 +44,7 @@ add5 = fn.partial(function(a,b)
                end, 5)
 return add5(10) -- returns 15
 ```
+
 ```lua
 function fn.partial(fn, ...)
    local args = pack(...)
@@ -47,13 +53,14 @@ function fn.partial(fn, ...)
    end
 end
 ```
-### itermap(fn, iter)
-
-Applies ``fn`` to each element returned from ``iter``, in turn.
 
 
-For a consistent interface, all return values are ``pack``ed into one array
-slot of a table, which is returned.
+### itermap\(fn, iter\)
+
+Applies `fn` to each element returned from `iter`, in turn\.
+
+For a consistent interface, all return values are `pack`ed into one array
+slot of a table, which is returned\.
 
 ```lua
 function fn.itermap(fn, iter)
@@ -68,29 +75,27 @@ function fn.itermap(fn, iter)
    end
 end
 ```
-### fn.dynamic(fn)
+
+
+### fn\.dynamic\(fn\)
 
 Because functions are immutable, we can't replace all instances of a function,
-at least not without trawling the entire program with the ``debug`` library
-looking for upvalues and locals.
+at least not without trawling the entire program with the `debug` library
+looking for upvalues and locals\.
 
-
-``dynamic`` sets up a closure, which uses a private attributes table to retrieve
-the passed function and call it.
-
+`dynamic` sets up a closure, which uses a private attributes table to retrieve
+the passed function and call it\.
 
 We create a table as a lightweight unique to index the function with, and
-provide a second method, ``fn.patch_dynamic``, to change the underlying function
-when desired.
-
+provide a second method, `fn.patch_dynamic`, to change the underlying function
+when desired\.
 
 We use two tables for the registry, because we want the values of the
-``_dynamics_call`` table to retain a reference even if it's the only one, which
-allows anonymous functions to be registered as dynamic or patched in.
-
+`_dynamics_call` table to retain a reference even if it's the only one, which
+allows anonymous functions to be registered as dynamic or patched in\.
 
 The net result is a unique function which can be swapped out in all places in
-which it is used.
+which it is used\.
 
 ```lua
 local _dynamics_call = setmetatable({}, {__mode = 'k'})
@@ -107,10 +112,12 @@ function fn.dynamic(fn)
    return dyn_fn
 end
 ```
-### fn.patch_dynamic(dyn_fn, fn)
+
+
+### fn\.patch\_dynamic\(dyn\_fn, fn\)
 
 Replaces the attribute function with the new function, and updates the table
-accordingly.
+accordingly\.
 
 ```lua
 function fn.patch_dynamic(dyn_fn, fn)
@@ -119,44 +126,39 @@ function fn.patch_dynamic(dyn_fn, fn)
    _dynamics_call[uid] = fn
 end
 ```
-### hookable(fn)
 
-As we build out ``helm``, I would like to be able to expose a rich API for
-extensions, a la Emacs.
 
+### hookable\(fn\)
+
+As we build out `helm`, I would like to be able to expose a rich API for
+extensions, a la Emacs\.
 
 One of the ways to do this is to expose functions with hooks: actions taken
-before or after a given function.
-
+before or after a given function\.
 
 Doing this well means not letting implementation get ahead of use; think of
-this as a proof of concept.
+this as a proof of concept\.
 
+A hookable function is a callable table with slots `pre` and `post`, which,
+when present, are called before and after the function\.
 
-A hookable function is a callable table with slots ``pre`` and ``post``, which,
-when present, are called before and after the function.
+`pre` receives the same parameters, and must return parameters that are then
+passed to the main function\.  These don't have to be the same parameters,
+but certainly can be, if pre is called for side effects\.  This calling
+convention gives `pre` a chance to modify the default parameters\.
 
-
-``pre`` receives the same parameters, and must return parameters that are then
-passed to the main function.  These don't have to be the same parameters,
-but certainly can be, if pre is called for side effects.  This calling
-convention gives ``pre`` a chance to modify the default parameters.
-
-
-``post`` receives the return values of the main function, if any, followed by
-either the return parameters of ``pre`` or the main parameters, depending on if
-there is a pre-hook.  The reason for this calling convention is that otherwise
-the order of parameters changes if the ``pre`` hook is removed, making it
-difficult to write a ``post`` hook which is unaware of what ``pre`` is doing.
-
+`post` receives the return values of the main function, if any, followed by
+either the return parameters of `pre` or the main parameters, depending on if
+there is a pre\-hook\.  The reason for this calling convention is that otherwise
+the order of parameters changes if the `pre` hook is removed, making it
+difficult to write a `post` hook which is unaware of what `pre` is doing\.
 
 This is because we don't want to have to structure the main function in a
-parameter-passing style, but if it does return something, ``post`` should get a
-shot at it.
+parameter\-passing style, but if it does return something, `post` should get a
+shot at it\.
 
-
-The return values are the return values of ``post`` or the main function,
-depending.
+The return values are the return values of `post` or the main function,
+depending\.
 
 ```lua
 local _hooks = setmetatable({}, {__mode = "k"})
@@ -214,20 +216,22 @@ function fn.hookable(fn, pre, post)
 end
 
 ```
+
+
 ## Errors and asserts
 
 
 ### Assertfmt
 
-I'll probably just globally replace assert with this over time.
-
+I'll probably just globally replace assert with this over time\.
 
 This avoids doing concatenations and conversions on messages that we never
-see in normal use.
+see in normal use\.
 
 ```lua
 fn.assertfmt = _base.assertfmt
 ```
+
 ```lua
 return fn
 ```

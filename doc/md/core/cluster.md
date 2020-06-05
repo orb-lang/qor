@@ -1,15 +1,16 @@
 # Cluster
 
 
-One of the language-development goals we have with the Bridge project is to
-build and extend a Meta-Object Protocol.
+One of the language\-development goals we have with the Bridge project is to
+build and extend a Meta\-Object Protocol\.
 
-
-That's cluster.
+That's cluster\.
 
 ```lua
 local cluster = {}
 ```
+
+
 ## Identity and Membership
 
 
@@ -19,7 +20,7 @@ local cluster = {}
 ### Meta
 
 This is our default pattern for single inheritance with transference of
-metamethods.
+metamethods\.
 
 ```lua
 local sub = assert(string.sub)
@@ -60,6 +61,7 @@ function cluster.meta(Meta)
    error "cannot make metatable"
 end
 ```
+
 ```lua
 return cluster
 ```

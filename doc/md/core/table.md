@@ -8,14 +8,20 @@ for k, v in pairs(table) do
    Tab[k] = v
 end
 ```
-## n_table
 
-  Sometimes we want to be able to include ``nil`` in an array-type table.  The
-usual way to handle this in Lua is with a table that has a ``.n`` field.
 
+## n\_table
+
+  Sometimes we want to be able to include `nil` in an array\-type table\.  The
+usual way to handle this in Lua is with a table that has a `.n` field\.
 
 This is a metatable and constructor which provides a table which behaves in
-that fashion.
+that fashion\.
+
+\#Todo
+should be their own constructor; they can share some methods, but `.n` has
+different semantics in this case, since it refers to the first open slot\.
+
 
 ```lua
 local N_M = {}
@@ -40,9 +46,11 @@ function Tab.n_table(tab, djikstra)
    return setmetatable(tab, N_M)
 end
 ```
-### readOnly(tab)
 
-Makes a table read-only, will throw an error if assigned to.
+
+### readOnly\(tab\)
+
+Makes a table read\-only, will throw an error if assigned to\.
 
 ```lua
 local function RO_M__newindex(tab, key, value)
@@ -54,10 +62,12 @@ function Tab.readOnly(tab)
    return setmetatable({}, {__index = tab, __newindex = RO_M__newindex})
 end
 ```
-### hasfield(tab, field) & hasfield.field(tab)
 
 
-A nicety which can be used both for predication and assignment.
+### hasfield\(tab, field\) & hasfield\.field\(tab\)
+
+
+A nicety which can be used both for predication and assignment\.
 
 ```lua
 local function _hasfield(tab, field)
@@ -91,15 +101,15 @@ end
 Tab.hasfield = setmetatable({}, { __index = _hf__index,
                                    __call  = _hf__call })
 ```
-### clone(tab, depth)
-
-Performs a shallow clone of table, attaching metatable if available.
 
 
-Will recurse to ``depth`` if provided.
+### clone\(tab, depth\)
 
+Performs a shallow clone of table, attaching metatable if available\.
 
-This will unroll circular references, which may not be what you want.
+Will recurse to `depth` if provided\.
+
+This will unroll circular references, which may not be what you want\.
 
 ```lua
 local function _clone(tab, depth)
@@ -117,9 +127,11 @@ local function _clone(tab, depth)
 end
 Tab.clone = _clone
 ```
-### Table.deepclone(tab)
 
-Makes a cycle-checked deep copy of a table, including metatables.
+
+### Table\.deepclone\(tab\)
+
+Makes a cycle\-checked deep copy of a table, including metatables\.
 
 ```lua
 function Tab.deepclone(tab)
@@ -147,20 +159,20 @@ function Tab.deepclone(tab)
    return _deep(tab)
 end
 ```
-### cloneinstance(tab)
-
-``deepclone`` is useful to take a snapshot, as of an environment, with the
-assurance that no subsequent action can mutate your clone.  With some caveats,
-if you're holding closures with mutable state, or userdata.
 
 
-``cloneinstance`` covers a more common use case, where you want a deep clone of
+### cloneinstance\(tab\)
+
+`deepclone` is useful to take a snapshot, as of an environment, with the
+assurance that no subsequent action can mutate your clone\.  With some caveats,
+if you're holding closures with mutable state, or userdata\.
+
+`cloneinstance` covers a more common use case, where you want a deep clone of
 an instance table, which may have circular references and member instances,
-but want to retain the same metatable for each table cloned.
-
+but want to retain the same metatable for each table cloned\.
 
 metatables are often used as a poor man's type signature, and this function
-will not break that contract.
+will not break that contract\.
 
 ```lua
 function Tab.cloneinstance(tab)
@@ -186,24 +198,24 @@ function Tab.cloneinstance(tab)
    return _deep(tab)
 end
 ```
-### isarray(tab)
-
-Determines if ``tab`` is an array, i.e. a table whose only keys are a contiguous
-range of integers starting at 1.
 
 
-This seems potentially unsafe--pairs() technically may return keys in any order.
-In practice integer keys seem to be returned first and in-order, and certainly
-**if** there are only integer keys I imagine this holds true no matter what. If
-there are non-integer keys, well, things being out of order will cause us to
-fail fast, which is a good thing, so...bonus, I guess.
+### isarray\(tab\)
 
+Determines if `tab` is an array, i\.e\. a table whose only keys are a contiguous
+range of integers starting at 1\.
+
+This seems potentially unsafe\-\-pairs\(\) technically may return keys in any order\.
+In practice integer keys seem to be returned first and in\-order, and certainly
+**if** there are only integer keys I imagine this holds true no matter what\. If
+there are non\-integer keys, well, things being out of order will cause us to
+fail fast, which is a good thing, so\.\.\.bonus, I guess\.
 
 NB: this function bears no resemblance to the actual behavior of Lua, which
-is frankly somewhat horrifying if one goes off-reservation with table
-behavior. (The actual Lua behavior uses a binary search, so some "holes"--
-e.g. {1, nil, 3}--will affect #, while others won't. We are more careful, at
-the cost of some performance.)
+is frankly somewhat horrifying if one goes off\-reservation with table
+behavior\. \(The actual Lua behavior uses a binary search, so some "holes"\-\-
+e\.g\. \{1, nil, 3\}\-\-will affect \#, while others won't\. We are more careful, at
+the cost of some performance\.\)
 
 ```lua
 function Tab.isarray(tab)
@@ -215,14 +227,15 @@ function Tab.isarray(tab)
    return true
 end
 ```
-### arraymap(tab, fn)
-
-Iterates the array portion of ``tab``, applying ``fn`` and storing the first
-return value in a new table, which is returned.
 
 
-Note that ``nil`` values will break the one-to-one relationship between the
-first table and the returned table.
+### arraymap\(tab, fn\)
+
+Iterates the array portion of `tab`, applying `fn` and storing the first
+return value in a new table, which is returned\.
+
+Note that `nil` values will break the one\-to\-one relationship between the
+first table and the returned table\.
 
 ```lua
 local insert = assert(table.insert)
@@ -237,23 +250,22 @@ function Tab.arraymap(tab, fn)
    return ret
 end
 ```
-### compact(tab, n)
-
-  Makes the array portion of a table compact up to ``n``, by moving any values
-found above ``nils`` downward into the holes.
 
 
-This is recommended as an alternative to a ``remove``-heavy algorithm.  Since it
-moves values at most once, it's faster to cache the value of ``#tab``, remove
-unwanted values, and run ``compact`` once at the end.
+### compact\(tab, n\)
 
+  Makes the array portion of a table compact up to `n`, by moving any values
+found above `nils` downward into the holes\.
 
-This is a ``.n`` aware algorithm, and will use it if the second argument is not
-provided.  As the purpose is to shrink a table with holes, we feel that
-providing ``#tab`` as a further fallback is asking for trouble.
+This is recommended as an alternative to a `remove`\-heavy algorithm\.  Since it
+moves values at most once, it's faster to cache the value of `#tab`, remove
+unwanted values, and run `compact` once at the end\.
 
+This is a `.n` aware algorithm, and will use it if the second argument is not
+provided\.  As the purpose is to shrink a table with holes, we feel that
+providing `#tab` as a further fallback is asking for trouble\.
 
-Returns nothing, in common with other functions which mutate a table in-place.
+Returns nothing, in common with other functions which mutate a table in\-place\.
 
 ```lua
 function Tab.compact(tab, n)
@@ -278,13 +290,14 @@ function Tab.compact(tab, n)
    end
 end
 ```
-### inverse(tab)
-
-Returns a new table, in which all keys of ``tab`` are values of the new table,
-and vice versa.
 
 
-Throws an error if duplicate values are present in the table.
+### inverse\(tab\)
+
+Returns a new table, in which all keys of `tab` are values of the new table,
+and vice versa\.
+
+Throws an error if duplicate values are present in the table\.
 
 ```lua
 function Tab.inverse(tab)
@@ -298,17 +311,17 @@ function Tab.inverse(tab)
    return bat
 end
 ```
-### flatten(tab, level)
+
+
+### flatten\(tab, level\)
 
 Takes nested tables and flattens the array portion into a single table, which
-is returned.
+is returned\.
 
+Will decline to follow circular references, with a side\-effect that multiple
+instances of the same table are only copied once\.
 
-Will decline to follow circular references, with a side-effect that multiple
-instances of the same table are only copied once.
-
-
-If ``level`` is provided, ``flatten`` will only iterate to the specified depth:
+If `level` is provided, `flatten` will only iterate to the specified depth:
 
 ```lua-example
 tab = {1, {2, {3, 4}, 5}, 6}
@@ -317,6 +330,7 @@ flatten(tab)
 flatten(tab, 1)
 -- {1, 2, {3, 4}, 5, 6}
 ```
+
 ```lua
 function Tab.flatten(tab, level)
    local ret, copies = {}, {}
@@ -340,10 +354,11 @@ function Tab.flatten(tab, level)
    return ret
 end
 ```
-### iscallable(val)
 
-  Determines if ``val`` is callable, i.e. a function, or something with a
-``__call`` metamethod.
+### iscallable\(val\)
+
+  Determines if `val` is callable, i\.e\. a function, or something with a
+`__call` metamethod\.
 
 ```lua
 local hasmetamethod = assert(meta.hasmetamethod)
@@ -353,9 +368,10 @@ function Tab.iscallable(val)
       or hasmetamethod("__call", val)
 end
 ```
-### arrayof(tab)
 
-Clones and returns the array portion of a table.
+### arrayof\(tab\)
+
+Clones and returns the array portion of a table\.
 
 ```lua
 function Tab.arrayof(tab)
@@ -366,10 +382,12 @@ function Tab.arrayof(tab)
    return arr
 end
 ```
-### collect(iter, ...)
+
+
+### collect\(iter, \.\.\.\)
 
   Collects and returns up to two tables of values, given an iterator and
-arguments to pass to it.
+arguments to pass to it\.
 
 ```lua
 function Tab.collect(iter, tab, ...)
@@ -381,15 +399,15 @@ function Tab.collect(iter, tab, ...)
    return k_tab, v_tab
 end
 ```
-### select(tab, key)
-
-Recursively return all ``v`` for ``key`` in all subtables of tab.
 
 
-NB: this is not being used and collides with a core library name.
+### select\(tab, key\)
 
+Recursively return all `v` for `key` in all subtables of tab\.
 
-Should probably be removed.
+NB: this is not being used and collides with a core library name\.
+
+Should probably be removed\.
 
 ```lua
 local function _select(collection, tab, key, cycle)
@@ -410,9 +428,11 @@ function Tab.select(tab, key)
    return _select({}, tab, key)
 end
 ```
-### reverse(tab)
 
-Reverses (only) the array portion of a table, returning a new table.
+
+### reverse\(tab\)
+
+Reverses \(only\) the array portion of a table, returning a new table\.
 
 ```lua
 function Tab.reverse(tab)
@@ -426,9 +446,11 @@ function Tab.reverse(tab)
    return bat
 end
 ```
-### keys(tab)
 
-Returns an array of the keys of a table.
+
+### keys\(tab\)
+
+Returns an array of the keys of a table\.
 
 ```lua
 function Tab.keys(tab)
@@ -441,7 +463,9 @@ function Tab.keys(tab)
    return keys, #keys
 end
 ```
-### values(tab)
+
+
+### values\(tab\)
 
 ```lua
 function Tab.values(tab)
@@ -454,12 +478,13 @@ function Tab.values(tab)
    return vals, #vals
 end
 ```
-### slice(tab, from[, to])
 
-Extracts a slice of ``tab``, starting at index ``from`` and ending at index ``to``,
-inclusive. If ``to`` is ommitted, the size of ``tab`` is used. Either ``from`` or
-``to`` may be negative, in which case they are relative to the end of the table.
-If ``to`` is less than ``from``, an empty table is returned.
+### slice\(tab, from\[, to\]\)
+
+Extracts a slice of `tab`, starting at index `from` and ending at index `to`,
+inclusive\. If `to` is ommitted, the size of `tab` is used\. Either `from` or
+`to` may be negative, in which case they are relative to the end of the table\.
+If `to` is less than `from`, an empty table is returned\.
 
 ```lua
 
@@ -479,14 +504,16 @@ function Tab.slice(tab, from, to)
 end
 
 ```
-### splice(tab, index, into)
 
-Puts the full contents of ``into`` into ``tab`` at ``index``.  The argument order is
-compatible with existing functions and method syntax.
+### splice\(tab, index, into\)
 
+Puts the full contents of `into` into `tab` at `index`\.  The argument order is
+compatible with existing functions and method syntax\.
 
-if ``index`` is nil, the contents of ``into`` will be inserted at the end of
-``tab``
+if `index` is nil, the contents of `into` will be inserted at the end of
+`tab`
+
+\#Todo
 
 ```lua
 local insert = assert(table.insert)
@@ -512,9 +539,11 @@ function Tab.splice(tab, idx, into)
     return tab
 end
 ```
-### addall(tab, to_add)
 
-Adds all key-value pairs of the ``to_add`` table to ``tab``.
+
+### addall\(tab, to\_add\)
+
+Adds all key\-value pairs of the `to_add` table to `tab`\.
 
 ```lua
 function Tab.addall(tab, to_add)
@@ -523,10 +552,11 @@ function Tab.addall(tab, to_add)
    end
 end
 ```
-### safeget(tab, key)
+
+### safeget\(tab, key\)
 
 This will retrieve a value, given a key, without causing errors if the table
-has been made strict.
+has been made strict\.
 
 ```lua
 function Tab.safeget(tab, key)
@@ -558,6 +588,8 @@ function Tab.safeget(tab, key)
    return nil
 end
 ```
+
+
 ```lua
 return Tab
 ```

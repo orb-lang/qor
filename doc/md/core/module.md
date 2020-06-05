@@ -1,12 +1,13 @@
 # Module
 
-Tools for dealing with modules.
+Tools for dealing with modules\.
 
 
 ```lua
 local Mod = {}
 local assert = assert(require "core:core/_base" . assertfmt)
 ```
+
 ```lua
 local require, pack, unpack = assert(require), assert(pack), assert(unpack)
 
@@ -20,6 +21,7 @@ function Mod.import(req_str, ...)
    return unpack(exports)
 end
 ```
+
 ```lua
 return Mod
 ```
