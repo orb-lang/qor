@@ -454,7 +454,7 @@ end
 
 
 
-function Tab.removerange(tab, start, stop)
+function Tab.deleterange(tab, start, stop)
    if start > stop then return end
    local offset = stop - start + 1
    for i = start, #tab do

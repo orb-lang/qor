@@ -426,14 +426,15 @@ function Tab.reverse(tab)
    return bat
 end
 ```
-### removerange(tab, start, stop)
 
-Removes the range of array indices from ``start`` to ``stop``, inclusive,
-from ``tab``. If the range is empty (=start= greater than ``stop``), does
-nothing.
+### deleterange\(tab, start, stop\)
+
+Deletes the range of array indices from `start` to `stop`, inclusive,
+from `tab`\. If the range is empty \(`start` greater than `stop`\), does
+nothing\.
 
 ```lua
-function Tab.removerange(tab, start, stop)
+function Tab.deleterange(tab, start, stop)
    if start > stop then return end
    local offset = stop - start + 1
    for i = start, #tab do
