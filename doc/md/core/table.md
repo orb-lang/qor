@@ -447,6 +447,21 @@ function Tab.reverse(tab)
 end
 ```
 
+### deleterange\(tab, start, stop\)
+
+Deletes the range of array indices from `start` to `stop`, inclusive,
+from `tab`\. If the range is empty \(`start` greater than `stop`\), does
+nothing\.
+
+```lua
+function Tab.deleterange(tab, start, stop)
+   if start > stop then return end
+   local offset = stop - start + 1
+   for i = start, #tab do
+      tab[i] = tab[i + offset]
+   end
+end
+```
 
 ### keys\(tab\)
 
