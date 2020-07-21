@@ -47,9 +47,9 @@ and I've sprayed duplicates of this method across the orb codebase\.
 
 It needs to live somewhere\. So here it is\.
 
-\- \#params
+- \#params
 
-  \- meta : the metatable to inherit from\.
+  - meta : the metatable to inherit from\.
 
 
 
@@ -72,11 +72,11 @@ functionalized table\.
 
 This is\.\.\. sometimes the right thing to do\. sometimes\.
 
-\- \#params
+- \#params
 
-  \- mod :  The module metatable
-  \- constructor :  A function, called =new=, which receives =mod= as the
-                   first parameter\.
+  - mod :  The module metatable
+  - constructor :  A function, called `new`, which receives `mod` as the
+      first parameter\.
 
 ```lua
 function meta.export(mod, constructor)
