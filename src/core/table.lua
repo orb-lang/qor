@@ -574,7 +574,7 @@ end
 
 
 
-function Tab.safeget(tab, key)
+function Tab.pget(tab, key)
    local val = rawget(tab, key)
    if val ~= nil then
       return val
@@ -603,6 +603,26 @@ function Tab.safeget(tab, key)
    return nil
 end
 
+
+
+
+
+
+
+
+function Tab.safeget(tab, key)
+   while tab ~= nil do
+      local val = rawget(tab, key)
+      if val ~= nil then return val end
+      local M = getmetatable(tab)
+      if M then
+         tab = rawget(M, "__index")
+      else
+         tab = nil
+      end
+   end
+   return nil
+end
 
 
 
