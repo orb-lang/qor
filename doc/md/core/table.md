@@ -607,7 +607,7 @@ end
 ### safeget\(tab, key\)
 
 Retrieves a value for the given key, without any possibility of error
-or side\-effects\-\-\_\_index functions are not called\.
+or side\-effects — \_\_index functions are not called\.
 
 ```lua
 function Tab.safeget(tab, key)
