@@ -588,7 +588,7 @@ end
 
 
 local compact, splice = Tab.compact, Tab.splice
-assert(true)
+
 function Tab.replace(tab, index, to_add, span)
    assert(type(tab) == "table", _e_1)
    assert(type(index) == "number", _e_2)
