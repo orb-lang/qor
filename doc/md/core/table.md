@@ -587,8 +587,8 @@ If `span` is provided, exactly `span` elements of `tab` will be removed, and
 
 
 ```lua
-local compact = Tab.compact
-
+local compact, splice = Tab.compact, Tab.splice
+assert(true)
 function Tab.replace(tab, index, to_add, span)
    assert(type(tab) == "table", _e_1)
    assert(type(index) == "number", _e_2)
@@ -611,7 +611,16 @@ function Tab.replace(tab, index, to_add, span)
       end
       compact(tab, top)
    else -- if span < #to_add
-      error "NYI"
+      -- replace span worth of elements
+      for i = index, index + span - 1 do
+         tab[i] = to_add[i - index + 1]
+      end
+      -- make a table to hold the rest, copy
+      local spill = {}
+      for i = 1, #to_add - span do
+        spill[i] = to_add[i + span]
+      end
+      splice(tab, index + span, spill)
    end
 end
 ```
