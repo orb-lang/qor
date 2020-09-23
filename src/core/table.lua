@@ -587,6 +587,8 @@ end
 
 
 
+local compact = Tab.compact
+
 function Tab.replace(tab, index, to_add, span)
    assert(type(tab) == "table", _e_1)
    assert(type(index) == "number", _e_2)
@@ -598,7 +600,16 @@ function Tab.replace(tab, index, to_add, span)
          tab[i] = to_add[i - index + 1]
       end
    elseif span > #to_add then
-      error "NYI"
+      local top = #tab
+      -- replace #to_add worth of elements
+      for i = index, index + #to_add - 1 do
+         tab[i] = to_add[i - index + 1]
+      end
+      -- nil out remaining elements
+      for i = index + #to_add, index + span - 1 do
+         tab[i] = nil
+      end
+      compact(tab, top)
    else -- if span < #to_add
       error "NYI"
    end
