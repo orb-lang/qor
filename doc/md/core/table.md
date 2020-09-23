@@ -22,6 +22,11 @@ that fashion\.
 should be their own constructor; they can share some methods, but `.n` has
 different semantics in this case, since it refers to the first open slot\.
 
+\#Todo
+stored in the correct place, namely `n + 1`\.  But it turns out that
+`table.insert` just completely ignores newindex methods, which is rude, and
+this might give a false confidence that `.n` will stay in sync, whereas
+clearly, it will not\.
 
 ```lua
 local N_M = {}
@@ -171,7 +176,7 @@ if you're holding closures with mutable state, or userdata\.
 an instance table, which may have circular references and member instances,
 but want to retain the same metatable for each table cloned\.
 
-metatables are often used as a poor man's type signature, and this function
+Metatables are often used as a poor man's type signature, and this function
 will not break that contract\.
 
 ```lua
@@ -237,6 +242,11 @@ return value in a new table, which is returned\.
 Note that `nil` values will break the one\-to\-one relationship between the
 first table and the returned table\.
 
+\#Todo
+should use an n\-table to collect the return values, which will keep any holes
+from producing impossible\-to\-detect isometry errors\.  There should also be a
+corresponding `map` function, which works over all key\-value pairs\.
+
 ```lua
 local insert = assert(table.insert)
 
@@ -244,7 +254,7 @@ function Tab.arraymap(tab, fn)
    local ret, ret_val = {}
    for _, val in ipairs(tab) do
       ret_val = fn(val) -- necessary to avoid unpacking multiple values
-                        -- in insert
+                        -- in insert (could be =insert(ret, (fn(val)))=...)
       insert(ret, ret_val)
    end
    return ret
@@ -355,6 +365,7 @@ function Tab.flatten(tab, level)
 end
 ```
 
+
 ### iscallable\(val\)
 
   Determines if `val` is callable, i\.e\. a function, or something with a
@@ -368,6 +379,7 @@ function Tab.iscallable(val)
       or hasmetamethod("__call", val)
 end
 ```
+
 
 ### arrayof\(tab\)
 
@@ -447,6 +459,7 @@ function Tab.reverse(tab)
 end
 ```
 
+
 ### deleterange\(tab, start, stop\)
 
 Deletes the range of array indices from `start` to `stop`, inclusive,
@@ -462,6 +475,7 @@ function Tab.deleterange(tab, start, stop)
    end
 end
 ```
+
 
 ### keys\(tab\)
 
@@ -494,6 +508,7 @@ function Tab.values(tab)
 end
 ```
 
+
 ### slice\(tab, from\[, to\]\)
 
 Extracts a slice of `tab`, starting at index `from` and ending at index `to`,
@@ -502,7 +517,6 @@ inclusive\. If `to` is ommitted, the size of `tab` is used\. Either `from` or
 If `to` is less than `from`, an empty table is returned\.
 
 ```lua
-
 function Tab.slice(tab, from, to)
    to = to or #tab
    if from < 0 then
@@ -517,18 +531,24 @@ function Tab.slice(tab, from, to)
    end
    return answer
 end
-
 ```
 
-### splice\(tab, index, into\)
 
-Puts the full contents of `into` into `tab` at `index`\.  The argument order is
+### splice\(tab, index, to\_add\)
+
+Puts the full contents of `into` to\_add `tab` at `index`\.  The argument order is
 compatible with existing functions and method syntax\.
 
-if `index` is nil, the contents of `into` will be inserted at the end of
+if `index` is nil, the contents of `to_add` will be inserted at the end of
 `tab`
 
-\#Todo
+\#Todo:
+queue, and then push and pop the queue to transfer the remaining contents\.
+Our existing algorithm has a huge constant factor from repeatedly copying the
+remaining portion\.
+
+Our `deque` project is specifically designed for this, but I want core to have
+no dependencies, so I'll probably just reuse the main logic\.
 
 ```lua
 local insert = assert(table.insert)
@@ -538,20 +558,50 @@ local _e_1 = sp_er .. "$1 must be a table"
 local _e_2 = sp_er .. "$2 must be a number"
 local _e_3 = sp_er .. "$3 must be a table"
 
-function Tab.splice(tab, idx, into)
+function Tab.splice(tab, index, to_add)
    assert(type(tab) == "table", _e_1)
-   assert(type(idx) == "number" or idx == nil, _e_2)
-   if idx == nil then
-      idx = #tab + 1
+   assert(type(index) == "number" or index == nil, _e_2)
+   if index == nil then
+      index = #tab + 1
    end
-   assert(type(into) == "table", _e_3)
-    idx = idx - 1
+   assert(type(to_add) == "table", _e_3)
+    index = index - 1
     local i = 1
-    for j = 1, #into do
-        insert(tab,i+idx,into[j])
+    for j = 1, #to_add do
+        insert(tab,i+index,to_add[j])
         i = i + 1
     end
     return tab
+end
+```
+
+
+### replace\(tab, index, to\_add, span?\)
+
+Splices the array portion of `to_add` into the array portion of `tab`, at
+`index`, which is mandatory\.
+
+If `span` is provided, exactly `span` elements of `tab` will be removed, and
+`tab` will grow, shrink, or stay the same size, depending on the length of
+`to_add`\.  If not, `#to_add` elements are replaced\.
+
+
+```lua
+function Tab.replace(tab, index, to_add, span)
+   assert(type(tab) == "table", _e_1)
+   assert(type(index) == "number", _e_2)
+   assert(type(to_add) == "table", _e_3)
+   span = span or #to_add
+   -- easiest to handle the three cases as distinct.
+   if span == #to_add then
+      for i = index, index + span - 1 do
+         tab[i] = to_add[i - index + 1]
+      end
+   elseif span > #to_add then
+      error "NYI"
+   else -- if span < #to_add
+      error "NYI"
+   end
 end
 ```
 

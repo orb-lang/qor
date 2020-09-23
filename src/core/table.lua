@@ -24,6 +24,11 @@ end
 
 
 
+
+
+
+
+
 local N_M = {}
 N_M.__index = N_M
 
@@ -238,13 +243,18 @@ end
 
 
 
+
+
+
+
+
 local insert = assert(table.insert)
 
 function Tab.arraymap(tab, fn)
    local ret, ret_val = {}
    for _, val in ipairs(tab) do
       ret_val = fn(val) -- necessary to avoid unpacking multiple values
-                        -- in insert
+                        -- in insert (could be =insert(ret, (fn(val)))=...)
       insert(ret, ret_val)
    end
    return ret
@@ -361,12 +371,14 @@ end
 
 
 
+
 local hasmetamethod = assert(meta.hasmetamethod)
 
 function Tab.iscallable(val)
    return type(val) == "function"
       or hasmetamethod("__call", val)
 end
+
 
 
 
@@ -454,6 +466,7 @@ end
 
 
 
+
 function Tab.deleterange(tab, start, stop)
    if start > stop then return end
    local offset = stop - start + 1
@@ -461,6 +474,7 @@ function Tab.deleterange(tab, start, stop)
       tab[i] = tab[i + offset]
    end
 end
+
 
 
 
@@ -531,6 +545,12 @@ end
 
 
 
+
+
+
+
+
+
 local insert = assert(table.insert)
 
 local sp_er = "table<core>.splice: "
@@ -538,20 +558,50 @@ local _e_1 = sp_er .. "$1 must be a table"
 local _e_2 = sp_er .. "$2 must be a number"
 local _e_3 = sp_er .. "$3 must be a table"
 
-function Tab.splice(tab, idx, into)
+function Tab.splice(tab, index, to_add)
    assert(type(tab) == "table", _e_1)
-   assert(type(idx) == "number" or idx == nil, _e_2)
-   if idx == nil then
-      idx = #tab + 1
+   assert(type(index) == "number" or index == nil, _e_2)
+   if index == nil then
+      index = #tab + 1
    end
-   assert(type(into) == "table", _e_3)
-    idx = idx - 1
+   assert(type(to_add) == "table", _e_3)
+    index = index - 1
     local i = 1
-    for j = 1, #into do
-        insert(tab,i+idx,into[j])
+    for j = 1, #to_add do
+        insert(tab,i+index,to_add[j])
         i = i + 1
     end
     return tab
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function Tab.replace(tab, index, to_add, span)
+   assert(type(tab) == "table", _e_1)
+   assert(type(index) == "number", _e_2)
+   assert(type(to_add) == "table", _e_3)
+   span = span or #to_add
+   -- easiest to handle the three cases as distinct.
+   if span == #to_add then
+      for i = index, index + span - 1 do
+         tab[i] = to_add[i - index + 1]
+      end
+   elseif span > #to_add then
+      error "NYI"
+   else -- if span < #to_add
+      error "NYI"
+   end
 end
 
 
