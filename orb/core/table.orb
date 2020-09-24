@@ -512,7 +512,7 @@ end
 *** slice(tab, from[, to])
 
 Extracts a slice of =tab=, starting at index =from= and ending at index =to=,
-inclusive. If =to= is ommitted, the size of =tab= is used. Either =from= or
+inclusive. If =to= is omitted, the size of =tab= is used. Either =from= or
 =to= may be negative, in which case they are relative to the end of the table.
 If =to= is less than =from=, an empty table is returned.
 
@@ -600,7 +600,6 @@ Splices the array portion of =to_add= into the array portion of =tab=, at
 If =span= is provided, exactly =span= elements of =tab= will be removed, and
 =tab= will grow, shrink, or stay the same size, depending on the length of
 =to_add=.  If not, =#to_add= elements are replaced.
-
 
 #!lua
 local compact, splice = Tab.compact, Tab.splice
