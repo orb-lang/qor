@@ -545,18 +545,24 @@ end
 
 
 
-
-
-
-
-
-
 local insert = assert(table.insert)
 
 local sp_er = "table<core>.splice: "
 local _e_1 = sp_er .. "$1 must be a table"
 local _e_2 = sp_er .. "$2 must be a number"
 local _e_3 = sp_er .. "$3 must be a table"
+
+local function push(queue, x)
+   queue.tail = queue.tail + 1
+   queue[queue.tail] = x
+end
+
+local function pop(queue)
+   if queue.tail == queue.head then return nil end
+   queue.head = queue.head + 1
+   local r = queue[queue.head]
+   return r
+end
 
 function Tab.splice(tab, index, to_add)
    assert(type(tab) == "table", _e_1)
@@ -566,10 +572,20 @@ function Tab.splice(tab, index, to_add)
    end
    assert(type(to_add) == "table", _e_3)
     index = index - 1
+    local queue = { head = 0, tail = 0}
     local i = 1
+    -- replace elements, spilling onto queue
     for j = 1, #to_add do
-        insert(tab,i+index,to_add[j])
+        push(queue, tab[i + index])
+        tab[i + index] = to_add[j]
         i = i + 1
+    end
+    local elem = pop(queue)
+    while elem ~= nil do
+       push(queue, tab[i + index])
+       tab[i + index] = elem
+       i = i + 1
+       elem = pop(queue)
     end
     return tab
 end
