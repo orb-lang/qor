@@ -498,7 +498,7 @@ end
 
 
 function Tab.values(tab)
-   assert(type(tab) == "table", "vals must receive a table")
+   assert(type(tab) == "table", "values must receive a table")
    local vals = {}
    for _, v in pairs(tab) do
       vals[#vals + 1] = v
@@ -560,8 +560,7 @@ end
 local function pop(queue)
    if queue.tail == queue.head then return nil end
    queue.head = queue.head + 1
-   local r = queue[queue.head]
-   return r
+   return queue[queue.head]
 end
 
 function Tab.splice(tab, index, to_add)
@@ -580,6 +579,7 @@ function Tab.splice(tab, index, to_add)
         tab[i + index] = to_add[j]
         i = i + 1
     end
+    -- run the queue up the remainder of the table
     local elem = pop(queue)
     while elem ~= nil do
        push(queue, tab[i + index])
@@ -589,7 +589,6 @@ function Tab.splice(tab, index, to_add)
     end
     return tab
 end
-
 
 
 
@@ -696,6 +695,7 @@ end
 
 
 
+
 function Tab.safeget(tab, key)
    while tab ~= nil do
       local val = rawget(tab, key)
@@ -703,6 +703,9 @@ function Tab.safeget(tab, key)
       local M = getmetatable(tab)
       if M then
          tab = rawget(M, "__index")
+         if type(tab) ~= 'table' then
+            return nil
+         end
       else
          tab = nil
       end

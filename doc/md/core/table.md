@@ -498,7 +498,7 @@ end
 
 ```lua
 function Tab.values(tab)
-   assert(type(tab) == "table", "vals must receive a table")
+   assert(type(tab) == "table", "values must receive a table")
    local vals = {}
    for _, v in pairs(tab) do
       vals[#vals + 1] = v
@@ -512,7 +512,7 @@ end
 ### slice\(tab, from\[, to\]\)
 
 Extracts a slice of `tab`, starting at index `from` and ending at index `to`,
-inclusive\. If `to` is ommitted, the size of `tab` is used\. Either `from` or
+inclusive\. If `to` is omitted, the size of `tab` is used\. Either `from` or
 `to` may be negative, in which case they are relative to the end of the table\.
 If `to` is less than `from`, an empty table is returned\.
 
@@ -560,8 +560,7 @@ end
 local function pop(queue)
    if queue.tail == queue.head then return nil end
    queue.head = queue.head + 1
-   local r = queue[queue.head]
-   return r
+   return queue[queue.head]
 end
 
 function Tab.splice(tab, index, to_add)
@@ -580,6 +579,7 @@ function Tab.splice(tab, index, to_add)
         tab[i + index] = to_add[j]
         i = i + 1
     end
+    -- run the queue up the remainder of the table
     local elem = pop(queue)
     while elem ~= nil do
        push(queue, tab[i + index])
@@ -600,7 +600,6 @@ Splices the array portion of `to_add` into the array portion of `tab`, at
 If `span` is provided, exactly `span` elements of `tab` will be removed, and
 `tab` will grow, shrink, or stay the same size, depending on the length of
 `to_add`\.  If not, `#to_add` elements are replaced\.
-
 
 ```lua
 local compact, splice = Tab.compact, Tab.splice
@@ -690,6 +689,7 @@ function Tab.pget(tab, key)
 end
 ```
 
+
 ### safeget\(tab, key\)
 
 Retrieves a value for the given key, without any possibility of error
@@ -703,6 +703,9 @@ function Tab.safeget(tab, key)
       local M = getmetatable(tab)
       if M then
          tab = rawget(M, "__index")
+         if type(tab) ~= 'table' then
+            return nil
+         end
       else
          tab = nil
       end
