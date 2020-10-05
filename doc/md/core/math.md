@@ -21,12 +21,12 @@ function Math.inbounds(value, lower, upper)
 end
 ```
 
-### Math\.bound\(value, lower, upper\)
+### Math\.clamp\(value, lower, upper\)
 
 As `inbounds`, but answers a value constrained to be within the specified range\.
 
 ```lua
-function Math.bound(value, lower, upper)
+function Math.clamp(value, lower, upper)
   if lower and value < lower then
     value = lower
   end

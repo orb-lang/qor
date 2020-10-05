@@ -26,7 +26,7 @@ end
 
 
 
-function Math.bound(value, lower, upper)
+function Math.clamp(value, lower, upper)
   if lower and value < lower then
     value = lower
   end
