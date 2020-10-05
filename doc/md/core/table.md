@@ -702,7 +702,7 @@ function Tab.safeget(tab, key)
       if val ~= nil then return val end
       local M = getmetatable(tab)
       if M then
-         tab = rawget(M, "__index")
+         tab = rawget(M, '__index')
          if type(tab) ~= 'table' then
             return nil
          end
