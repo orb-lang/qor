@@ -23,6 +23,7 @@ insert(mods, require "core:core/string")
 insert(mods, require "core:core/table")
 insert(mods, require "core:core/coro")
 insert(mods, require "core:core/math")
+insert(mods, require "core:core/cluster")
 for _, mod in ipairs(mods) do
    for k,v in pairs(mod) do
       core[k] = v
