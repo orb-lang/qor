@@ -2,11 +2,37 @@
 
 
 
+
+
+
+
 local meta = require "core/meta"
 local Tab = {}
 for k, v in pairs(table) do
    Tab[k] = v
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -58,6 +84,14 @@ end
 
 
 
+
+
+
+
+
+
+
+
 local function RO_M__newindex(tab, key, value)
    error("attempt to write value `" .. tostring(value)
          .. "` to read-only table slot `." .. tostring(key) .. "`")
@@ -66,6 +100,15 @@ end
 function Tab.readOnly(tab)
    return setmetatable({}, {__index = tab, __newindex = RO_M__newindex})
 end
+
+
+
+
+
+
+
+
+
 
 
 
@@ -117,6 +160,18 @@ Tab.hasfield = setmetatable({}, { __index = _hf__index,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 local function _clone(tab, depth)
    depth = depth or 1
    assert(depth > 0, "depth must be positive " .. tostring(depth))
@@ -131,6 +186,14 @@ local function _clone(tab, depth)
    return clone
 end
 Tab.clone = _clone
+
+
+
+
+
+
+
+
 
 
 
@@ -163,6 +226,23 @@ function Tab.deepclone(tab)
    end
    return _deep(tab)
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -223,6 +303,27 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function Tab.isarray(tab)
    local i = 1
    for k,_ in pairs(tab) do
@@ -231,6 +332,23 @@ function Tab.isarray(tab)
    end
    return true
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -259,6 +377,25 @@ function Tab.arraymap(tab, fn)
    end
    return ret
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -310,6 +447,17 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 function Tab.inverse(tab)
    local bat = {}
    for k,v in pairs(tab) do
@@ -320,6 +468,28 @@ function Tab.inverse(tab)
    end
    return bat
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -372,12 +542,29 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
 local hasmetamethod = assert(meta.hasmetamethod)
 
 function Tab.iscallable(val)
    return type(val) == "function"
       or hasmetamethod("__call", val)
 end
+
+
+
+
+
+
+
+
 
 
 
@@ -402,6 +589,15 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
 function Tab.collect(iter, tab, ...)
    local k_tab, v_tab = {}, {}
    for k, v in iter(tab, ...) do
@@ -410,6 +606,18 @@ function Tab.collect(iter, tab, ...)
    end
    return k_tab, v_tab
 end
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -447,6 +655,14 @@ end
 
 
 
+
+
+
+
+
+
+
+
 function Tab.reverse(tab)
    if type(tab) ~= "table" or #tab == 0 then
       return {}
@@ -457,6 +673,16 @@ function Tab.reverse(tab)
    end
    return bat
 end
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -482,6 +708,14 @@ end
 
 
 
+
+
+
+
+
+
+
+
 function Tab.keys(tab)
    assert(type(tab) == "table", "keys must receive a table")
    local keys = {}
@@ -491,6 +725,12 @@ function Tab.keys(tab)
 
    return keys, #keys
 end
+
+
+
+
+
+
 
 
 
@@ -517,6 +757,17 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 function Tab.slice(tab, from, to)
    to = to or #tab
    if from < 0 then
@@ -531,6 +782,20 @@ function Tab.slice(tab, from, to)
    end
    return answer
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -602,6 +867,19 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 local compact, splice = Tab.compact, Tab.splice
 
 function Tab.replace(tab, index, to_add, span)
@@ -646,11 +924,27 @@ end
 
 
 
+
+
+
+
+
+
+
+
 function Tab.addall(tab, to_add)
    for k, v in pairs (to_add) do
       tab[k] = v
    end
 end
+
+
+
+
+
+
+
+
 
 
 
@@ -696,6 +990,15 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
 function Tab.safeget(tab, key)
    while tab ~= nil do
       local val = rawget(tab, key)
@@ -715,4 +1018,8 @@ end
 
 
 
+
+
+
 return Tab
+

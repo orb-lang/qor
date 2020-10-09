@@ -2,7 +2,27 @@
 
 
 
+
+
+
+
 local meta = {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -54,6 +74,25 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function meta.inherit(meta)
   local MT = meta or {}
   local M = setmetatable({}, MT)
@@ -79,10 +118,46 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function meta.export(mod, constructor)
   mod.__call = constructor
   return setmetatable({}, mod)
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -131,6 +206,19 @@ meta.hasmetamethod = hasmetamethod
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 local pairs = assert(pairs)
 
 function meta.endow(Meta)
@@ -140,6 +228,19 @@ function meta.endow(Meta)
    end
    return MC
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -163,4 +264,8 @@ end
 
 
 
+
+
+
 return meta
+

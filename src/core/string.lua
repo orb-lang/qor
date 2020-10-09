@@ -2,7 +2,17 @@
 
 
 
+
+
+
+
 local String = {}
+
+
+
+
+
+
 
 
 
@@ -23,7 +33,27 @@ local format = assert(string.format)
 
 
 
+
+
+
+
+
+
+
+
+
 String.assertfmt = assertfmt
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -105,6 +135,19 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 function String.findall(str, patt)
    local matches = {}
    local index = 1
@@ -122,6 +165,52 @@ function String.findall(str, patt)
       return nil
    end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -193,6 +282,15 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
 local matches =
   {
     ["^"] = "%^";
@@ -224,6 +322,17 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 local function cleave(str, pat)
    local at = find(str, pat)
    if at then
@@ -243,10 +352,27 @@ String.cleave = cleave
 
 
 
+
+
+
+
+
+
+
+
+
+
 local find = assert(string.find)
 function String.isidentifier(str)
    return find(str, "^[a-zA-Z_][a-zA-Z0-9_]+$") == 1
 end
+
+
+
+
+
+
+
 
 
 
@@ -283,6 +409,15 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
 local function _str__repr(str_tab)
     return str_tab[1]
 end
@@ -301,12 +436,28 @@ end
 
 
 
+
+
+
+
+
+
+
+
 function String.slurp(filename)
   local f = io.open(filename, "rb")
   local content = f:read("*all")
   f:close()
   return content
 end
+
+
+
+
+
+
+
+
 
 
 
@@ -331,4 +482,8 @@ end
 
 
 
+
+
+
 return String
+

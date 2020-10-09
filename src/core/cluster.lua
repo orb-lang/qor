@@ -7,7 +7,31 @@
 
 
 
+
+
+
+
+
+
+
+
+
 local cluster = {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -74,6 +98,19 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 local function _bind(obj, fn)
    return function(...)
       return fn(obj, ...)
@@ -110,4 +147,8 @@ end
 
 
 
+
+
+
 return cluster
+

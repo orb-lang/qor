@@ -12,6 +12,20 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local _base = require "core:core/_base"
 
 
@@ -19,7 +33,22 @@ local _base = require "core:core/_base"
 
 
 
+
+
+
+
+
+
 local fn = {}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -46,12 +75,39 @@ fn.thunk = assert(_base.thunk)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function fn.partial(fn, ...)
    local args = pack(...)
    return function(...)
       return fn(unpack(args, 1, args.n), ...)
    end
 end
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -98,6 +154,30 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local _dynamics_call = setmetatable({}, {__mode = 'k'})
 local _dynamics_registry  = setmetatable({}, {__mode = 'kv'})
 
@@ -120,11 +200,56 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
 function fn.patch_dynamic(dyn_fn, fn)
    assert(_dynamics_registry[dyn_fn], "cannot patch a non-dynamic function")
    local uid = _dynamics_registry[dyn_fn]
    _dynamics_call[uid] = fn
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -229,8 +354,26 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn.assertfmt = _base.assertfmt
 
 
 
+
+
+
 return fn
+
