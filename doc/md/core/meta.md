@@ -47,6 +47,7 @@ and I've sprayed duplicates of this method across the orb codebase\.
 
 It needs to live somewhere\. So here it is\.
 
+
 - \#params
 
   - meta : the metatable to inherit from\.
@@ -71,6 +72,7 @@ end
 functionalized table\.
 
 This is\.\.\. sometimes the right thing to do\. sometimes\.
+
 
 - \#params
 

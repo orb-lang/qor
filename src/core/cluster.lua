@@ -45,8 +45,8 @@ function cluster.Meta(Meta)
             tab[field] = value
          end
       end
-      setmetatable(tab, Meta)
-      return tab
+      tab.__index = Meta
+      return setmetatable(tab, Meta)
    elseif Meta
       and type(Meta) == "table"
       and isempty(Meta) then
@@ -111,3 +111,4 @@ end
 
 
 return cluster
+
