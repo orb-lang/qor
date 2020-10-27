@@ -93,7 +93,7 @@ function cluster.super(obj, field)
       if idx and type(idx) == 'table' then
          return _bind(obj, M[field])
       elseif idx and type(idx) == 'function' then
-         return _bind(obj, idx(field))
+         return _bind(obj, idx(obj, field))
       else
          return nil
       end
