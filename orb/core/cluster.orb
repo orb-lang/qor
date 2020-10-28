@@ -69,7 +69,7 @@ end
   A mixin which allows for the accessing of a method up the inheritance chain
 from the shadowed field.
 
-Invoked as =obj :super "field" (params)=.
+Invoked as =obj :super 'field' (params)=.
 
 #Todo this was written but has yet to be tested in any way; fix.
 
@@ -85,18 +85,18 @@ function cluster.super(obj, field)
    if rawget(obj, field) then
       local idx = getmetatable(obj).__index
       if not idx then return nil end
-      return _bind(obj, idx[field])
+      return type(idx) == 'table'
+         and _bind(obj, idx[field])
+         or  _bind(obj, idx(obj, field))
    else
       local M_idx = getmetatable(obj).__index
       if not M_idx then return nil end
-      local idx = getmetatable(M_idx).__index
-      if idx and type(idx) == 'table' then
-         return _bind(obj, M[field])
-      elseif idx and type(idx) == 'function' then
-         return _bind(obj, idx(obj, field))
-      else
-         return nil
-      end
+      local idx = type(M_idx) == 'table'
+                  and getmetatable(M_idx).__index or nil
+      if not idx then return nil end
+      return type(idx) == 'table'
+         and _bind(obj, idx[field])
+         or  _bind(obj, idx(obj, field))
    end
    -- no such field
    return nil
