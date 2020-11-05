@@ -46,11 +46,26 @@ fn.thunk = assert(_base.thunk)
 
 
 
+local function _unpacker(fn, args)
+   return function(...)
+      -- clone args
+      local call = {}
+      for i = 1, args.n do
+         call[i] = args[i]
+      end
+      call.n = args.n
+      -- add new args from ...
+      for i = 1, select('#', ...) do
+         call.n = call.n + 1
+         call[call.n] = select(i, ...)
+      end
+      return fn(unpack(call, 1, call.n))
+   end
+end
+
 function fn.partial(fn, ...)
    local args = pack(...)
-   return function(...)
-      return fn(unpack(args, 1, args.n), ...)
-   end
+   return _unpacker(fn, args)
 end
 
 
