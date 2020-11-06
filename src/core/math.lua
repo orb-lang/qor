@@ -1,7 +1,18 @@
 
 
 
+
+
+
 local Math = {}
+
+
+
+
+
+
+
+
 
 
 
@@ -27,6 +38,14 @@ end
 
 
 
+
+
+
+
+
+
+
+
 function Math.clamp(value, lower, upper)
   if lower and value < lower then
     value = lower
@@ -36,6 +55,10 @@ function Math.clamp(value, lower, upper)
   end
   return value
 end
+
+
+
+
 
 
 

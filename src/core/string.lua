@@ -2,7 +2,17 @@
 
 
 
+
+
+
+
 local String = {}
+
+
+
+
+
+
 
 
 
@@ -23,7 +33,27 @@ local format = assert(string.format)
 
 
 
+
+
+
+
+
+
+
+
+
 String.assertfmt = assertfmt
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -105,6 +135,19 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 function String.findall(str, patt)
    local matches = {}
    local index = 1
@@ -122,6 +165,52 @@ function String.findall(str, patt)
       return nil
    end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -193,6 +282,15 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
 local matches =
   {
     ["^"] = "%^";
@@ -224,6 +322,17 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 local function cleave(str, pat)
    local at = find(str, pat)
    if at then
@@ -243,10 +352,27 @@ String.cleave = cleave
 
 
 
+
+
+
+
+
+
+
+
+
+
 local find = assert(string.find)
 function String.isidentifier(str)
    return find(str, "^[a-zA-Z_][a-zA-Z0-9_]+$") == 1
 end
+
+
+
+
+
+
+
 
 
 
@@ -283,6 +409,15 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
 local function _str__repr(str_tab)
     return str_tab[1]
 end
@@ -293,6 +428,14 @@ function String.to_repr(str)
    str = tostring(str)
    return setmetatable({str}, {__index = _str_M})
 end
+
+
+
+
+
+
+
+
 
 
 
@@ -315,6 +458,14 @@ end
 
 
 
+
+
+
+
+
+
+
+
 local sub = assert(string.sub)
 
 function String.splice(to_split, to_splice, index)
@@ -328,6 +479,9 @@ function String.splice(to_split, to_splice, index)
    local head, tail = sub(to_split, 1, index), sub(to_split, index + 1)
    return head .. to_splice .. tail
 end
+
+
+
 
 
 

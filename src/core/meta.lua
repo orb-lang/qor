@@ -2,7 +2,27 @@
 
 
 
+
+
+
+
 local meta = {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -54,6 +74,25 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function meta.inherit(meta)
   local MT = meta or {}
   local M = setmetatable({}, MT)
@@ -79,10 +118,46 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function meta.export(mod, constructor)
   mod.__call = constructor
   return setmetatable({}, mod)
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -131,6 +206,19 @@ meta.hasmetamethod = hasmetamethod
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 local pairs = assert(pairs)
 
 function meta.endow(Meta)
@@ -153,6 +241,19 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 function meta.instanceof(obj, Class)
    if type(Class) == "string" then
       return type(obj) == Class
@@ -160,6 +261,9 @@ function meta.instanceof(obj, Class)
       return type(obj) == "table" and obj.idEst == Class
    end
 end
+
+
+
 
 
 

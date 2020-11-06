@@ -6,7 +6,18 @@
 
 
 
+
+
+
+
+
+
+
+
 local uv = require "luv"
+
+
+
 
 
 
@@ -14,8 +25,24 @@ local thread = {}
 
 
 
+
+
+
 local running, yield = assert(coroutine.running),
                        assert(coroutine.yield)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -47,6 +74,19 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 function thread.canyield(...)
    local _, main = running()
    if not main then
@@ -55,6 +95,9 @@ function thread.canyield(...)
       return ...
    end
 end
+
+
+
 
 
 

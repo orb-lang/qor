@@ -7,7 +7,31 @@
 
 
 
+
+
+
+
+
+
+
+
+
 local cluster = {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -74,6 +98,19 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 local function _bind(obj, fn)
    return function(...)
       return fn(obj, ...)
@@ -107,6 +144,9 @@ function cluster.super(obj, field)
    -- no such field
    return nil
 end
+
+
+
 
 
 

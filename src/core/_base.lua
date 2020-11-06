@@ -7,7 +7,24 @@
 
 
 
+
+
+
+
+
+
+
+
+
 local _base = {}
+
+
+
+
+
+
+
+
 
 
 
@@ -27,6 +44,11 @@ end
 
 
 
+
+
+
+
+
 local format = assert(string.format)
 
 function _base.assertfmt(pred, msg, ...)
@@ -36,6 +58,9 @@ function _base.assertfmt(pred, msg, ...)
       error(format(msg, ...), 2)
    end
 end
+
+
+
 
 
 
