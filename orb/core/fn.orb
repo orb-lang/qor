@@ -62,7 +62,9 @@ local currier = {
 }
 
 function fn.curry(fn, param)
-   assert(type(fn) == 'function', '#1 of curry must be a function')
+   assert(type(fn) == 'function' or
+          type(fn) == 'table' and getmetatable(fn).__call,
+          '#1 of curry must be a function or callable table')
    local curried;
    local pre = _curried[fn]
    if not pre then
