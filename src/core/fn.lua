@@ -29,6 +29,73 @@ local fn = {}
 
 
 
+
+
+
+
+
+
+local _curried = setmetatable({}, { __mode = 'k' })
+
+local currier = {
+   false, -- this shouldn't happen
+   function(fn, a, b) -- [2]
+      return function(...)
+         return fn(a, b, ...)
+      end
+   end,
+   function(fn, a, b, c) -- [3]
+      return function(...)
+         return fn(a, b, c, ...)
+      end
+   end,
+   function(fn, a, b, c, d) -- [4]
+      return function(...)
+         return fn(a, b, c, d, ...)
+      end
+   end,
+   function(fn, a, b, c, d, e) -- [5]
+      return function(...)
+         return fn(a, b, c, d, e, ...)
+      end
+   end,
+}
+
+function fn.curry(fn, param)
+   assert(type(fn) == 'function', '#1 of curry must be a function')
+   local curried;
+   local pre = _curried[fn]
+   if not pre then
+      curried = function(...) return fn(param, ...) end
+      _curried[curried] = { param, n = 1 , fn = fn }
+   else
+      if pre.n <= 4 then
+         local post = {}
+         for i = 1, pre.n do
+            post[i] = pre[i]
+         end
+         post.n = pre.n + 1
+         post.fn = pre.fn
+         post[post.n] = param
+         curried = currier[post.n](post.fn, unpack(post, 1, post.n))
+         _curried[curried] = post
+      else
+         curried = function(...) return fn(param, ...) end
+      end
+   end
+
+   return curried
+end
+
+
+
+
+
+
+
+
+
+
 fn.thunk = assert(_base.thunk)
 
 
