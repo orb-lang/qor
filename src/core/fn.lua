@@ -61,9 +61,9 @@ local currier = {
    end,
 }
 
-function fn.curry(fn, param)
+local function curry(fn, param)
    assert(type(fn) == 'function' or
-          (type(fn) == 'table' and getmetatable(fn).__call),
+          type(fn) == 'table' and getmetatable(fn).__call,
           '#1 of curry must be a function or callable table')
    local curried;
    local pre = _curried[fn]
@@ -88,6 +88,8 @@ function fn.curry(fn, param)
 
    return curried
 end
+
+fn.curry = curry
 
 
 
@@ -115,26 +117,14 @@ fn.thunk = assert(_base.thunk)
 
 
 
-local function _unpacker(fn, args)
-   return function(...)
-      -- clone args
-      local call = {}
-      for i = 1, args.n do
-         call[i] = args[i]
-      end
-      call.n = args.n
-      -- add new args from ...
-      for i = 1, select('#', ...) do
-         call.n = call.n + 1
-         call[call.n] = select(i, ...)
-      end
-      return fn(unpack(call, 1, call.n))
-   end
-end
+
+
 
 function fn.partial(fn, ...)
-   local args = pack(...)
-   return _unpacker(fn, args)
+   for i = 1, select('#', ...) do
+      fn = curry(fn, select(i, ...))
+   end
+   return fn
 end
 
 
