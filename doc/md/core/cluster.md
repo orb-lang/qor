@@ -69,42 +69,41 @@ end
   A mixin which allows for the accessing of a method up the inheritance chain
 from the shadowed field\.
 
-Invoked as `obj :super "field" (params)`\.
+Invoked as `obj :super 'field' (params)`\.
 
 \#Todo
 
 ```lua
 local function _bind(obj, fn)
-   return function(...)
-      return fn(obj, ...)
-   end
+  if not fn then return nil end
+  return function(...)
+     return fn(obj, ...)
+  end
+end
+
+local function _get_idx(obj)
+   local M = getmetatable(obj)
+   return M and M.__index
 end
 
 function cluster.super(obj, field)
+   local super_idx
+   -- If the object has such a field directly, consider the implementation
+   -- from the metatable to be the "super" implementation
    if rawget(obj, field) then
-      local idx = getmetatable(obj).__index
-      return _bind(obj, idx[field])
+      super_idx = _get_idx(obj)
+   -- Otherwise, look one step further up the inheritance chain
    else
-      if obj[field] then
-         -- skip the metatable and get its metatable, recursively,
-         -- until we find
-         local idx, done = getmetatable(obj).__index, false
-         while not done do
-            idx = getmetatable(obj).__index
-            if idx and type(idx) == 'table' then
-               if rawget(M, field) then
-                  return _bind(obj, M[field])
-               end
-            elseif idx and type(idx) == 'function' then
-               return _bind(obj, idx(field))
-            else
-               -- this indicates there was no super slot
-               done = true
-            end
-         end
-      end
+      local M_idx = _get_idx(obj)
+      super_idx = type(M_idx) == 'table' and _get_idx(M_idx) or nil
    end
-   -- no such field
+   if super_idx then
+      return type(super_idx) == 'table'
+         and _bind(obj, idx[field])
+         or  _bind(obj, idx(obj, field))
+   end
+   -- No superclass, or our class uses an __index function so we can't
+   -- meaningfully figure out what to do
    return nil
 end
 ```
