@@ -1,14 +1,7 @@
 
 
 
-
-
-
 local coro = {}
-
-
-
-
 
 
 
@@ -24,34 +17,10 @@ local thunk = assert(_base.thunk)
 
 
 
-
-
-
-
-
-
-
-
-
 local coro = {}
 for k,v in next, coroutine do
    coro[k] = v
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -129,47 +98,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 local wrap = assert(coroutine.wrap)
 
 function coro.wrapgen(fn, ...)
@@ -186,40 +114,12 @@ end
 
 
 
-
-
-
-
-
-
-
-
 function coro.cogen(fn, ...)
    local body = thunk(fn, ...)
    return function()
       return create(body)
    end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -261,10 +161,6 @@ function coro.fire(co, ...)
       error("cannot fire on a " .. cotype)
    end
 end
-
-
-
-
 
 
 

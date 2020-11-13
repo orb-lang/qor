@@ -4,33 +4,13 @@
 
 
 
-
-
-
-
-
-
 local Mod = {}
-
-
-
 
 
 
 
 local assert = assert(require "core:core/_base" . assertfmt)
 local require, pack, unpack = assert(require), assert(pack), assert(unpack)
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -59,14 +39,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
 local pcall = assert(pcall)
 
 function Mod.request(module)
@@ -77,9 +49,6 @@ function Mod.request(module)
       return nil
    end
 end
-
-
-
 
 
 
