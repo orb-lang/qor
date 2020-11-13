@@ -99,8 +99,8 @@ function cluster.super(obj, field)
    end
    if super_idx then
       return type(super_idx) == 'table'
-         and _bind(obj, idx[field])
-         or  _bind(obj, idx(obj, field))
+         and _bind(obj, super_idx[field])
+         or  _bind(obj, super_idx(obj, field))
    end
    -- No superclass, or our class uses an __index function so we can't
    -- meaningfully figure out what to do
