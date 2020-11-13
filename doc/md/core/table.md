@@ -660,32 +660,12 @@ has been made strict\.
 
 ```lua
 function Tab.pget(tab, key)
-   local val = rawget(tab, key)
-   if val ~= nil then
+   local ok, val = pcall(function() return tab[key] end)
+   if ok then
       return val
+   else
+      return nil
    end
-   local _M = getmetatable(tab)
-   while _M ~= nil and rawget(_M, "__index") ~= nil do
-      local index_t = type(_M.__index)
-      if index_t == "table" then
-         val = rawget(_M.__index, key)
-      elseif index_t == "function" then
-         local success
-         success, val = pcall(_M.__index, table, key)
-         if success then
-            return val
-         else
-            val = nil
-         end
-      else
-         error("somehow, __index is of type " .. index_t)
-      end
-      if val ~= nil then
-         return val
-      end
-      _M = index_t == "table" and getmetatable(_M.__index) or nil
-   end
-   return nil
 end
 ```
 
