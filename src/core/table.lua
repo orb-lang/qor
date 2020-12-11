@@ -2,6 +2,11 @@
 
 
 
+local _base = require "core:core/_base"
+
+
+
+
 local meta = require "core/meta"
 local Tab = {}
 for k, v in pairs(table) do
@@ -372,12 +377,7 @@ end
 
 
 
-local hasmetamethod = assert(meta.hasmetamethod)
-
-function Tab.iscallable(val)
-   return type(val) == "function"
-      or hasmetamethod("__call", val)
-end
+Tab.iscallable = assert(_base.iscallable)
 
 
 

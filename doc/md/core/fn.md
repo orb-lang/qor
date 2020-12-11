@@ -104,6 +104,15 @@ fn.thunk = assert(_base.thunk)
 ```
 
 
+### iscallable\(maybe\_fn\)
+
+Returns true for a function, or a table with a `__call` metamethod\.
+
+```lua
+fn.iscallable = assert(_base.iscallable)
+```
+
+
 ### partial\(fn, \.\.\.\)
 
 Partial applicator: takes a function, and fills in the given arguments,
