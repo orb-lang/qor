@@ -77,5 +77,19 @@ end
 
 
 ```lua
+function Print.center(str, width)
+   local diff = width - #str
+   local lmargin, rmargin
+   if diff % 2 ~= 0 then
+      lmargin, rmargin = math.floor(diff / 2), math.floor(diff / 2) + 1
+   else
+      lmargin, rmargin = diff / 2, diff / 2
+   end
+   return  (" "):rep(lmargin) .. str .. (" "):rep(rmargin)
+end
+```
+
+
+```lua
 return Print
 ```
