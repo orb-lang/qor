@@ -291,7 +291,7 @@ local _str_M = {__repr = _str__repr}
 
 function String.to_repr(str)
    str = tostring(str)
-   return setmetatable({str}, {__index = _str_M})
+   return setmetatable({str}, _str_M)
 end
 #/lua
 

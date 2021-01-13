@@ -42,5 +42,24 @@ end
 
 
 
+
+
+
+
+
+
+function _base.iscallable(val)
+   if type(val) == 'function' then return true end
+   if type(val) == 'table' then
+      local M = getmetatable(val)
+      if M and rawget(M, "__call") then
+         return true
+      end
+   end
+   return false
+end
+
+
+
 return _base
 

@@ -29,7 +29,7 @@ local isempty = table.isempty
                 or
                 function(tab)
                    local empty = true
-                   for _,__ in pairs(tab) do
+                   for _, __ in pairs(tab) do
                       empty = false
                       break
                    end
@@ -48,7 +48,7 @@ function cluster.Meta(Meta)
       tab.__index = Meta
       return setmetatable(tab, Meta)
    elseif Meta
-      and type(Meta) == "table"
+      and type(Meta) == 'table'
       and isempty(Meta) then
       -- decorate
       Meta.__index = Meta
@@ -58,7 +58,6 @@ function cluster.Meta(Meta)
       _M.__index = _M
       return _M
    end
-   -- callable tables and constructors here
    error "cannot make metatable"
 end
 ```
@@ -70,8 +69,6 @@ end
 from the shadowed field\.
 
 Invoked as `obj :super 'field' (params)`\.
-
-\#Todo
 
 ```lua
 local function _bind(obj, fn)

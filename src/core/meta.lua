@@ -154,10 +154,10 @@ end
 
 
 function meta.instanceof(obj, Class)
-   if type(Class) == "string" then
+   if type(Class) == 'string' then
       return type(obj) == Class
    else
-      return type(obj) == "table" and obj.idEst == Class
+      return type(obj) == 'table' and obj.idEst == Class
    end
 end
 
