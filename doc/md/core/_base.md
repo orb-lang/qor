@@ -41,6 +41,25 @@ function _base.assertfmt(pred, msg, ...)
 end
 ```
 
+
+### iscallable
+
+Defined in both `table` and `fn`, since the arguments returning true are one
+or the other of these\.
+
+```lua
+function _base.iscallable(val)
+   if type(val) == 'function' then return true end
+   if type(val) == 'table' then
+      local M = getmetatable(val)
+      if M and rawget(M, "__call") then
+         return true
+      end
+   end
+   return false
+end
+```
+
 ```lua
 return _base
 ```

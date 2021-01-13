@@ -109,6 +109,15 @@ fn.thunk = assert(_base.thunk)
 
 
 
+fn.iscallable = assert(_base.iscallable)
+
+
+
+
+
+
+
+
 
 
 
