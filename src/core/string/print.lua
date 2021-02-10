@@ -5,15 +5,13 @@
 
 
 
-
-
-utf8 = require "lua-utf8"
-local anterm; -- lazy-loaded
-
-
-
-
 Print = {}
+
+
+
+
+
+
 
 
 

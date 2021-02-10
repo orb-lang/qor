@@ -4,14 +4,6 @@
   String manipulation libraries for printing.
 
 
-***** imports
-
-#!lua
-utf8 = require "lua-utf8"
-local anterm; -- lazy-loaded
-#/lua
-
-
 #!lua
 Print = {}
 #/lua
