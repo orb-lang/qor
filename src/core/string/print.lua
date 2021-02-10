@@ -24,7 +24,7 @@ Print = {}
 
 
 local concat = assert(table.concat)
-local floor = assert(math.floor)
+local floor, max = assert(math.floor), assert(math.max)
 local inbounds = assert(require "core:math" . inbounds)
 
 local split_at = {}
@@ -34,16 +34,20 @@ end
 
 function Print.breakascii(str, width)
    if #str <= width then
-      return str
+      return str, 1, #str
    end
    local lines = {}
+   local actual_width = 0
    local left = 1
    local min_width = floor(width / 2)
    while left <= #str do
       local min_right = left + min_width - 1
       local max_right = left + width - 1
+      local line
       if max_right >= #str then
-         lines[#lines + 1] = str:sub(left)
+         line = str:sub(left)
+         lines[#lines + 1] = line
+         actual_width = max(actual_width, #line)
          break
       end
       local split_index, offset
@@ -62,10 +66,12 @@ function Print.breakascii(str, width)
          split_index = max_right
          offset = 0
       end
-      lines[#lines + 1] = str:sub(left, split_index + offset)
+      line = str:sub(left, split_index + offset)
+      lines[#lines + 1] = line
+      actual_width = max(actual_width, #line)
       left = split_index + 1
    end
-   return concat(lines, "\n")
+   return concat(lines, "\n"), #lines, actual_width
 end
 
 
