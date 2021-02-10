@@ -62,8 +62,6 @@ function Print.breakascii(str, width)
       end
       lines[#lines + 1] = str:sub(left, split_index + offset)
       left = split_index + 1
-      -- __G.foo = rawget(__G, "foo") or {}
-      -- __G.foo[#__G.foo + 1] = left
    end
    return concat(lines, "\n")
 end
