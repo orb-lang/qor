@@ -1,0 +1,71 @@
+return {
+  {
+    {
+      line = "Print = require \"core:core/string/print\"",
+      ordinal = 1,
+      results = {
+        n = 0
+      } --[[table: 0x0b5fb380]],
+      status = "ignore",
+      time = "2020-12-11T06:29:44.236",
+      title = ""
+    } --[[table: 0x0b630c58]],
+    {
+      line = "Print.center(\"abcdef\", 12)",
+      ordinal = 2,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2   abcdef   "
+        } --[[table: 0x0b6301b0]]
+      } --[[table: 0x0b5fbd08]],
+      status = "accept",
+      time = "2020-12-11T06:29:51.966",
+      title = "centers an even-lettered string"
+    } --[[table: 0x0b5fb440]],
+    {
+      line = "#Print.center(\"abcdef\", 12)",
+      ordinal = 3,
+      results = {
+        n = 1,
+        repr = {
+          "\1n\00212"
+        } --[[table: 0x0b54dd58]]
+      } --[[table: 0x0b54e410]],
+      status = "accept",
+      time = "2020-12-11T06:30:01.015",
+      title = "even-letter string fits in width"
+    } --[[table: 0x0b54db10]],
+    {
+      line = "Print.center(\"abcdefg\", 12)",
+      ordinal = 4,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2  abcdefg   "
+        } --[[table: 0x0b4d7150]]
+      } --[[table: 0x0b521e28]],
+      status = "accept",
+      time = "2020-12-11T06:30:18.132",
+      title = "'centers' an odd-lettered string"
+    } --[[table: 0x0b54e510]],
+    {
+      line = "#Print.center(\"abcdefg\", 12)",
+      ordinal = 5,
+      results = {
+        n = 1,
+        repr = {
+          "\1n\00212"
+        } --[[table: 0x0b5cdf88]]
+      } --[[table: 0x0b5ce028]],
+      status = "accept",
+      time = "2020-12-11T06:30:22.353",
+      title = "odd-lettered string fits in width"
+    } --[[table: 0x0b521ee0]],
+    accepted = true,
+    session_title = "Centers a string"
+  } --[[table: 0x0b6076f0]],
+  bundle_type = "session",
+  project = "core",
+  version = 1
+} --[[table: 0x0b65bfe8]]
