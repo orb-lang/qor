@@ -4,14 +4,6 @@
   String manipulation libraries for printing\.
 
 
-##### imports
-
-```lua
-utf8 = require "lua-utf8"
-local anterm; -- lazy-loaded
-```
-
-
 ```lua
 Print = {}
 ```
@@ -19,59 +11,67 @@ Print = {}
 
 #### Print\.breakascii\(str, width\)
 
-Breaks a long line up into shorter lines\.  Assumes no newlines in the line\.
+Breaks a string into lines of up to `width` characters, attempting to do so at
+word boundaries, but falling back to a hard chop if this is not possible\.
+Will never produce a line less than half the maximum length \(other than the
+last line, of course\)\. Assumes no preexisting newlines in the string\.
 
-Doing this with utf8 in the mix is harder, and we can get away with ASCII
-only sometimes\.\.\.
+Answers the wrapped string, plus the height and width required to display itthe number of lines, and the length of the longest line\)\.
+
+\(
+Doing this with utf8 in the mix is harder, and we can get away with
+ASCII\-only sometimes\.\.\.
 
 ```lua
-local byte, sub = assert(string.byte), assert(string.sub)
 local concat = assert(table.concat)
+local floor, max = assert(math.floor), assert(math.max)
+local inbounds = assert(require "core:math" . inbounds)
 
-local _splits, split_at = {" ", "-", "(", "{", "["}, {}
-
-for _, v in ipairs(_splits) do
-   split_at[v] = true
+local split_at = {}
+for _, v in ipairs{" ", "-", "(", "{", "["} do
+   split_at[v] = v == " " and -1 or 0
 end
 
 function Print.breakascii(str, width)
    if #str <= width then
-      return str
+      return str, 1, #str
    end
    local lines = {}
-   local idx, left, right = 1, 1, width
-   local gutter = math.floor(1/2 * width)
-   local breaking = true
-   while breaking do
-      -- get one line
-      if left + width > #str then
-         -- take the last part
-         lines[#lines + 1] = sub(str, left)
-         breaking = false
-      else
-         for i = right, right - gutter, -1 do
-            local test = split_at[sub(str, i, i)]
-            if test then
-               idx = i
-               break
-            end
-         end
-         if idx >= right - gutter then
-            local offset = sub(str, idx, idx) == " " and 1 or 0
-            lines[#lines + 1] = sub(str, left, idx - offset)
-            left = idx + 1
-            right = left + width
-            idx = left
-         else
-            -- just break
-            lines[#lines + 1] = sub(str, left, right)
-            left = right + 1
-            right = left + width
-            idx = left
+   local actual_width = 0
+   local left = 1
+   local min_width = floor(width / 2)
+   while left <= #str do
+      local min_right = left + min_width - 1
+      local max_right = left + width - 1
+      local line
+      if max_right >= #str then
+         line = str:sub(left)
+         lines[#lines + 1] = line
+         actual_width = max(actual_width, #line)
+         break
+      end
+      local split_index, offset
+      -- Check one past the max width because we might be able to
+      -- remove a trailing space
+      for i = max_right + 1, min_right, -1 do
+         offset = split_at[str:sub(i, i)]
+         -- But now we do need to check if we'll actually be in bounds
+         if offset and inbounds(i + offset, min_right, max_right) then
+            split_index = i
+            break
          end
       end
+      if not split_index then
+         -- Didn't find a natural breakpoint, just chop at the max width
+         split_index = max_right
+         offset = 0
+      end
+      line = str:sub(left, split_index + offset)
+      lines[#lines + 1] = line
+      actual_width = max(actual_width, #line)
+      left = split_index + 1
    end
-   return concat(lines, "\n")
+   return concat(lines, "\n"), #lines, actual_width
 end
 ```
 

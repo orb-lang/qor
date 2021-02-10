@@ -1,0 +1,154 @@
+return {
+  {
+    {
+      line = "breakascii = require \"core:string/print\" . breakascii",
+      ordinal = 1,
+      results = {
+        n = 0
+      } --[[table: 0x03cbfd10]],
+      status = "ignore",
+      time = "2021-01-13T19:50:25.020",
+      title = ""
+    } --[[table: 0x03cbfc90]],
+    {
+      line = "breakascii(\"abc def ghi jkl\", 11)",
+      ordinal = 2,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abc def ghi\\njkl",
+          "\1n\0022",
+          "\1n\00211"
+        } --[[table: 0x03adcad0]]
+      } --[[table: 0x03b0b518]],
+      status = "accept",
+      time = "2021-01-13T19:50:46.711",
+      title = "Exact fit after removing trailing whitespace"
+    } --[[table: 0x03adc9b8]],
+    {
+      line = "breakascii(\"abc defghi jkl\", 11)",
+      ordinal = 3,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abc defghi\\njkl",
+          "\1n\0022",
+          "\1n\00210"
+        } --[[table: 0x03b0b6e0]]
+      } --[[table: 0x03b2c3b8]],
+      status = "accept",
+      time = "2021-01-13T19:52:51.687",
+      title = "One short after removing trailing whitespace"
+    } --[[table: 0x03b0b5b0]],
+    {
+      line = "breakascii(\"abc defghi-jkl\", 11)",
+      ordinal = 4,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abc defghi-\\njkl",
+          "\1n\0022",
+          "\1n\00211"
+        } --[[table: 0x03a46550]]
+      } --[[table: 0x03a465e0]],
+      status = "accept",
+      time = "2021-01-13T19:52:55.159",
+      title = "Exact fit because separator is not whitespace"
+    } --[[table: 0x03b0b740]],
+    {
+      line = "breakascii(\"abcde ghijkl\", 11)",
+      ordinal = 5,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abcde\\nghijkl",
+          "\1n\0022",
+          "\1n\0026"
+        } --[[table: 0x03aadaf0]]
+      } --[[table: 0x03aadb80]],
+      status = "accept",
+      time = "2021-01-13T19:53:23.359",
+      title = "Split at minimum length"
+    } --[[table: 0x03a46678]],
+    {
+      line = "breakascii(\"abcd efghijkl\", 11)",
+      ordinal = 6,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abcd efghij\\nkl",
+          "\1n\0022",
+          "\1n\00211"
+        } --[[table: 0x03c1f5a0]]
+      } --[[table: 0x03c1f630]],
+      status = "accept",
+      time = "2021-01-13T19:53:38.030",
+      title = "Available split point is too early, chop in middle of word"
+    } --[[table: 0x03b2c450]],
+    {
+      line = "breakascii(\"abcd-efghijkl\", 11)",
+      ordinal = 7,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abcd-\\nefghijkl",
+          "\1n\0022",
+          "\1n\0028"
+        } --[[table: 0x03a87d90]]
+      } --[[table: 0x03a87e20]],
+      status = "accept",
+      time = "2021-01-13T19:54:29.190",
+      title = "Separator counts so this is no longer too early"
+    } --[[table: 0x03c1f6c8]],
+    {
+      line = "breakascii(\"abc-defghijkl\", 11)",
+      ordinal = 8,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abc-defghij\\nkl",
+          "\1n\0022",
+          "\1n\00211"
+        } --[[table: 0x03cbfbd0]]
+      } --[[table: 0x03c2a490]],
+      status = "accept",
+      time = "2021-01-13T19:54:43.134",
+      title = "But this again is"
+    } --[[table: 0x03a87eb8]],
+    {
+      line = "breakascii(\"abcdefghijk\", 11)",
+      ordinal = 9,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abcdefghijk",
+          "\1n\0021",
+          "\1n\00211"
+        } --[[table: 0x03bf4bc0]]
+      } --[[table: 0x03abd738]],
+      status = "accept",
+      time = "2021-01-13T19:55:22.486",
+      title = "Exact fit with no separators"
+    } --[[table: 0x03c2a548]],
+    {
+      line = "breakascii(\"abcdefghijkl\", 11)",
+      ordinal = 10,
+      results = {
+        n = 3,
+        repr = {
+          "\1sw\2abcdefghijk\\nl",
+          "\1n\0022",
+          "\1n\00211"
+        } --[[table: 0x03b6dd50]]
+      } --[[table: 0x03ab4060]],
+      status = "accept",
+      time = "2021-01-13T19:55:24.893",
+      title = "Overshot by one, have to just chop"
+    } --[[table: 0x03abd8e8]],
+    accepted = true,
+    session_title = "breakascii-edgecases"
+  } --[[table: 0x03c6f0c8]],
+  bundle_type = "session",
+  project = "core",
+  version = 1
+} --[[table: 0x03b2de30]]
