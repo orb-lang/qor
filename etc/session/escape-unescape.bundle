@@ -1,0 +1,244 @@
+return {
+  {
+    {
+      line = "escape_module = require \"core:string/escape\"",
+      ordinal = 1,
+      results = {
+        n = 0
+      } --[[table: 0x02f64910]],
+      status = "ignore",
+      time = "2021-02-11T20:32:40.592",
+      title = ""
+    } --[[table: 0x02f63cd8]],
+    {
+      line = "escape = assert(escape_module.escape)",
+      ordinal = 2,
+      results = {
+        n = 0
+      } --[[table: 0x02f66b58]],
+      status = "ignore",
+      time = "2021-02-11T20:32:40.594",
+      title = ""
+    } --[[table: 0x02f63210]],
+    {
+      line = "escape(\"\\\"'[]\",'\"')",
+      ordinal = 3,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\\\\\"'[]"
+        } --[[table: 0x02f675d8]]
+      } --[[table: 0x02f67678]],
+      status = "accept",
+      time = "2021-02-11T20:32:40.595",
+      title = ""
+    } --[[table: 0x02f66bf8]],
+    {
+      line = "escape(\"\\\"'[]\",\"'\")",
+      ordinal = 4,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\"\\\\'[]"
+        } --[[table: 0x02f67f60]]
+      } --[[table: 0x02fd3050]],
+      status = "accept",
+      time = "2021-02-11T20:32:40.595",
+      title = ""
+    } --[[table: 0x02d35f00]],
+    {
+      line = "escape(\"\\\"'[]\",\"[]\")",
+      ordinal = 5,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\"'\\\\[\\\\]"
+        } --[[table: 0x02fd3960]]
+      } --[[table: 0x02fd3a00]],
+      status = "accept",
+      time = "2021-02-11T20:32:40.596",
+      title = ""
+    } --[[table: 0x02fd3108]],
+    {
+      line = "escape(\"\\a\\b\\f\\n\\r\\t\\v \\x00\\x1f\\x7f\")",
+      ordinal = 6,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\\\\a\\\\b\\\\f\\\\n\\\\r\\\\t\\\\v \\\\x00\\\\x1f\\\\x7f"
+        } --[[table: 0x02fd4370]]
+      } --[[table: 0x02fd4410]],
+      status = "accept",
+      time = "2021-02-12T20:13:13.281",
+      title = ""
+    } --[[table: 0x02f67730]],
+    {
+      line = "escape(\"abcde\\f\")",
+      ordinal = 7,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2abcde\\\\f"
+        } --[[table: 0x02fd4d20]]
+      } --[[table: 0x02fd4dc0]],
+      status = "accept",
+      time = "2021-02-12T20:13:26.169",
+      title = ""
+    } --[[table: 0x02fd44c8]],
+    {
+      line = "escape(\"☞\")",
+      ordinal = 8,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2☞"
+        } --[[table: 0x02fd5850]]
+      } --[[table: 0x02fd58f0]],
+      status = "accept",
+      time = "2021-02-12T20:13:48.970",
+      title = ""
+    } --[[table: 0x02fd4e78]],
+    {
+      line = "escape_char = assert(escape_module.escape_char)",
+      ordinal = 9,
+      results = {
+        n = 0
+      } --[[table: 0x02fd60a0]],
+      status = "ignore",
+      time = "2021-02-11T20:32:40.598",
+      title = ""
+    } --[[table: 0x02fd59a8]],
+    {
+      line = "escape_char(\"\\a\")",
+      ordinal = 10,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\\\\a"
+        } --[[table: 0x02fd69e0]]
+      } --[[table: 0x02fd6a80]],
+      status = "accept",
+      time = "2021-02-11T20:32:40.599",
+      title = ""
+    } --[[table: 0x02fd3ab8]],
+    {
+      line = "escape_char(\"\\n\")",
+      ordinal = 11,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\\\\n"
+        } --[[table: 0x02fd7350]]
+      } --[[table: 0x02fd73f0]],
+      status = "accept",
+      time = "2021-02-11T20:32:40.599",
+      title = ""
+    } --[[table: 0x02fd6b38]],
+    {
+      line = "escape_char(\"\\x7f\")",
+      ordinal = 12,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\\\\x7f"
+        } --[[table: 0x02fd7d00]]
+      } --[[table: 0x02fd7da0]],
+      status = "accept",
+      time = "2021-02-11T20:32:40.601",
+      title = ""
+    } --[[table: 0x02fd74a8]],
+    {
+      line = "escape_char(\"a\")",
+      ordinal = 13,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2a"
+        } --[[table: 0x02fd86a8]]
+      } --[[table: 0x02fd8748]],
+      status = "accept",
+      time = "2021-02-12T20:14:27.769",
+      title = ""
+    } --[[table: 0x02fd7e58]],
+    {
+      line = "escape_char(\"☞\")",
+      ordinal = 14,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2☞"
+        } --[[table: 0x02fd9028]]
+      } --[[table: 0x02fd90c8]],
+      status = "accept",
+      time = "2021-02-12T20:14:36.305",
+      title = ""
+    } --[[table: 0x02fd8800]],
+    {
+      line = "unescape = assert(escape_module.unescape)",
+      ordinal = 15,
+      results = {
+        n = 0
+      } --[[table: 0x02fd9878]],
+      status = "ignore",
+      time = "2021-02-11T20:32:40.602",
+      title = ""
+    } --[[table: 0x02fd9180]],
+    {
+      line = "unescape(\"\\\\n\")",
+      ordinal = 16,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\\n"
+        } --[[table: 0x02fda160]]
+      } --[[table: 0x02fda200]],
+      status = "accept",
+      time = "2021-02-11T20:32:40.603",
+      title = ""
+    } --[[table: 0x02fd9918]],
+    {
+      line = "unescape(\"\\\\a\\\\b\\\\f\\\\n\\\\r\\\\t\\\\v\\\\'\\\\\\\"\\\\[\\\\]\\\\x00\\\\x1f\\\\x7f\")",
+      ordinal = 17,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\\a\\b\\f\\n\\r\\t\\v'\"[]\\x00\\x1f\\x7f"
+        } --[[table: 0x02fdab50]]
+      } --[[table: 0x02fdabf0]],
+      status = "accept",
+      time = "2021-02-11T20:32:40.604",
+      title = ""
+    } --[[table: 0x02fda2b8]],
+    {
+      line = "unescape(\"abc☞\")",
+      ordinal = 18,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2abc☞"
+        } --[[table: 0x02fdb588]]
+      } --[[table: 0x02fdb628]],
+      status = "accept",
+      time = "2021-02-12T20:15:00.405",
+      title = ""
+    } --[[table: 0x02fd61a8]],
+    {
+      line = "unescape(\"\\\\\\\"\\\\'\\\\[\\\\]\")",
+      ordinal = 19,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2\"'[]"
+        } --[[table: 0x02f67450]]
+      } --[[table: 0x02fdc2e0]],
+      status = "accept",
+      time = "2021-02-12T20:15:36.055",
+      title = ""
+    } --[[table: 0x02fdb6e0]],
+    accepted = true,
+    session_title = "escape-unescape"
+  } --[[table: 0x02f63408]],
+  bundle_type = "session",
+  project = "core",
+  version = 1
+} --[[table: 0x02ececd8]]
