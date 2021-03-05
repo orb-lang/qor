@@ -125,15 +125,14 @@ This will unroll circular references, which may not be what you want\.
 local function _clone(tab, depth)
    depth = depth or 1
    assert(depth > 0, "depth must be positive " .. tostring(depth))
-   local _M = getmetatable(tab)
-   local clone = _M and setmetatable({}, _M) or {}
-   for k,v in pairs(tab) do
+   local clone = {}
+   for k,v in tab, next do
       if depth > 1 and type(v) == "table" then
         v = _clone(v, depth - 1)
       end
       clone[k] = v
    end
-   return clone
+   return setmetatable(clone, getmetatable(tab))
 end
 Tab.clone = _clone
 ```
