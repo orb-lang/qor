@@ -693,6 +693,27 @@ function Tab.safeget(tab, key)
 end
 #/lua
 
+
+*** fromkeys(tab, keys...)
+
+Returns a table with the given keys, and values taken from the corresponding
+key in =tab=. Effectively a subset of =tab=, but calling it that would imply
+that Set is involved somehow, which it isn't.
+
+Note that the values copied are those returned by =tab[k]=, i.e. *after* any
+=__index= behavior, and the result is a raw table, without a metatable.
+
+#!lua
+function Tab.fromkeys(tab, ...)
+   local answer = {}
+   local keys = pack(...)
+   for _, k in ipairs(keys) do
+      answer[k] = tab[k]
+   end
+   return answer
+end
+#/lua
+
 #!lua
 return Tab
 #/lua

@@ -694,5 +694,26 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+function Tab.fromkeys(tab, ...)
+   local answer = {}
+   local keys = pack(...)
+   for _, k in ipairs(keys) do
+      answer[k] = tab[k]
+   end
+   return answer
+end
+
+
+
 return Tab
 
