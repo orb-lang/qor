@@ -126,7 +126,7 @@ local function _clone(tab, depth)
    depth = depth or 1
    assert(depth > 0, "depth must be positive " .. tostring(depth))
    local clone = {}
-   for k,v in tab, next do
+   for k,v in next, tab do
       if depth > 1 and type(v) == "table" then
         v = _clone(v, depth - 1)
       end
