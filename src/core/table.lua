@@ -125,15 +125,14 @@ Tab.hasfield = setmetatable({}, { __index = _hf__index,
 local function _clone(tab, depth)
    depth = depth or 1
    assert(depth > 0, "depth must be positive " .. tostring(depth))
-   local _M = getmetatable(tab)
-   local clone = _M and setmetatable({}, _M) or {}
-   for k,v in pairs(tab) do
+   local clone = {}
+   for k,v in next, tab do
       if depth > 1 and type(v) == "table" then
         v = _clone(v, depth - 1)
       end
       clone[k] = v
    end
-   return clone
+   return setmetatable(clone, getmetatable(tab))
 end
 Tab.clone = _clone
 
@@ -691,6 +690,27 @@ function Tab.safeget(tab, key)
       end
    end
    return nil
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+function Tab.fromkeys(tab, ...)
+   local answer = {}
+   local keys = pack(...)
+   for _, k in ipairs(keys) do
+      answer[k] = tab[k]
+   end
+   return answer
 end
 
 
