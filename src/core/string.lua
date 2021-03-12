@@ -301,8 +301,10 @@ end
 
 
 
+
+
 function String.slurp(filename)
-  local f = io.open(filename, "rb")
+  local f = io.open(tostring(filename), "rb")
   local content = f:read("*all")
   f:close()
   return content

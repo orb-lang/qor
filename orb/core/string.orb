@@ -300,9 +300,11 @@ end
 
 This takes a (text) file and returns a string containing its whole contents.
 
+Uses =tostring()= on =filename= so it can be passed a Path etc.
+
 #!lua
 function String.slurp(filename)
-  local f = io.open(filename, "rb")
+  local f = io.open(tostring(filename), "rb")
   local content = f:read("*all")
   f:close()
   return content
