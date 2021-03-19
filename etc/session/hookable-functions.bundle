@@ -1,0 +1,147 @@
+return {
+  {
+    {
+      line = "hooked = core.hookable(string.sub)",
+      ordinal = 1,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:20:22.500",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", 1, 2)",
+      ordinal = 2,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2AB"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:20:22.502",
+      title = "hookable makes a dynamic function"
+    },
+    {
+      line = "core.prehook(hooked, function(str, a, b) return string.lower(str), a, b end )",
+      ordinal = 3,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:20:22.503",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", 1, 2)",
+      ordinal = 4,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2ab"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:20:22.504",
+      title = "prehook is applied before the hooked fn"
+    },
+    {
+      line = "core.posthook(hooked, string.reverse)",
+      ordinal = 5,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:20:22.505",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", 1, 2)",
+      ordinal = 6,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2ba"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:20:22.506",
+      title = "posthooks are applied after the hooked function"
+    },
+    {
+      line = "core.prehook(hooked, nil)",
+      ordinal = 7,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:20:22.507",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", 1, 2)",
+      ordinal = 8,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2BA"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:20:22.508",
+      title = "prehooks can be removed with nil"
+    },
+    {
+      line = "core.posthook(hooked)",
+      ordinal = 9,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:20:43.370",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", 1, 2)",
+      ordinal = 10,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2AB"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:20:45.275",
+      title = "posthooks can be removed with nil"
+    },
+    {
+      line = "core.patch_dynamic(hooked, string.lower)",
+      ordinal = 11,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:21:02.706",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", 1, 2)",
+      ordinal = 12,
+      results = {
+        n = 1,
+        repr = {
+          "\1sw\2abcdef"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:21:05.611",
+      title = "hooked functions can be replaced with patch_dynamic"
+    },
+    accepted = true,
+    session_title = "hookable functions"
+  },
+  bundle_type = "session",
+  project = "core",
+  version = 1
+}

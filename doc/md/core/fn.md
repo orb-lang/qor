@@ -5,7 +5,7 @@
 methodically\.
 
 This is also the home of some core functions which are distinguished by their
-actions, side effects, or effect on control flow, rather than by acting on
+actions, side effects, or affect on control flow, rather than by acting on
 a specific data structure\.  Currently this is limited to `assertfmt`\.
 
 
@@ -184,16 +184,18 @@ which it is used\.
 local _dynamics_call = setmetatable({}, {__mode = 'k'})
 local _dynamics_registry  = setmetatable({}, {__mode = 'kv'})
 
-function fn.dynamic(fn)
+local function dynamic(fn)
    -- make a unique table as key
    local uid = {}
+   _dynamics_call[uid] = fn
    local function dyn_fn(...)
       return _dynamics_call[uid](...)
    end
-   _dynamics_call[uid] = fn
    _dynamics_registry[dyn_fn] = uid
    return dyn_fn
 end
+
+fn.dynamic = dynamic
 ```
 
 
@@ -219,39 +221,54 @@ extensions, a la Emacs\.
 One of the ways to do this is to expose functions with hooks: actions taken
 before or after a given function\.
 
-Doing this well means not letting implementation get ahead of use; think of
-this as a proof of concept\.
+A hookable function is registered as a `dynamic` function\.  This means that
+`patch_dynamic` can replace the core function\.  Note that if you pass an
+already `dynamic` function to  `hookable`, you'll end up with a "double
+dynamic" function, which might not be what you want\! `patch_dynamic` will do
+different things to the original \(dynamic\) function and its hookable dynamic
+cousin\.
 
-A hookable function is a callable table with slots `pre` and `post`, which,
-when present, are called before and after the function\.
+We offer two hooks, `pre` and `post`\.
 
-`pre` receives the same parameters, and must return parameters that are then
+`pre` receives the same parameters, and must return parameters which are then
 passed to the main function\.  These don't have to be the same parameters,
 but certainly can be, if pre is called for side effects\.  This calling
 convention gives `pre` a chance to modify the default parameters\.
 
 `post` receives the return values of the main function, if any, followed by
 either the return parameters of `pre` or the main parameters, depending on if
-there is a pre\-hook\.  The reason for this calling convention is that otherwise
-the order of parameters changes if the `pre` hook is removed, making it
-difficult to write a `post` hook which is unaware of what `pre` is doing\.
+there is a pre\-hook\.  So a function `f(a, b, c)` which returns `d` will call a
+ post\-hook with `post_f(d, a, b, c)`\.  The reason for this calling convention
+is that post\-hooks are primarily interested in what the function did, and may
+also need to know how the function was called\.
 
-This is because we don't want to have to structure the main function in a
-parameter\-passing style, but if it does return something, `post` should get a
-shot at it\.
+Note that Lua has no concept of how many parameters are "supposed to" be
+passed to a function, and from `pack`'s perspective there is a difference
+between `return nil` and just `return`\.  So if `f(a, b, c)` sometimes returns
+`d` and sometimes returns nothing with a bare `return` keyword, then sometimes
+you will get `post_f(d, a, b, c)`, and sometimes just `post_f(d, a, b, c)`\.
+So it's important to design hookable functions so that they return a
+consistent number of parameters in all cases, padded with `nil`s if necessary\.
+
+Similarly if one were to call `f(a, b, c, extra)`, and the function has no
+concept of an `extra` parameter, this is silently ignored, but `(un)pack` will
+provide the post\-hook with `f_post( d, a, b, c, extra)` but this is going to
+be less important: unless your post\-hook has an optional parameter which you
+aren't expecting and didn't mean to pass it\!
 
 The return values are the return values of `post` or the main function,
-depending\.
+depending, so if the call site is relying on something to be `returned`, a
+post\-hook should make sure to return that something\.
 
 ```lua
-local _hooks = setmetatable({}, {__mode = "k"})
+local _pre_hook = setmetatable({}, {__mode = 'k'})
+local _post_hook = setmetatable({}, {__mode = 'k'})
 
-local function hookable_newindex()
-   error "Attempt to assign value to a hookable function"
-end
 
-local function call_with_hooks(hooked, fn, ...)
-   local pre, post = _hooks[hooked].pre, _hooks[hooked].post
+local function _call_with_hooks(uid, ...)
+   local fn = _dynamics_call[uid]
+   assert(fn, "_dynamics_call is missing a hookable function")
+   local pre, post = _pre_hook[uid], _post_hook[uid]
 
    if pre and post then
       local new_arg = pack(pre(...))
@@ -259,43 +276,33 @@ local function call_with_hooks(hooked, fn, ...)
    elseif pre then
       return fn(pre(...))
    elseif post then
-      return post(fn(...), ...)
+      local rets = pack(fn(...))
+      return post(unpack(rets), ...)
    else
       return fn(...)
    end
 end
 
-local function hookPre(hooked, pre_hook)
-   _hooks[hooked].pre = pre_hook
+local function prehook(hooked, pre_hook)
+   _pre_hook[_dynamics_registry[hooked]] = pre_hook
 end
 
-local function hookPost(hooked, post_hook)
-   _hooks[hooked].post = post_hook
+local function posthook(hooked, post_hook)
+   _post_hook[_dynamics_registry[hooked]] = post_hook
 end
 
-local function unhookPre(hooked)
-   _hooks[hooked].pre = nil
-end
-
-local function unhookPost(hooked)
-   _hooks[hooked].post = nil
-end
-
-local hook_index = { hookPre    =  hookPre,
-                     hookPost   =  hookPost,
-                     unhookPre  =  unhookPre,
-                     unhookPost =  unhookPost }
+fn.prehook, fn.posthook = prehook, posthook
 
 function fn.hookable(fn, pre, post)
-   local hook_m = { __newindex = hookable_newindex,
-                    __index    = hook_index,
-                    __call = function(hooked, ...)
-                                return call_with_hooks(hooked, fn, ...)
-                             end }
-   local hooked = setmetatable({}, hook_m)
-   local hook_attr = { pre = pre, post = post }
-   _hooks[hooked] = hook_attr
-   return hooked
+   -- make a uid, add to _dynamics_call
+   local uid = {}
+   _dynamics_call[uid] = fn
+   local hookable = function(...)
+                       return _call_with_hooks(uid, ...)
+                    end
+   -- register the hookable in the dynamics registry
+   _dynamics_registry[hookable] = uid
+   return hookable
 end
 
 ```

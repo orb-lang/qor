@@ -305,6 +305,9 @@ Uses `tostring()` on `filename` so it can be passed a Path etc\.
 ```lua
 function String.slurp(filename)
   local f = io.open(tostring(filename), "rb")
+  if not f then
+     error ("no such file: " .. tostring(filename))
+  end
   local content = f:read("*all")
   f:close()
   return content
