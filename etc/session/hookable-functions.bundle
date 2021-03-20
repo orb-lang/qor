@@ -141,6 +141,82 @@ return {
     accepted = true,
     session_title = "hookable functions"
   },
+  {
+    {
+      line = "hooked = core.hookable(function(a, b, c, d) return string.sub(a, c, d), string.reverse(b) end)",
+      ordinal = 1,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:56:42.615",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", \"GHIJKL\", 1, 4)",
+      ordinal = 2,
+      results = {
+        n = 2,
+        repr = {
+          "\1sw\2ABCD",
+          "\1sw\2LKJIHG"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:57:06.470",
+      title = "hooks a function with two return values"
+    },
+    {
+      line = "core.prehook(hooked, function(a, b, c, d) return string.lower(a), b, c + 1, d end)",
+      ordinal = 3,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:58:27.766",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", \"GHIJKL\", 1, 4)",
+      ordinal = 4,
+      results = {
+        n = 2,
+        repr = {
+          "\1sw\2bcd",
+          "\1sw\2LKJIHG"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:58:31.216",
+      title = "prehooks a function with multiple returns"
+    },
+    {
+      line = "core.posthook(hooked, function(a, b) return string.upper(a), string.reverse(b) end)",
+      ordinal = 5,
+      results = {
+        n = 0
+      },
+      status = "ignore",
+      time = "2021-03-19T23:59:04.838",
+      title = ""
+    },
+    {
+      line = "hooked(\"ABCDEF\", \"GHIJKL\", 1, 4)",
+      ordinal = 6,
+      results = {
+        n = 2,
+        repr = {
+          "\1sw\2BCD",
+          "\1sw\2GHIJKL"
+        }
+      },
+      status = "accept",
+      time = "2021-03-19T23:59:08.798",
+      title = "posthooks a function with multiple returns"
+    },
+    accepted = true,
+    session_title = "hookable functions with multiple returns"
+  },
   bundle_type = "session",
   project = "core",
   version = 1

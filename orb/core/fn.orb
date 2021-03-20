@@ -228,7 +228,9 @@ dynamic" function, which might not be what you want! =patch_dynamic= will do
 different things to the original (dynamic) function and its hookable dynamic
 cousin.
 
-We offer two hooks, =pre= and =post=.
+We offer two hooks, =pre= and =post=, which are hooked with =fn.prehook= and
+=fn.posthook=, respectively.  Functions may be unhooked by calling
+=fn.prehook(fn, nil)=, or the equivalent for a posthook.
 
 =pre= receives the same parameters, and must return parameters which are then
 passed to the main function.  These don't have to be the same parameters,
@@ -245,25 +247,27 @@ also need to know how the function was called.
 Note that Lua has no concept of how many parameters are "supposed to" be
 passed to a function, and from =pack='s perspective there is a difference
 between =return nil= and just =return=.  So if =f(a, b, c)= sometimes returns
-=d= and sometimes returns nothing with a bare =return= keyword, then sometimes
-you will get =post_f(d, a, b, c)=, and sometimes just =post_f(d, a, b, c)=.
-So it's important to design hookable functions so that they return a
-consistent number of parameters in all cases, padded with =nil=s if necessary.
+=d= and sometimes returns nothing with a bare =return= keyword, or just by
+falling off the end of the function, then sometimes you will get =post_f(d, a,
+b, c)=, and sometimes just =post_f(a, b, c)=.  So it's important to design
+hookable functions so that they return a consistent number of parameters in
+all cases, padded with =nil=s if necessary.  This is not idiomatic,
+particularly for functions which return an optional second value under some
+circumstances.
 
-Similarly if one were to call =f(a, b, c, extra)=, and the function has no
+Similarly, if one were to call =f(a, b, c, extra)=, and the function has no
 concept of an =extra= parameter, this is silently ignored, but =(un)pack= will
-provide the post-hook with =f_post( d, a, b, c, extra)= but this is going to
-be less important: unless your post-hook has an optional parameter which you
-aren't expecting and didn't mean to pass it!
+provide the post-hook with =f_post(d, a, b, c, extra)=.  This is less
+important, since =f_post= will also ignore it unless it happens to have an
+optional parameter.
 
 The return values are the return values of =post= or the main function,
 depending, so if the call site is relying on something to be =returned=, a
 post-hook should make sure to return that something.
 
 #!lua
-local _pre_hook = setmetatable({}, {__mode = 'k'})
-local _post_hook = setmetatable({}, {__mode = 'k'})
-
+local _pre_hook, _post_hook = setmetatable({}, {__mode = 'k'}),
+                              setmetatable({}, {__mode = 'k'})
 
 local function _call_with_hooks(uid, ...)
    local fn = _dynamics_call[uid]
@@ -272,12 +276,24 @@ local function _call_with_hooks(uid, ...)
 
    if pre and post then
       local new_arg = pack(pre(...))
-      return post(fn(unpack(new_arg)), unpack(new_arg))
+      local rets = pack(fn(unpack(new_arg)))
+      -- make into one pack, because you can only apply multiple arguments at
+      -- the end of a function call
+      for i = 1, rets.n do
+         new_arg[#new_arg + 1] = rets[i]
+      end
+      new_arg.n = new_arg.n + rets.n
+      return post(unpack(rets))
    elseif pre then
       return fn(pre(...))
    elseif post then
-      local rets = pack(fn(...))
-      return post(unpack(rets), ...)
+      local args, rets = pack(...), pack(fn(...))
+      -- same trick here...
+      for i = 1, args.n do
+         rets[#rets + 1] = args[i]
+      end
+      rets.n = rets.n + args.n
+      return post(unpack(rets))
    else
       return fn(...)
    end

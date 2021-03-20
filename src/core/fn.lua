@@ -261,9 +261,13 @@ end
 
 
 
-local _pre_hook = setmetatable({}, {__mode = 'k'})
-local _post_hook = setmetatable({}, {__mode = 'k'})
 
+
+
+
+
+local _pre_hook, _post_hook = setmetatable({}, {__mode = 'k'}),
+                              setmetatable({}, {__mode = 'k'})
 
 local function _call_with_hooks(uid, ...)
    local fn = _dynamics_call[uid]
@@ -272,12 +276,24 @@ local function _call_with_hooks(uid, ...)
 
    if pre and post then
       local new_arg = pack(pre(...))
-      return post(fn(unpack(new_arg)), unpack(new_arg))
+      local rets = pack(fn(unpack(new_arg)))
+      -- make into one pack, because you can only apply multiple arguments at
+      -- the end of a function call
+      for i = 1, rets.n do
+         new_arg[#new_arg + 1] = rets[i]
+      end
+      new_arg.n = new_arg.n + rets.n
+      return post(unpack(rets))
    elseif pre then
       return fn(pre(...))
    elseif post then
-      local rets = pack(fn(...))
-      return post(unpack(rets), ...)
+      local args, rets = pack(...), pack(fn(...))
+      -- same trick here...
+      for i = 1, args.n do
+         rets[#rets + 1] = args[i]
+      end
+      rets.n = rets.n + args.n
+      return post(unpack(rets))
    else
       return fn(...)
    end
