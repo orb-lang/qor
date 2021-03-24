@@ -22,6 +22,17 @@ local format = assert(string.format)
 
 
 
+for k, v in next, string do
+  String[k] = v
+end
+
+
+
+
+
+
+
+
 
 String.assertfmt = assertfmt
 

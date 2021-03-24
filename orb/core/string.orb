@@ -17,6 +17,17 @@ local format = assert(string.format)
 #/lua
 
 
+**** copy string table
+
+This lets us use =core:string= as a drop-in replacement for the string table.
+
+#!lua
+for k, v in next, string do
+  String[k] = v
+end
+#/lua
+
+
 *** assertfmt(predicate, msg, ...)
 
 Not clear this belongs here, but it is as much like =string.format= as
