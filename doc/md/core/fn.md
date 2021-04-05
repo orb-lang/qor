@@ -104,6 +104,24 @@ fn.thunk = assert(_base.thunk)
 ```
 
 
+### deferSend\(obj, msg, \.\.\.\)
+
+Returns a function which, called, will pass the message and arguments to the
+given object\.
+
+That is, `deferSend(obj, "msg", a)` is the same as `thunk(obj.msg, obj, a)`,
+just a more convenient way of expressing it\.
+
+```lua
+function fn.deferSend(obj, msg, ...)
+   local packed = pack(...)
+   return function()
+      return obj[msg](obj, unpack(packed))
+   end
+end
+```
+
+
 ### iscallable\(maybe\_fn\)
 
 Returns true for a function, or a table with a `__call` metamethod\.

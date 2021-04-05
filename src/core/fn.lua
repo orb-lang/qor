@@ -109,6 +109,24 @@ fn.thunk = assert(_base.thunk)
 
 
 
+
+
+
+
+function fn.deferSend(obj, msg, ...)
+   local packed = pack(...)
+   return function()
+      return obj[msg](obj, unpack(packed))
+   end
+end
+
+
+
+
+
+
+
+
 fn.iscallable = assert(_base.iscallable)
 
 
