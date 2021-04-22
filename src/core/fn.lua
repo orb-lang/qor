@@ -114,6 +114,8 @@ fn.thunk = assert(_base.thunk)
 
 
 function fn.deferSend(obj, msg, ...)
+   assert(type(obj) == 'table', "#1 to deferSend must be a table")
+   assert(type(msg) == 'string', "#2 to deferSend must be a string")
    local packed = pack(...)
    return function()
       return obj[msg](obj, unpack(packed))
