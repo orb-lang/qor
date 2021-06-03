@@ -7,7 +7,20 @@
 
 
 
+
+
+local act = require "core:core/cluster/actor"
+
+
+
+
+
+
 local cluster = {}
+
+for k, v in pairs(act) do
+   cluster[k] = v
+end
 
 
 

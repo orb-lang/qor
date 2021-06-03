@@ -6,8 +6,21 @@ build and extend a Meta\-Object Protocol\.
 
 That's cluster\.
 
+#### imports
+
+```lua
+local act = require "core:core/cluster/actor"
+```
+
+
+## cluster
+
 ```lua
 local cluster = {}
+
+for k, v in pairs(act) do
+   cluster[k] = v
+end
 ```
 
 
