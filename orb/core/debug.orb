@@ -15,7 +15,8 @@ end
 
 Finds every instance of a given value, anywhere in the code.
 
-This can be expected to take awhile.
+This is not intended to be fast, although much like anti_G, it's practically
+instant. But I wouldn't use it in a hot loop or anything like that.
 
 #!lua
 local getupvalue, getinfo = assert(debug.getupvalue), assert(debug.getinfo)
