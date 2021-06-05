@@ -58,9 +58,7 @@ local act = {}
 
 
 
-local _weak = { __mode = 'kv' }
-local __act_mth_attr = setmetatable({}, _weak)
-local __mth_attr = setmetatable({}, _weak)
+local __act_mth_attr = setmetatable({}, { __mode = 'kv' })
 
 function act.borrowmethod(actor, method)
    assert(iscallable(method) or type(method) == 'string',
@@ -70,27 +68,21 @@ function act.borrowmethod(actor, method)
    actor = nil
    if type(method) == 'string' then
       -- return a lookup function
-      __mth_attr[uid] = method
-      method = nil
       return function(...)
          local _actor = __act_mth_attr[uid]
-         local _method = __mth_attr[uid]
          if not _actor then
             error "actor has gone out of scope"
          end
-         return _actor[_method](_actor, ...)
+         return _actor[method](_actor, ...)
       end
    else
       -- return a direct-call function
-      __mth_attr[uid] = method
-      method = nil
       return function(...)
          local _actor = __act_mth_attr[uid]
-         local _method = __mth_attr[uid]
          if not _actor then
             error "actor has gone out of scope"
          end
-         return _method(_actor, ...)
+         return method(_actor, ...)
       end
    end
 end
