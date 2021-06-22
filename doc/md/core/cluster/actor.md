@@ -17,8 +17,8 @@ holder of that reference should call the Actor directly\.
 Lua offers no way to enforce this, so we'll just have to be careful\.
 
 Other communication must take place through various proxies\.  We have the
-[Window](@:window/window), which offers a proxy table with fine\-grained
-access to the underlying Actor's table, and the [mailbox](@:mailbox/mailbox),
+[Window](https://gitlab.com/special-circumstance/DEFAULT_PROJECT/), which offers a proxy table with fine\-grained
+access to the underlying Actor's table, and the [mailbox](https://gitlab.com/special-circumstance/DEFAULT_PROJECT/),
 a two\-way queue for message passing\.
 
 There will inevitably be methods and functions useful in constructing and
