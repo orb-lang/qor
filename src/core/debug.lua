@@ -76,7 +76,7 @@ end
 
 function Debug.findrefs(val)
    local dupes = {}
-   return unpack(_findrefs({n = 0}, val, dupes, getfenv(1)))
+   return _findrefs({n = 0}, val, dupes, getfenv(1))
 end
 
 
