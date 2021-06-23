@@ -61,5 +61,36 @@ end
 
 
 
+
+
+
+
+function _base.deepclone(tab)
+   assert(type(tab) == "table",
+          "cannot deepclone value of type " .. type(tab))
+   local dupes = {}
+   local function _deep(val)
+      local copy = val
+      if type(val) == "table" then
+         if dupes[val] then
+            copy = dupes[val]
+         else
+            copy = {}
+            dupes[val] = copy
+            for k,v in next, val do
+               copy[_deep(k)] = _deep(v)
+            end
+            -- copy the metatable after, in case it contains
+            -- __index or __newindex behaviors
+            copy = setmetatable(copy, _deep(getmetatable(val)))
+         end
+      end
+      return copy
+   end
+   return _deep(tab)
+end
+
+
+
 return _base
 

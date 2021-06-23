@@ -12,6 +12,8 @@ local Tab = {}
 for k, v in pairs(table) do
    Tab[k] = v
 end
+
+Tab.deepclone = _base.deepclone
 ```
 
 

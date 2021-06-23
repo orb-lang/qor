@@ -153,12 +153,27 @@ end
 
 
 
+
 function meta.instanceof(obj, Class)
    if type(Class) == 'string' then
       return type(obj) == Class
    else
       return type(obj) == 'table' and obj.idEst == Class
    end
+end
+
+
+
+
+
+
+
+
+
+
+
+function meta.rawrepr(tab)
+
 end
 
 

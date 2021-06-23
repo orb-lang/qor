@@ -148,6 +148,7 @@ That's just a shallow clone, the subtlety is that if the \_\_index was a
 self\-table, it now points to `Meta`, while if Meta was created through
 endowment or inheritance it's now out of the picture\.
 
+
 ### instanceof\(obj, Class\)
 
 Answers whether `obj` is an "instance of" `Class`, which may be either the
@@ -161,6 +162,20 @@ function meta.instanceof(obj, Class)
    else
       return type(obj) == 'table' and obj.idEst == Class
    end
+end
+```
+
+
+### rawrepr\(tab\)
+
+  Takes a table, performs a `deepclone`, and strips any `__repr` method the
+table might have, returning the clone\.
+
+Intended for printing table with custom reprs in raw form in `helm`\.
+
+```lua
+function meta.rawrepr(tab)
+
 end
 ```
 
