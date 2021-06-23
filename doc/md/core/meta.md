@@ -1,22 +1,42 @@
 # Metatable Extensions
 
 
+  Extensions to metatables\.
+
+Right now this isn't well\-organized, and I need to change that\.
+
+But I have to do it carefully, because `meta` touches the code all over the
+place, and even though it's almost identical to `Meta` in [cluster](NO default.domain IN MANIFESTcore/MISSING_POST_PROJECTdoc/md/core/cluster.md), it might break something to just replace it\.
+
+When the refactor is complete, this will be functions acting on metatables,
+not using them to implement cluster, which is the extensions to the
+Meta\-Object protocols which we use to implement the bridge object and actor
+systems\.
+
+
+#### imports
+
+Just `_base`, which is the only valid import for a `core` module\.
+
+```lua
+local _base = require "core:core/_base"
+```
+
+
+## meta library
+
 ```lua
 local meta = {}
 ```
 
 
-## Meta Object Protocol
-
-This is where we start to design Cluster\.
-
-We shorten a few of the common Lua keywords: `coro` rather than `coroutine`,
-and `getmeta` and `setmeta` over `getmetatable` and `setmetatable`\.
-
-### meta
+### meta\.meta
 
 In my code there is a repeated pattern of use that is basic enough that I'm
 entering it into the global namespace as simple `meta`\.
+
+\#NB
+from Cluster, import it as `meta`, and when this one is gone, we'll delete it\.
 
 ```lua
 function meta.meta(MT, tab)
@@ -53,6 +73,9 @@ metamethod\.
 I've made the parameter order identical to `hasfield` so as to make this
 practical; for now, it's a bit of fiddling around for little benefit\.
 
+This method accepts that any `__` field on the metatable is a metamethod,
+either a native one or a custom extension\.  It certainly should be\.
+
 ```lua
 local sub = assert(string.sub)
 
@@ -72,31 +95,6 @@ end
 meta.hasmetamethod = hasmetamethod
 ```
 
-### endow\(Meta\)
-
-Performs a thick copy of the metatable\.
-
-Because this will include \_\_index and the like, this folds an level of
-indirection out of inheritance\.
-
-I plan to use this with Nodes when I make a single base class for a complex
-Grammar\.
-
-```lua
-local pairs = assert(pairs)
-
-function meta.endow(Meta)
-   local MC = {}
-   for k, v in pairs(Meta) do
-      MC[k] = v
-   end
-   return MC
-end
-```
-
-That's just a shallow clone, the subtlety is that if the \_\_index was a
-self\-table, it now points to `Meta`, while if Meta was created through
-endowment or inheritance it's now out of the picture\.
 
 ### instanceof\(obj, Class\)
 
