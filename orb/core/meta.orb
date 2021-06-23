@@ -2,6 +2,10 @@
 
 
 #!lua
+local _base = require "core:core/_base"
+#/lua
+
+#!lua
 local meta = {}
 #/lua
 
@@ -171,9 +175,22 @@ table might have, returning the clone.
 
 Intended for printing table with custom reprs in raw form in =helm=.
 
-#!lua
-function meta.rawrepr(tab)
+If the clone doesn't have a =__repr= method, this is just =deepclone=.
+Obviously it shouldn't be used as a substitute... but there's no reason to
+throw an error if it happens to be used on a table which doesn't have custom
+printing.
 
+#!lua
+local deepclone = assert(_base.deepclone)
+
+function meta.rawrepr(tab)
+   local clone = deepclone(tab)
+   local _M = getmetatable(clone)
+   if _M then
+      _M.__repr = nil
+      return clone
+   end
+   return clone
 end
 #/lua
 

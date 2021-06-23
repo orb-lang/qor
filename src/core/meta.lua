@@ -2,6 +2,10 @@
 
 
 
+local _base = require "core:core/_base"
+
+
+
 local meta = {}
 
 
@@ -172,8 +176,21 @@ end
 
 
 
-function meta.rawrepr(tab)
 
+
+
+
+
+local deepclone = assert(_base.deepclone)
+
+function meta.rawrepr(tab)
+   local clone = deepclone(tab)
+   local _M = getmetatable(clone)
+   if _M then
+      _M.__repr = nil
+      return clone
+   end
+   return clone
 end
 
 
