@@ -2,15 +2,32 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local _base = require "core:core/_base"
 
 
 
 local meta = {}
-
-
-
-
 
 
 
@@ -39,6 +56,8 @@ function meta.meta(MT, tab)
       return _M
    end
 end
+
+
 
 
 
@@ -106,6 +125,9 @@ end
 
 
 
+
+
+
 local sub = assert(string.sub)
 
 local function hasmetamethod(mmethod, tab)
@@ -122,32 +144,6 @@ local function hasmetamethod(mmethod, tab)
 end
 
 meta.hasmetamethod = hasmetamethod
-
-
-
-
-
-
-
-
-
-
-
-
-
-local pairs = assert(pairs)
-
-function meta.endow(Meta)
-   local MC = {}
-   for k, v in pairs(Meta) do
-      MC[k] = v
-   end
-   return MC
-end
-
-
-
-
 
 
 
