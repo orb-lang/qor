@@ -99,10 +99,10 @@ local __act_getter_attr = setmetatable({}, { __mode = 'kv' })
 
 function act.getter(actor, slot)
    local uid = {}
-   __act_mth_attr[uid] = actor
+   __act_getter_attr[uid] = actor
    actor = nil
    return function()
-             local _actor = __act_mth_attr[uid]
+             local _actor = __act_getter_attr[uid]
              if not _actor then
                 error "actor has gone out of scope"
              end
