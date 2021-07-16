@@ -84,7 +84,8 @@ from the shadowed field.
 Invoked as =obj :super 'field' (params)=.
 
 #!lua
-local function _bind(obj, fn)
+--| if =fn= exists, bind fn(obj, ...)
+local function _maybe_bind(obj, fn)
   if not fn then return nil end
   return function(...)
      return fn(obj, ...)
@@ -109,8 +110,8 @@ function cluster.super(obj, field)
    end
    if super_idx then
       return type(super_idx) == 'table'
-         and _bind(obj, super_idx[field])
-         or  _bind(obj, super_idx(obj, field))
+         and _maybe_bind(obj, super_idx[field])
+         or  _maybe_bind(obj, super_idx(obj, field))
    end
    -- No superclass, or our class uses an __index function so we can't
    -- meaningfully figure out what to do

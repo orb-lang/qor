@@ -17,8 +17,8 @@ holder of that reference should call the Actor directly\.
 Lua offers no way to enforce this, so we'll just have to be careful\.
 
 Other communication must take place through various proxies\.  We have the
-[Window](@:window/window), which offers a proxy table with fine\-grained
-access to the underlying Actor's table, and the [mailbox](@:mailbox/mailbox),
+[Window](https://gitlab.com/special-circumstance/core/-/blob/trunk/doc/md/window/window.md), which offers a proxy table with fine\-grained
+access to the underlying Actor's table, and the [mailbox](https://gitlab.com/special-circumstance/core/-/blob/trunk/doc/md/mailbox/mailbox.md),
 a two\-way queue for message passing\.
 
 There will inevitably be methods and functions useful in constructing and
@@ -86,6 +86,31 @@ function act.borrowmethod(actor, method)
       end
    end
 end
+```
+
+
+## act\.getter\(actor, slot\)
+
+  Provides a closure which will return the value of the slot on the given
+actor\.
+
+```lua
+local __act_getter_attr = setmetatable({}, { __mode = 'kv' })
+
+function act.getter(actor, slot)
+   local uid = {}
+   __act_mth_attr[uid] = actor
+   actor = nil
+   return function()
+             local _actor = __act_mth_attr[uid]
+             if not _actor then
+                error "actor has gone out of scope"
+             end
+             return _actor[slot]
+          end
+end
+
+
 ```
 
 ```lua
