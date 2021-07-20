@@ -140,6 +140,7 @@ end
 
 
 
+
 function coro.fire(co, ...)
    local cotype = type(co)
    if cotype == 'thread' then
@@ -159,6 +160,26 @@ function coro.fire(co, ...)
       return co(...)
    else
       error("cannot fire on a " .. cotype)
+   end
+end
+
+
+
+
+
+
+
+
+
+
+local running, yield = assert(.running), assert(.yield)
+
+function coro.canyield(...)
+   local _, main = running()
+   if not main then
+      yield(...)
+   else
+      return ...
    end
 end
 

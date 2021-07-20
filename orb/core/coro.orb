@@ -122,6 +122,7 @@ function coro.cogen(fn, ...)
 end
 #/lua
 
+
 *** fire(co, ...)
 
 =fire= is a one-shot =wrap=, taking care of the marshalling and return
@@ -159,6 +160,26 @@ function coro.fire(co, ...)
       return co(...)
    else
       error("cannot fire on a " .. cotype)
+   end
+end
+#/lua
+
+
+*** canyield(...)
+
+Like =yield=, except it first detects if we're inside a not-main coroutine.
+
+If not, =return= the values.
+
+#!lua
+local running, yield = assert(.running), assert(.yield)
+
+function coro.canyield(...)
+   local _, main = running()
+   if not main then
+      yield(...)
+   else
+      return ...
    end
 end
 #/lua
