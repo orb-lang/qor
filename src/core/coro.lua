@@ -172,7 +172,7 @@ end
 
 
 
-local running, yield = assert(.running), assert(.yield)
+local running = assert(coroutine.running)
 
 function coro.canyield(...)
    local _, main = running()
