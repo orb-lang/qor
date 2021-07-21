@@ -229,7 +229,7 @@ end
 
 function Tab.isarray(tab)
    local i = 1
-   for k,_ in pairs(tab) do
+   for k,_ in next, tab do
       if k ~= i then return false end
       i = i + 1
    end
