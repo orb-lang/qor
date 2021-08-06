@@ -54,54 +54,6 @@ end
 
 
 
-function meta.inherit(meta)
-  local MT = meta or {}
-  local M = setmetatable({}, MT)
-  M.__index = M
-  local m = setmetatable({}, M)
-  m.__index = m
-  return M, m
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function meta.export(mod, constructor)
-  mod.__call = constructor
-  return setmetatable({}, mod)
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 local sub = assert(string.sub)
 
 local function hasmetamethod(mmethod, tab)

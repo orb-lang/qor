@@ -63,12 +63,35 @@ end
 ```
 
 
+### constructor\(mt, new\)
+
+Wraps up a module metatable in a callable\-table\-style constructor, assigning
+\`idEst\` appropriately on the metatable\. \`new\` is assigned to \`mt\.\_\_call\`, or
+if nil, one is assumed to already be present\.
+
+```lua
+function cluster.constructor(mt, new)
+   if new then
+      mt.__call = new
+   end
+   local constructor = setmetatable({}, mt)
+   mt.idEst = constructor
+   return constructor
+end
+```
+
+
 ### super\(field\)
 
   A mixin which allows for the accessing of a method up the inheritance chain
 from the shadowed field\.
 
 Invoked as `obj :super 'field' (params)`\.
+
+Deprecated\-\-does not function properly with multi\-level hierarchies, as lookup
+needs to start with the superclass of the class in which a method was
+**declared**, and we have no way to determine that from just the instance
+itself\.
 
 ```lua
 local function _bind(obj, fn)
@@ -104,6 +127,7 @@ function cluster.super(obj, field)
    return nil
 end
 ```
+
 
 ```lua
 return cluster

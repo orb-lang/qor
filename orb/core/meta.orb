@@ -38,54 +38,6 @@ end
 #/lua
 
 
-*** inherit(meta)
-
-I may yet regret this.
-
-But I use this inheritance pattern throughout Nodes, along with Export,
-and I've sprayed duplicates of this method across the orb codebase.
-
-It needs to live somewhere. So here it is.
-
-- #params
-
-  - meta : the metatable to inherit from.
-
-
-
-#!lua
-function meta.inherit(meta)
-  local MT = meta or {}
-  local M = setmetatable({}, MT)
-  M.__index = M
-  local m = setmetatable({}, M)
-  m.__index = m
-  return M, m
-end
-#/lua
-
-
-*** export(mod, constructor)
-
-=export= is traditionally called at the end of a module to make a
-functionalized table.
-
-This is... sometimes the right thing to do. sometimes.
-
-- #params
-
-  - mod :  The module metatable
-  - constructor :  A function, called =new=, which receives =mod= as the
-                   first parameter.
-
-#!lua
-function meta.export(mod, constructor)
-  mod.__call = constructor
-  return setmetatable({}, mod)
-end
-#/lua
-
-
 *** hasmetamethod(mmethod, tab)
 
 Given a table, return a metamethod if present, otherwise, return =false= or
