@@ -42,7 +42,7 @@ local isempty = table.isempty
                 or
                 function(tab)
                    local empty = true
-                   for _, __ in pairs(tab) do
+                   for _, __ in next, tab, nil do
                       empty = false
                       break
                    end
@@ -73,6 +73,24 @@ function cluster.Meta(Meta)
    end
    error "cannot make metatable"
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -121,4 +139,3 @@ end
 
 
 return cluster
-

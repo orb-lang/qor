@@ -1,61 +1,65 @@
 # Actor
 
-  A collection of useful functions for Actors\.
+  A collection of useful functions for Actors.
+
 
 What constitutes an Actor in cluster, and therefore in bridge, is a work in
-progress\.  It is a role, more than an interface or a specific type of object\.
+progress.  It is a role, more than an interface or a specific type of object.
 
 
 ## Premise
 
   One of the distinguishing characteristics of an Actor is that they are
-singular\.
+singular.
+
 
 This means that only one reference to an Actor should exist, and only the
-holder of that reference should call the Actor directly\.
+holder of that reference should call the Actor directly.
 
-Lua offers no way to enforce this, so we'll just have to be careful\.
 
-Other communication must take place through various proxies\.  We have the
-[Window](https://gitlab.com/special-circumstance/core/-/blob/trunk/doc/md/window/window.md), which offers a proxy table with fine\-grained
-access to the underlying Actor's table, and the [mailbox](https://gitlab.com/special-circumstance/core/-/blob/trunk/doc/md/mailbox/mailbox.md),
-a two\-way queue for message passing\.
+Lua offers no way to enforce this, so we'll just have to be careful.
+
+
+Other communication must take place through various proxies.  We have the
+[[Window][@:window/window]], which offers a proxy table with fine-grained
+access to the underlying Actor's table, and the [[mailbox][@:mailbox/mailbox]],
+a two-way queue for message passing.
+
 
 There will inevitably be methods and functions useful in constructing and
-implementing Actors\.  I have one so far, hence this module\.
+implementing Actors.  I have one so far, hence this module.
 
 
-#### \_base
+#### _base
 
 ```lua
 local _base = require "core:_base"
 local iscallable = assert(_base.iscallable)
 ```
-
-
 ## actor library
 
 ```lua
 local act = {}
 ```
+### act.borrowmethod(actor, method)
+
+  This function takes an Actor and a method, and returns a closure which a)
+will call the method with the Actor as the first parameter and b) will not
+retain a strong reference to the Actor.
 
 
-### act\.borrowmethod\(actor, method\)
+The method may be either a callable or a string.  A callable is used directly,
+and a string is used at call-time to retrieve a method from the Actor and call
+it.
 
-  This function takes an Actor and a method, and returns a closure which a\)
-will call the method with the Actor as the first parameter and b\) will not
-retain a strong reference to the Actor\.
-
-The method may be either a callable or a string\.  A callable is used directly,
-and a string is used at call\-time to retrieve a method from the Actor and call
-it\.
 
 Both options are provided, because with the callable, it doesn't have to be an
 actual method on a field of the Actor, and with the string, the method itself
-can change and will still be called\.
+can change and will still be called.
+
 
 We do this with an anonymous index table and a weak attribute table, which we
-use to retrieve the Actor and method if they haven't gone out of scope\.
+use to retrieve the Actor and method if they haven't gone out of scope.
 
 ```lua
 local __act_mth_attr = setmetatable({}, { __mode = 'kv' })
@@ -87,12 +91,10 @@ function act.borrowmethod(actor, method)
    end
 end
 ```
-
-
-## act\.getter\(actor, slot\)
+## act.getter(actor, slot)
 
   Provides a closure which will return the value of the slot on the given
-actor\.
+actor.
 
 ```lua
 local __act_getter_attr = setmetatable({}, { __mode = 'kv' })
@@ -112,7 +114,6 @@ end
 
 
 ```
-
 ```lua
 return act
 ```

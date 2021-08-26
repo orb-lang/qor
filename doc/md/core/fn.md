@@ -2,11 +2,12 @@
 
 
   Various methods to extend the functionality of functions and methods,
-methodically\.
+methodically.
+
 
 This is also the home of some core functions which are distinguished by their
 actions, side effects, or affect on control flow, rather than by acting on
-a specific data structure\.  Currently this is limited to `assertfmt`\.
+a specific data structure.  Currently this is limited to ``assertfmt``.
 
 
 #### imports
@@ -14,25 +15,23 @@ a specific data structure\.  Currently this is limited to `assertfmt`\.
 ```lua
 local _base = require "core:core/_base"
 ```
-
-
 ## fn table
 
 ```lua
 local fn = {}
 ```
+### curry(fn, param)
 
+  Returns a function which pre-applies the given parameter to the first
+position of the function.
 
-### curry\(fn, param\)
-
-  Returns a function which pre\-applies the given parameter to the first
-position of the function\.
 
 We could simply do this naively, and LuaJIT being what it is, there's a decent
-chance it would be optimized away\.
+chance it would be optimized away.
+
 
 But I prefer to provide a guarantee that, for up to five parameters, there is
-exactly one level of indirection involved\.
+exactly one level of indirection involved.
 
 ```lua
 local _curried = setmetatable({}, { __mode = 'k' })
@@ -91,26 +90,22 @@ end
 
 fn.curry = curry
 ```
-
-
-
-### thunk\(fn, \.\.\.\)
+### thunk(fn, ...)
 
 Returns a function which, called, will call the function with the given
-arguments\.
+arguments.
 
 ```lua
 fn.thunk = assert(_base.thunk)
 ```
-
-
-### deferSend\(obj, msg, \.\.\.\)
+### deferSend(obj, msg, ...)
 
 Returns a function which, called, will pass the message and arguments to the
-given object\.
+given object.
 
-That is, `deferSend(obj, "msg", a)` is the same as `thunk(obj.msg, obj, a)`,
-just a more convenient way of expressing it\.
+
+That is, ``deferSend(obj, "msg", a)`` is the same as ``thunk(obj.msg, obj, a)``,
+just a more convenient way of expressing it.
 
 ```lua
 function fn.deferSend(obj, msg, ...)
@@ -122,18 +117,14 @@ function fn.deferSend(obj, msg, ...)
    end
 end
 ```
+### iscallable(maybe_fn)
 
-
-### iscallable\(maybe\_fn\)
-
-Returns true for a function, or a table with a `__call` metamethod\.
+Returns true for a function, or a table with a ``__call`` metamethod.
 
 ```lua
 fn.iscallable = assert(_base.iscallable)
 ```
-
-
-### partial\(fn, \.\.\.\)
+### partial(fn, ...)
 
 Partial applicator: takes a function, and fills in the given arguments,
 returning another function which accepts additional arguments:
@@ -145,8 +136,8 @@ add5 = fn.partial(function(a,b)
 return add5(10) -- returns 15
 ```
 
-This is just a convenience function, which repeatedly curries the given `fn`
-until the parameters are consumed\.
+This is just a convenience function, which repeatedly curries the given ``fn``
+until the parameters are consumed.
 
 ```lua
 function fn.partial(fn, ...)
@@ -156,14 +147,13 @@ function fn.partial(fn, ...)
    return fn
 end
 ```
+### itermap(fn, iter)
+
+Applies ``fn`` to each element returned from ``iter``, in turn.
 
 
-### itermap\(fn, iter\)
-
-Applies `fn` to each element returned from `iter`, in turn\.
-
-For a consistent interface, all return values are `pack`ed into one array
-slot of a table, which is returned\.
+For a consistent interface, all return values are ``pack``ed into one array
+slot of a table, which is returned.
 
 ```lua
 function fn.itermap(fn, iter)
@@ -178,27 +168,29 @@ function fn.itermap(fn, iter)
    end
 end
 ```
-
-
-### fn\.dynamic\(fn\)
+### fn.dynamic(fn)
 
 Because functions are immutable, we can't replace all instances of a function,
-at least not without trawling the entire program with the `debug` library
-looking for upvalues and locals\.
+at least not without trawling the entire program with the ``debug`` library
+looking for upvalues and locals.
 
-`dynamic` sets up a closure, which uses a private attributes table to retrieve
-the passed function and call it\.
+
+``dynamic`` sets up a closure, which uses a private attributes table to retrieve
+the passed function and call it.
+
 
 We create a table as a lightweight unique to index the function with, and
-provide a second method, `fn.patch_dynamic`, to change the underlying function
-when desired\.
+provide a second method, ``fn.patch_dynamic``, to change the underlying function
+when desired.
+
 
 We use two tables for the registry, because we want the values of the
-`_dynamics_call` table to retain a reference even if it's the only one, which
-allows anonymous functions to be registered as dynamic or patched in\.
+``_dynamics_call`` table to retain a reference even if it's the only one, which
+allows anonymous functions to be registered as dynamic or patched in.
+
 
 The net result is a unique function which can be swapped out in all places in
-which it is used\.
+which it is used.
 
 ```lua
 local _dynamics_call = setmetatable({}, {__mode = 'k'})
@@ -217,12 +209,10 @@ end
 
 fn.dynamic = dynamic
 ```
-
-
-### fn\.patch\_dynamic\(dyn\_fn, fn\)
+### fn.patch_dynamic(dyn_fn, fn)
 
 Replaces the attribute function with the new function, and updates the table
-accordingly\.
+accordingly.
 
 ```lua
 function fn.patch_dynamic(dyn_fn, fn)
@@ -231,59 +221,65 @@ function fn.patch_dynamic(dyn_fn, fn)
    _dynamics_call[uid] = fn
 end
 ```
+### hookable(fn)
 
+As we build out ``helm``, I would like to be able to expose a rich API for
+extensions, a la Emacs.
 
-### hookable\(fn\)
-
-As we build out `helm`, I would like to be able to expose a rich API for
-extensions, a la Emacs\.
 
 One of the ways to do this is to expose functions with hooks: actions taken
-before or after a given function\.
+before or after a given function.
 
-A hookable function is registered as a `dynamic` function\.  This means that
-`patch_dynamic` can replace the core function\.  Note that if you pass an
-already `dynamic` function to  `hookable`, you'll end up with a "double
-dynamic" function, which might not be what you want\! `patch_dynamic` will do
-different things to the original \(dynamic\) function and its hookable dynamic
-cousin\.
 
-We offer two hooks, `pre` and `post`, which are hooked with `fn.prehook` and
-`fn.posthook`, respectively\.  Functions may be unhooked by calling
-`fn.prehook(fn, nil)`, or the equivalent for a posthook\.
+A hookable function is registered as a ``dynamic`` function.  This means that
+``patch_dynamic`` can replace the core function.  Note that if you pass an
+already ``dynamic`` function to  ``hookable``, you'll end up with a "double
+dynamic" function, which might not be what you want! ``patch_dynamic`` will do
+different things to the original (dynamic) function and its hookable dynamic
+cousin.
 
-`pre` receives the same parameters, and must return parameters which are then
-passed to the main function\.  These don't have to be the same parameters,
-but certainly can be, if pre is called for side effects\.  This calling
-convention gives `pre` a chance to modify the default parameters\.
 
-`post` receives the return values of the main function, if any, followed by
-either the return parameters of `pre` or the main parameters, depending on if
-there is a pre\-hook\.  So a function `f(a, b, c)` which returns `d` will call a
- post\-hook with `post_f(d, a, b, c)`\.  The reason for this calling convention
-is that post\-hooks are primarily interested in what the function did, and may
-also need to know how the function was called\.
+We offer two hooks, ``pre`` and ``post``, which are hooked with ``fn.prehook`` and
+``fn.posthook``, respectively.  Functions may be unhooked by calling
+``fn.prehook(fn, nil)``, or the equivalent for a posthook.
+
+
+``pre`` receives the same parameters, and must return parameters which are then
+passed to the main function.  These don't have to be the same parameters,
+but certainly can be, if pre is called for side effects.  This calling
+convention gives ``pre`` a chance to modify the default parameters.
+
+
+``post`` receives the return values of the main function, if any, followed by
+either the return parameters of ``pre`` or the main parameters, depending on if
+there is a pre-hook.  So a function ``f(a, b, c)`` which returns ``d`` will call a
+ post-hook with ``post_f(d, a, b, c)``.  The reason for this calling convention
+is that post-hooks are primarily interested in what the function did, and may
+also need to know how the function was called.
+
 
 Note that Lua has no concept of how many parameters are "supposed to" be
-passed to a function, and from `pack`'s perspective there is a difference
-between `return nil` and just `return`\.  So if `f(a, b, c)` sometimes returns
-`d` and sometimes returns nothing with a bare `return` keyword, or just by
-falling off the end of the function, then sometimes you will get `post_f(d, a,, and sometimes just `post_f(a, b, c)`\.  So it's important to design
-hookable
-b, c)` functions so that they return a consistent number of parameters in
-all cases, padded with `nil`s if necessary\.  This is not idiomatic,
+passed to a function, and from ``pack``'s perspective there is a difference
+between ``return nil`` and just ``return``.  So if ``f(a, b, c)`` sometimes returns
+``d`` and sometimes returns nothing with a bare ``return`` keyword, or just by
+falling off the end of the function, then sometimes you will get ``post_f(d, a,
+b, c)``, and sometimes just ``post_f(a, b, c)``.  So it's important to design
+hookable functions so that they return a consistent number of parameters in
+all cases, padded with ``nil``s if necessary.  This is not idiomatic,
 particularly for functions which return an optional second value under some
-circumstances\.
+circumstances.
 
-Similarly, if one were to call `f(a, b, c, extra)`, and the function has no
-concept of an `extra` parameter, this is silently ignored, but `(un)pack` will
-provide the post\-hook with `f_post(d, a, b, c, extra)`\.  This is less
-important, since `f_post` will also ignore it unless it happens to have an
-optional parameter\.
 
-The return values are the return values of `post` or the main function,
-depending, so if the call site is relying on something to be `returned`, a
-post\-hook should make sure to return that something\.
+Similarly, if one were to call ``f(a, b, c, extra)``, and the function has no
+concept of an ``extra`` parameter, this is silently ignored, but ``(un)pack`` will
+provide the post-hook with ``f_post(d, a, b, c, extra)``.  This is less
+important, since ``f_post`` will also ignore it unless it happens to have an
+optional parameter.
+
+
+The return values are the return values of ``post`` or the main function,
+depending, so if the call site is relying on something to be ``returned``, a
+post-hook should make sure to return that something.
 
 ```lua
 local _pre_hook, _post_hook = setmetatable({}, {__mode = 'k'}),
@@ -342,22 +338,20 @@ function fn.hookable(fn, pre, post)
 end
 
 ```
-
-
 ## Errors and asserts
 
 
 ### Assertfmt
 
-I'll probably just globally replace assert with this over time\.
+I'll probably just globally replace assert with this over time.
+
 
 This avoids doing concatenations and conversions on messages that we never
-see in normal use\.
+see in normal use.
 
 ```lua
 fn.assertfmt = _base.assertfmt
 ```
-
 ```lua
 return fn
 ```

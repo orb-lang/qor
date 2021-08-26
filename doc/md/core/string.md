@@ -4,8 +4,6 @@
 ```lua
 local String = {}
 ```
-
-
 ## String extensions
 
 ```lua
@@ -15,35 +13,30 @@ local find = assert(string.find)
 local sub = assert(string.sub)
 local format = assert(string.format)
 ```
-
-
 #### copy string table
 
-This lets us use `core:string` as a drop\-in replacement for the string table\.
+This lets us use ``core:string`` as a drop-in replacement for the string table.
 
 ```lua
 for k, v in next, string do
   String[k] = v
 end
 ```
+### assertfmt(predicate, msg, ...)
 
-
-### assertfmt\(predicate, msg, \.\.\.\)
-
-Not clear this belongs here, but it is as much like `string.format` as
-anything else\.
+Not clear this belongs here, but it is as much like ``string.format`` as
+anything else.
 
 ```lua
 String.assertfmt = assertfmt
 ```
-
-
-### utf8\(str, \[offset\]\)
+### utf8(str, [offset])
 
 This takes a string and validates one codepoint, starting at the given
-offset \(default of 1\)\.
+offset (default of 1).
 
-Return is either the \(valid\) length in bytes, or nil and an error string\.
+
+Return is either the (valid) length in bytes, or nil and an error string.
 
 ```lua
 local function continue(c)
@@ -104,16 +97,16 @@ function String.utf8(str, offset)
    end
 end
 ```
+### findall(str, patt)
+
+Runs ``find`` repeatedly, returning an array of arrays where ``[1]`` is the
+beginning of the match, and ``[2]`` is the end.
 
 
-### findall\(str, patt\)
+Returns ``nil`` if no match is found.
 
-Runs `find` repeatedly, returning an array of arrays where `[1]` is the
-beginning of the match, and `[2]` is the end\.
 
-Returns `nil` if no match is found\.
-
-Should probably take a third parameter to limit the number of matches\.
+Should probably take a third parameter to limit the number of matches.
 
 ```lua
 function String.findall(str, patt)
@@ -134,49 +127,57 @@ function String.findall(str, patt)
    end
 end
 ```
+### typeformat(str, ...)
+
+Background: I want to start using format in errors and assertions.
 
 
-### typeformat\(str, \.\.\.\)
+It's not as bad to use concatenation in-place for errors, since evaluating
+them is a final step.  Assertions run much faster if passed only arguments.
 
-Background: I want to start using format in errors and assertions\.
-
-It's not as bad to use concatenation in\-place for errors, since evaluating
-them is a final step\.  Assertions run much faster if passed only arguments\.
 
 Lua peforms a small number of implicit conversions, mostly at the string
-boundary\. This is an actual feature since the language has both `..` and `+`,
-but it leaves a bit to be desired when it comes to `string.format`\.
+boundary. This is an actual feature since the language has both ``..`` and ``+``,
+but it leaves a bit to be desired when it comes to ``string.format``.
 
-`format` treats any `%s` as a request to convert `tostring`, also treating
-`%d` as a call to `tonumber`\.  The latter I will allow, I'm struggling to find
-a circumstance where casting "1" to "1" through `1` is dangerous\.
 
-What I want is a type\-checked `format`, which I can extend to use a few more
-flexible strategies, depending on the context\.
+``format`` treats any ``%s`` as a request to convert ``tostring``, also treating
+``%d`` as a call to ``tonumber``.  The latter I will allow, I'm struggling to find
+a circumstance where casting "1" to "1" through ``1`` is dangerous.
 
-Less concerned about hostility and more about explicit coding practices\. Also
-don't want to undermine hardening elsewhere\.
+
+What I want is a type-checked ``format``, which I can extend to use a few more
+flexible strategies, depending on the context.
+
+
+Less concerned about hostility and more about explicit coding practices. Also
+don't want to undermine hardening elsewhere.
+
 
 From the wiki, the full set of numeric parameters is
-`{A,a,c,d,E,e,f,G,g,i,o,u,X,x}`\.  That leaves `%q` and `%s`, the former does
-string escaping but of course it is the Lua/C style of escaping\.
+``{A,a,c,d,E,e,f,G,g,i,o,u,X,x}``.  That leaves ``%q`` and ``%s``, the former does
+string escaping but of course it is the Lua/C style of escaping.
 
-We add `%t` and `%L` \(for λ\), which call `tostring` on a table or a function
-respectively\.  While we're being thorough, `%b` for boolean, `%n` for `nil`,
-and `%*` for the union type\.  Why bother with `nil`, which we can just write?
-Type\-checking, of course\.  We treat `nil` as a full type, because in Lua, it
-is\.
 
-`%t` will actually accept all remaining compound types: `userdata`, `thread`,
-and `cdata`\.  For only tables, we can have `%T`, and also `%U`, `%R` \(coRo\),
-and `%C`\.
+We add ``%t`` and ``%L`` (for λ), which call ``tostring`` on a table or a function
+respectively.  While we're being thorough, ``%b`` for boolean, ``%n`` for ``nil``,
+and ``%*`` for the union type.  Why bother with ``nil``, which we can just write?
+Type-checking, of course.  We treat ``nil`` as a full type, because in Lua, it
+is.
 
-Note our `%L` is not the C version\.  Tempted to have `%λ` directly, but
+
+``%t`` will actually accept all remaining compound types: ``userdata``, ``thread``,
+and ``cdata``.  For only tables, we can have ``%T``, and also ``%U``, ``%R`` (coRo),
+and ``%C``.
+
+
+Note our ``%L`` is not the C version.  Tempted to have ``%λ`` directly, but
 that's a bit weird and it breaks the idea that format sequences are two
-bytes long\.  While I don't intend to write code that would break in this
-case, eh\.
+bytes long.  While I don't intend to write code that would break in this
+case, eh.
 
-`typeformat` returns the correctly formatted string, or throws an error\.
+
+``typeformat`` returns the correctly formatted string, or throws an error.
 
 ```lua
 local fmt_set = {"*", "C", "L", "R", "T", "U", "b", "n", "q", "s", "t" }
@@ -196,12 +197,12 @@ function String.format_safe(str, ...)
 
 end
 ```
+### litpat(s)
 
-### litpat\(s\)
+``%`` escapes all pattern characters.
 
-`%` escapes all pattern characters\.
 
-The resulting string will literally match `s` in `sub` or `gsub`\.
+The resulting string will literally match ``s`` in ``sub`` or ``gsub``.
 
 ```lua
 local matches =
@@ -225,14 +226,13 @@ function String.litpat(s)
     return (s:gsub(".", matches))
 end
 ```
+### cleave(str, patt)
+
+Performs the common operation of returning one run of bytes up to ``patt``
+then the rest of the bytes after ``patt``.
 
 
-### cleave\(str, patt\)
-
-Performs the common operation of returning one run of bytes up to `patt`
-then the rest of the bytes after `patt`\.
-
-Can be used to build iterators, either stateful or coroutine\-based\.
+Can be used to build iterators, either stateful or coroutine-based.
 
 ```lua
 local function cleave(str, pat)
@@ -245,13 +245,12 @@ local function cleave(str, pat)
 end
 String.cleave = cleave
 ```
+### isidentifier(str)
 
-### isidentifier\(str\)
-
-Determines if `str` is a valid Lua identifier\.
-This follows the Lua standard\-\-LuaJIT is actually much more permissive,
+Determines if ``str`` is a valid Lua identifier.
+This follows the Lua standard--LuaJIT is actually much more permissive,
 but the rules are potentially quite complicated wrt special Unicode characters
-like ZWJ and NBSP, so let's stick with the simple standard for now\.
+like ZWJ and NBSP, so let's stick with the simple standard for now.
 
 ```lua
 local find = assert(string.find)
@@ -259,10 +258,9 @@ function String.isidentifier(str)
    return find(str, "^[a-zA-Z_][a-zA-Z0-9_]+$") == 1
 end
 ```
+#### String.lines(str)
 
-#### String\.lines\(str\)
-
-Returns an iterator over the lines of a string\.
+Returns an iterator over the lines of a string.
 
 ```lua
 function String.lines(str)
@@ -286,12 +284,10 @@ function String.lines(str)
    end
 end
 ```
+### to_repr(str)
 
-
-### to\_repr\(str\)
-
-makes a \_\_repr\-able table which returns the actual string without markup and
-respecting line breaks\.
+makes a __repr-able table which returns the actual string without markup and
+respecting line breaks.
 
 ```lua
 local function _str__repr(str_tab)
@@ -305,13 +301,12 @@ function String.to_repr(str)
    return setmetatable({str}, _str_M)
 end
 ```
+### String.slurp(filename)
+
+This takes a (text) file and returns a string containing its whole contents.
 
 
-### String\.slurp\(filename\)
-
-This takes a \(text\) file and returns a string containing its whole contents\.
-
-Uses `tostring()` on `filename` so it can be passed a Path etc\.
+Uses ``tostring()`` on ``filename`` so it can be passed a Path etc.
 
 ```lua
 function String.slurp(filename)
@@ -324,11 +319,9 @@ function String.slurp(filename)
   return content
 end
 ```
+### String.splice(to_split, to_splice, index)
 
-
-### String\.splice\(to\_split, to\_splice, index\)
-
-Splices `to_splice` into `to_split` at index `index`\.
+Splices ``to_splice`` into ``to_split`` at index ``index``.
 
 ```lua
 local sub = assert(string.sub)
@@ -345,7 +338,6 @@ function String.splice(to_split, to_splice, index)
    return head .. to_splice .. tail
 end
 ```
-
 ```lua
 return String
 ```

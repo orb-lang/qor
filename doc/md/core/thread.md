@@ -1,33 +1,31 @@
 # Thread
 
 
-Bridge uses coroutines in combination with the `uv` event loop\.
+Bridge uses coroutines in combination with the ``uv`` event loop.
 
-This is a home for primitives which make that a little cleaner\.
+
+This is a home for primitives which make that a little cleaner.
 
 ```lua
 local uv = require "luv"
 ```
-
 ```lua
 local thread = {}
 ```
-
 ```lua
 local running, yield = assert(coroutine.running),
                        assert(coroutine.yield)
 
 ```
+### onloop()
 
+A predicate which returns ``true`` if we're inside a ``uv`` event loop and inside
+a coroutine: which means we can register a callback, ``yield``, and ``resume``
+inside the callback.
 
-### onloop\(\)
-
-A predicate which returns `true` if we're inside a `uv` event loop and inside
-a coroutine: which means we can register a callback, `yield`, and `resume`
-inside the callback\.
 
 Used to write "purple" functions, which are colored red or blue depending on
-whether or not we're handling things asynchronously\.
+whether or not we're handling things asynchronously.
 
 ```lua
 function thread.onloop()
@@ -35,16 +33,15 @@ function thread.onloop()
    return main and uv.loop_alive()
 end
 ```
+### canyield(...)
+
+If we're inside a coroutine, ``yield`` the values, otherwise, return them.
 
 
-### canyield\(\.\.\.\)
-
-If we're inside a coroutine, `yield` the values, otherwise, return them\.
-
-This should let us write functions which are either blocking or non\-blocking,
+This should let us write functions which are either blocking or non-blocking,
 with some care, by wrapping async operations in 'purple' functions and using
-`canyield` to mark points where, in the service of e\.g\. resynchronizing, we
-might want to surrender control\.
+``canyield`` to mark points where, in the service of e.g. resynchronizing, we
+might want to surrender control.
 
 ```lua
 function thread.canyield(...)
@@ -56,7 +53,6 @@ function thread.canyield(...)
    end
 end
 ```
-
 ```lua
 return thread
 ```

@@ -1,18 +1,17 @@
 # Cluster
 
 
-One of the language\-development goals we have with the Bridge project is to
-build and extend a Meta\-Object Protocol\.
+One of the language-development goals we have with the Bridge project is to
+build and extend a Meta-Object Protocol.
 
-That's cluster\.
+
+That's cluster.
 
 #### imports
 
 ```lua
 local act = require "core:core/cluster/actor"
 ```
-
-
 ## cluster
 
 ```lua
@@ -22,8 +21,6 @@ for k, v in pairs(act) do
    cluster[k] = v
 end
 ```
-
-
 ## Identity and Membership
 
 
@@ -33,7 +30,7 @@ end
 ### Meta
 
 This is our default pattern for single inheritance with transference of
-metamethods\.
+metamethods.
 
 ```lua
 local sub = assert(string.sub)
@@ -42,7 +39,7 @@ local isempty = table.isempty
                 or
                 function(tab)
                    local empty = true
-                   for _, __ in pairs(tab) do
+                   for _, __ in next, tab, nil do
                       empty = false
                       break
                    end
@@ -74,14 +71,34 @@ function cluster.Meta(Meta)
    error "cannot make metatable"
 end
 ```
+## __meta
+
+The meta metatable.
 
 
-### super\(field\)
+Index looks up symbol resolution, such that on a self-indexed table, the
+metafields and metamethods are available.  While this is untrue of a table
+in which ``__index`` does not point to itself.
+
+
+The cluster word ``meta`` will therefore post-copy out of a table called
+``__meta``, if such a metametatable should happen to exist as the rvalue of
+the ``__meta`` field.
+
+
+Valid keys are only strings starting with a double underscore.  Valid values
+would tend to be best thought of as tables and functions, with booleans
+playing their usual role.  To put a point upon it, rules are not imposed here.
+
+
+
+### super(field)
 
   A mixin which allows for the accessing of a method up the inheritance chain
-from the shadowed field\.
+from the shadowed field.
 
-Invoked as `obj :super 'field' (params)`\.
+
+Invoked as ``obj :super 'field' (params)``.
 
 ```lua
 --| if =fn= exists, bind fn(obj, ...)
@@ -118,7 +135,6 @@ function cluster.super(obj, field)
    return nil
 end
 ```
-
 ```lua
 return cluster
 ```
