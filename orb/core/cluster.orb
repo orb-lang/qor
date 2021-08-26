@@ -42,7 +42,7 @@ local isempty = table.isempty
                 or
                 function(tab)
                    local empty = true
-                   for _, __ in pairs(tab) do
+                   for _, __ in next, tab, nil do
                       empty = false
                       break
                    end
@@ -74,6 +74,24 @@ function cluster.Meta(Meta)
    error "cannot make metatable"
 end
 #/lua
+
+
+** __meta
+
+The meta metatable.
+
+Index looks up symbol resolution, such that on a self-indexed table, the
+metafields and metamethods are available.  While this is untrue of a table
+in which =__index= does not point to itself.
+
+The cluster word =meta= will therefore post-copy out of a table called
+=__meta=, if such a metametatable should happen to exist as the rvalue of
+the =__meta= field.
+
+Valid keys are only strings starting with a double underscore.  Valid values
+would tend to be best thought of as tables and functions, with booleans
+playing their usual role.  To put a point upon it, rules are not imposed here.
+
 
 
 *** super(field)
