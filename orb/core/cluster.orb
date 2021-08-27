@@ -78,7 +78,7 @@ function cluster.Meta(Meta)
       _M.__index = _M
       return _M
    end
-   error "cannot make metatable from type" .. type(Meta)
+   error ("cannot make metatable from type" .. type(Meta))
 end
 #/lua
 
