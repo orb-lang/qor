@@ -58,8 +58,15 @@ function cluster.Meta(Meta)
             tab[field] = value
          end
       end
+      if Meta.__meta then
+         tab.__meta = tab.__meta or {}
+         for _, __ in next, Meta.__meta, nil do
+            tab.__meta[_] = __
+         end
+      end
       tab.__index = tab
       return setmetatable(tab, Meta)
+
    elseif Meta
       and type(Meta) == 'table'
       and isempty(Meta) then
@@ -71,7 +78,7 @@ function cluster.Meta(Meta)
       _M.__index = _M
       return _M
    end
-   error "cannot make metatable"
+   error "cannot make metatable from type" .. type(Meta)
 end
 #/lua
 
