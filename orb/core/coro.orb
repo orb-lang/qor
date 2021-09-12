@@ -70,7 +70,7 @@ called.
 
 An example:
 
-#!lua-example
+#!lua #nk #example
 local tab = {1,2,3,4}
 local cog = coro.wrapgen(
             function(t)
@@ -81,7 +81,7 @@ local cog = coro.wrapgen(
 local iter = cog()
 local new_tab = coro.collect(iter)
 -- new_tab = {1,2,3,4}
-#/lua-example
+#/lua
 
 Note that each call to =cog= will generate a fresh iterator, and that due to
 Lua's semantics, tables (and userdata) remain mutable, e.g. an =insert(tab,5)=
@@ -91,6 +91,9 @@ Also, any closure with mutable state will be in whatever state the next
 generator finds it when a new wrapped coroutine is generated.  Providing
 genuinely immutable semantics is difficult, expensive, and impossible in the
 general case (that is, including userdata).
+
+The specific case is at least no more expensive than it has to be, quipu being
+what it is.
 
 This pattern may be used to provide some of the additional functionality of
 continuations; if a coroutine is a one-shot continuation, this is a one-shot
@@ -121,6 +124,7 @@ function coro.cogen(fn, ...)
    end
 end
 #/lua
+
 
 *** fire(co, ...)
 
