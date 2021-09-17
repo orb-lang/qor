@@ -1,26 +1,26 @@
 # Print
 
 
-  String manipulation libraries for printing.
+  String manipulation libraries for printing\.
 
 
 ```lua
 Print = {}
 ```
-#### Print.breakascii(str, width)
-
-Breaks a string into lines of up to ``width`` characters, attempting to do so at
-word boundaries, but falling back to a hard chop if this is not possible.
-Will never produce a line less than half the maximum length (other than the
-last line, of course). Assumes no preexisting newlines in the string.
 
 
-Answers the wrapped string, plus the height and width required to display it
-(the number of lines, and the length of the longest line).
+#### Print\.breakascii\(str, width\)
 
+Breaks a string into lines of up to `width` characters, attempting to do so at
+word boundaries, but falling back to a hard chop if this is not possible\.
+Will never produce a line less than half the maximum length \(other than the
+last line, of course\)\. Assumes no preexisting newlines in the string\.
 
+Answers the wrapped string, plus the height and width required to display itthe number of lines, and the length of the longest line\)\.
+
+\(
 Doing this with utf8 in the mix is harder, and we can get away with
-ASCII-only sometimes...
+ASCII\-only sometimes\.\.\.
 
 ```lua
 local concat = assert(table.concat)
@@ -74,6 +74,8 @@ function Print.breakascii(str, width)
    return concat(lines, "\n"), #lines, actual_width
 end
 ```
+
+
 ```lua
 function Print.center(str, width)
    local diff = width - #str
@@ -86,6 +88,8 @@ function Print.center(str, width)
    return  (" "):rep(lmargin) .. str .. (" "):rep(rmargin)
 end
 ```
+
+
 ```lua
 return Print
 ```

@@ -1,23 +1,25 @@
 # Module
 
-Tools for dealing with modules.
+Tools for dealing with modules\.
 
 
 ```lua
 local Mod = {}
 ```
+
 ```lua
 
 local assert = assert(require "core:core/_base" . assertfmt)
 local require, pack, unpack = assert(require), assert(pack), assert(unpack)
 ```
-### import(req_str, ...)
-
-This is something like an ``import`` statement from other dynamic languages.
 
 
-The first parameter is a ``require`` string, and the rest are fields from the
-return value to assert and return.
+### import\(req\_str, \.\.\.\)
+
+This is something like an `import` statement from other dynamic languages\.
+
+The first parameter is a `require` string, and the rest are fields from the
+return value to assert and return\.
 
 ```lua
 function Mod.import(req_str, ...)
@@ -30,9 +32,11 @@ function Mod.import(req_str, ...)
    return unpack(exports)
 end
 ```
+
+
 ### request
 
-The optional veresion of ``require``.
+The optional veresion of `require`\.
 
 ```lua
 local pcall = assert(pcall)
@@ -46,6 +50,7 @@ function Mod.request(module)
    end
 end
 ```
+
 ```lua
 return Mod
 ```

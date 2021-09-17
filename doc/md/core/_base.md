@@ -2,19 +2,20 @@
 
 
 This contains parts of the core module system which are used within the core
-module system.
-
+module system\.
 
 Nothing in this module should be invoked directly, except by core; everything
-in it is attached to one of the other submodules.
+in it is attached to one of the other submodules\.
 
 ```lua
 local _base = {}
 ```
-### thunk(fn, ...)
+
+
+### thunk\(fn, \.\.\.\)
 
 Returns a function which, called, will call the function with the given
-arguments.
+arguments\.
 
 ```lua
 function _base.thunk(fn, ...)
@@ -24,7 +25,9 @@ function _base.thunk(fn, ...)
    end
 end
 ```
-### assertfmt(pred, msg, ...)
+
+
+### assertfmt\(pred, msg, \.\.\.\)
 
 ```lua
 local format = assert(string.format)
@@ -37,10 +40,12 @@ function _base.assertfmt(pred, msg, ...)
    end
 end
 ```
+
+
 ### iscallable
 
-Defined in both ``table`` and ``fn``, since the arguments returning true are one
-or the other of these.
+Defined in both `table` and `fn`, since the arguments returning true are one
+or the other of these\.
 
 ```lua
 function _base.iscallable(val)
@@ -54,6 +59,7 @@ function _base.iscallable(val)
    return false
 end
 ```
+
 ```lua
 return _base
 ```

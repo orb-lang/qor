@@ -1,6 +1,6 @@
 # Debug
 
-Extensions to the debug library.
+Extensions to the debug library\.
 
 ```lua
 local Debug = {}
@@ -9,13 +9,14 @@ for k,v in pairs(assert(debug)) do
    Debug[k] = v
 end
 ```
-### debug.findrefs(val)
-
-Finds every instance of a given value, anywhere in the code.
 
 
-This is not intended to be fast, although much like anti_G, it's practically
-instant. But I wouldn't use it in a hot loop or anything like that.
+### debug\.findrefs\(val\)
+
+Finds every instance of a given value, anywhere in the code\.
+
+This is not intended to be fast, although much like anti\_G, it's practically
+instant\. But I wouldn't use it in a hot loop or anything like that\.
 
 ```lua
 local getupvalue, getinfo = assert(debug.getupvalue), assert(debug.getinfo)
@@ -78,6 +79,8 @@ function Debug.findrefs(val)
    return unpack(_findrefs({n = 0}, val, dupes, getfenv(1)))
 end
 ```
+
+
 ```lua
 return Debug
 ```
