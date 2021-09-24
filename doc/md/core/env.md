@@ -1,11 +1,12 @@
-
-# Environments
+#\* Environments
 
 
   Functions to create and introspect upon LuaJIT `fenv`s\.
 
 
 ```lua
+local next = assert(next) -- !
+
 local Env = {}
 function Env.fenv(...)
    local _env = {}

@@ -5,6 +5,7 @@
 
 
 
+local next = assert(next) -- !
 
 local Env = {}
 function Env.fenv(...)
