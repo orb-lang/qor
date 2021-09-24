@@ -17,20 +17,21 @@
 local mods = {}
 local core = {}
 local insert = assert(table.insert)
-insert(mods, require "core:core/cluster")
-insert(mods, require "core:core/coro")
-insert(mods, require "core:core/fn")
-insert(mods, require "core:core/math")
-insert(mods, require "core:core/meta")
-insert(mods, require "core:core/module")
-insert(mods, require "core:core/string")
-insert(mods, require "core:core/table")
-insert(mods, require "core:core/thread")
 
-for _, mod in ipairs(mods) do
-   for k,v in pairs(mod) do
-      core[k] = v
-   end
+mods[require "core:core/cluster"] =  'core'
+mods[require "core:core/coro"] =  'coro'
+mods[require "core:core/fn"] =  'fn'
+mods[require "core:core/math"] =  'math'
+mods[require "core:core/meta"] =  'meta'
+mods[require "core:core/module"] =  'module'
+mods[require "core:core/string"] =  'string'
+mods[require "core:core/table"] =  'table'
+mods[require "core:core/thread"] =  'thread'
+mods[require "core:core/env"] =  'env'
+
+for k, v in pairs(mods) do
+   core[v] = k
 end
+
 return core
 
