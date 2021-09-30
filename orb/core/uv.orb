@@ -1,0 +1,40 @@
+* UV
+
+
+  A core library extending [[libuv][httk://]], specifically the [[luv]
+[httk://]] bindings.
+
+#!lua
+local assert = assert or error "no assert"
+
+local Uv = {}
+
+local uv = assert(require "luv")
+#/lua
+
+
+*** Uv.deferby(event, ms)
+
+
+
+#!lua
+function Uv.deferby(event, ms)
+   ms =  ms or 0
+   local timer = uv.new_timer()
+
+   local _event = function()
+      event()
+      uv.timer_stop(timer)
+      uv.close(timer)
+   end
+
+   uv.timer_start(timer, ms, 0, _event)
+
+   return;
+end
+#/lua
+
+
+#!lua
+return Uv
+#/lua
