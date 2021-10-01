@@ -441,6 +441,31 @@ end
 ```
 
 
+### keysort\(a, b\)
+
+Sort callback function that puts strings first, numbers next, and everything
+else at the end in no particular order\. Used by [https://gitlab.com/special-circumstance/repr/-/blob/trunk/doc/md/tabulate.md](https://gitlab.com/special-circumstance/repr/-/blob/trunk/doc/md/tabulate.md) to sort
+table keys\.
+
+```lua
+function Tab.keysort(a, b)
+   if (type(a) == 'string' and type(b) == 'string')
+      or (type(a) == 'number' and type(b) == 'number') then
+      return a < b
+   elseif type(a) == 'number' and type(b) == 'string' then
+      return false
+   elseif type(a) == 'string' and type(b) == 'number' then
+      return true
+   elseif type(a) == 'string' or type(a) == 'number' then
+      -- we want these tags at the bottom
+      return true
+   else
+      return false
+   end
+end
+```
+
+
 ### reverse\(tab\)
 
 Reverses \(only\) the array portion of a table, returning a new table\.
