@@ -100,6 +100,23 @@ would tend to be best thought of as tables and functions, with booleans
 playing their usual role.  To put a point upon it, rules are not imposed here.
 
 
+*** constructor(mt, new)
+
+Wraps up a module metatable in a callable-table-style constructor, assigning
+`idEst` appropriately on the metatable. `new` is assigned to `mt.__call`, or
+if nil, one is assumed to already be present.
+
+#!lua
+function cluster.constructor(mt, new)
+   if new then
+      mt.__call = new
+   end
+   local constructor = setmetatable({}, mt)
+   mt.idEst = constructor
+   return constructor
+end
+#/lua
+
 
 *** super(field)
 
@@ -107,6 +124,11 @@ playing their usual role.  To put a point upon it, rules are not imposed here.
 from the shadowed field.
 
 Invoked as =obj :super 'field' (params)=.
+
+Deprecated--does not function properly with multi-level hierarchies, as lookup
+needs to start with the superclass of the class in which a method was
+*declared*, and we have no way to determine that from just the instance
+itself.
 
 #!lua
 --| if =fn= exists, bind fn(obj, ...)
@@ -143,6 +165,7 @@ function cluster.super(obj, field)
    return nil
 end
 #/lua
+
 
 #!lua
 return cluster

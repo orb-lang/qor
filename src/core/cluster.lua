@@ -107,6 +107,28 @@ end
 
 
 
+function cluster.constructor(mt, new)
+   if new then
+      mt.__call = new
+   end
+   local constructor = setmetatable({}, mt)
+   mt.idEst = constructor
+   return constructor
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 --| if =fn= exists, bind fn(obj, ...)
@@ -142,6 +164,7 @@ function cluster.super(obj, field)
    -- meaningfully figure out what to do
    return nil
 end
+
 
 
 
