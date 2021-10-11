@@ -35,6 +35,9 @@ end
 This is our default pattern for single inheritance with transference of
 metamethods.
 
+
+***** prerequisites
+
 #!lua
 local sub = assert(string.sub)
 
@@ -48,7 +51,14 @@ local isempty = table.isempty
                    end
                    return empty
                 end
+#/lua
 
+Due to the multi-pattern nature of the function, and its centrality to Cluster,
+we break =Meta= into sub-blocks.
+
+The first polymorphism is =⟨Meta & Meta.__index⟩=:
+
+#!lua
 function cluster.Meta(Meta)
    if Meta and Meta.__index then
       -- inherit
@@ -58,32 +68,10 @@ function cluster.Meta(Meta)
             tab[field] = value
          end
       end
-      if Meta.__meta then
-         tab.__meta = tab.__meta or {}
-         for _, __ in next, Meta.__meta, nil do
-            tab.__meta[_] = __
-         end
-      end
-      tab.__index = tab
-      return setmetatable(tab, Meta)
-
-   elseif Meta
-      and type(Meta) == 'table'
-      and isempty(Meta) then
-      -- decorate
-      Meta.__index = Meta
-      return Meta
-   elseif not Meta then
-      local _M = {}
-      _M.__index = _M
-      return _M
-   end
-   error ("cannot make metatable from type" .. type(Meta))
-end
 #/lua
 
 
-** __meta
+**** __meta: =⟨Meta & Meta.__meta⟩=
 
 The meta metatable.
 
@@ -99,6 +87,37 @@ Valid keys are only strings starting with a double underscore.  Valid values
 would tend to be best thought of as tables and functions, with booleans
 playing their usual role.  To put a point upon it, rules are not imposed here.
 
+#!lua
+      if Meta.__meta then
+         tab.__meta = tab.__meta or {}
+         for _, __ in next, Meta.__meta, nil do
+            tab.__meta[_] = __
+         end
+      end
+      tab.__index = tab
+      return setmetatable(tab, Meta)
+#/lua
+
+
+**** =⟨Meta: table & Meta {}⟩ | ¬ Meta (∅)=
+
+Decorator or generator.
+
+#!lua
+   elseif Meta
+      and type(Meta) == 'table'
+      and isempty(Meta) then
+      -- decorate
+      Meta.__index = Meta
+      return Meta
+   elseif not Meta then
+      local _M = {}
+      _M.__index = _M
+      return _M
+   end
+   error ("cannot make metatable from type" .. type(Meta))
+end
+#/lua
 
 
 *** super(field)
