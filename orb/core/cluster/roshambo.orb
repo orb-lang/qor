@@ -40,20 +40,24 @@ Roshambo is always decisive.
 
 #!lua
 local Set = require "set:set"
+local s   = require "status:status"
+s.verbose = true
+#/lua
 
---[[
+#!lua #noKnit #example
 roshambo = {}
 
-roshambo._beats = { rock = Set{"scissors"},
-             paper = Set{"rock"},
-             scissors = Set{"paper"} }
---]]
+roshambo._beats = { rock     = Set {"scissors"},
+                    paper    = Set {"rock"},
+                    scissors = Set {"paper"} }
+#/lua
 
---- declares a victor by fiat.
--- @function roshambo:beats
--- @within methods
--- @param champ the value which wins
--- @param loser the value which loses
+
+*** beats(roshambo, champ, loser)
+
+Declares a victor by fiat.
+
+#!lua
 local function beats(roshambo, champ, loser)
    --needs check for opposite condition,
    --which is nilled out.
@@ -72,8 +76,12 @@ local function beats(roshambo, champ, loser)
    roshambo._beats[champ] = champion
    roshambo:pr(champ.." beats "..tostring(roshambo._beats[champ]))
 end
+#/lua
 
 
+*** duel(roshambo, champ, challenge)
+
+#!lua
 local function duel(roshambo,champ,challenge)
    if roshambo._duel_with then
       roshambo:pr "it's a duel!"
@@ -86,52 +94,57 @@ local function duel(roshambo,champ,challenge)
       return champ, challenge
    end
 end
+#/lua
 
---- sets a function for dueling
--- @function duel_with
--- @within methods
--- @param fn `λ(roshambo, champ, challenge)
+
+*** duel_with(roshambo, fn)
+
+Sets a function for dueling.
+
+-- @param fn =λ(roshambo, champ, challenge)=
 -- -> winner, loser`
+
+#!lua
 local function duel_with(roshambo, fn)
    roshambo._duel_with = fn
 end
+#/lua
 
 
---- conducts combat between values
--- @function fight
--- @within methods
--- @param champ will win by fiat
--- @param challenge will lose by fiat
--- @return the victor
--- @return the loser
+*** fight(roshambo, champ, challenge)
+
+Conducts combat between values.
+
+#!lua
 local function fight(roshambo, champ, challenge)
    if roshambo._beats[champ] then
-      if roshambo._beats[champ][challenge] then
+      if roshambo._beats[champ](challenge) then
           roshambo:pr(tostring(champ).." wins")
           return champ, challenge
       elseif roshambo._beats[challenge] then
-         if roshambo._beats[challenge][champ] then
+         if roshambo._beats[challenge](champ) then
             roshambo:pr(tostring(challenge).." wins")
             return challenge, champ
          end
       else --duel here
-         roshambo:pr(tostring(challenge).." not found")
+         s:verb(tostring(challenge) .. " not found")
          return duel(roshambo,champ,challenge)
       end
    else --duel here as well
-      roshambo:pr(tostring(champ).." not found")
+      s:verb(tostring(champ).." not found")
       return duel(roshambo, champ, challenge)
    end
 end
+#/lua
 
---- provides a sorting function using Roshambo
--- @function sort
--- @within methods
--- @param champ returns true if victor
--- @param challenge returns false if victor
--- @return boolean
+
+*** roshambo_sort(roshambo, champ, challenge)
+
+Provides a sorting function using Roshambo.
+
+#!lua
 function roshambo_sort(roshambo, champ, challenge)
-   local victor = fight(roshambo,champ,challenge)
+   local victor = fight(roshambo, champ, challenge)
    return victor == champ and true or false
 end
 
@@ -169,6 +182,8 @@ local function Roshambo(init)
    rosh.foo = "bar"
    return rosh
 end
+#/lua
 
+#!lua
 return Roshambo
 #/lua
