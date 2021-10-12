@@ -27,6 +27,7 @@ insert(mods, require "core:core/string")
 insert(mods, require "core:core/table")
 insert(mods, require "core:core/thread")
 insert(mods, require "core:core/env")
+insert(mods, require "core:core/uv")
 
 for _, mod in ipairs(mods) do
    for k,v in pairs(mod) do

@@ -114,5 +114,39 @@ end
 
 
 
+
+local function dispatchmessage(actor, msg)
+   while msg do
+      -- #todo replace this with
+      -- construction-time translation to nested message?
+
+      -- handle recursive case first
+      if msg.message then
+         actor :dispatchmessage(msg.message)
+         return actor
+      end
+
+      if msg.sendto then
+         actor = actor[msg.sendto]
+      elseif msg.property then
+         actor = actor[msg.property]
+      elseif msg.call == true then
+         actor = actor(unpack(msg))
+      elseif msg.call then
+         actor = actor[msg.call](unpack(msg))
+      elseif msg.method then
+         actor = actor[msg.method](actor, unpack(msg))
+      else
+         error("Message must have one of property, call, or method")
+      end
+      msg = msg.message
+   end
+   return actor
+end
+
+
+
+
+
 return act
 

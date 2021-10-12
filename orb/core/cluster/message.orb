@@ -1,9 +1,16 @@
 * Message
 
 
-  We'll want a metatable and constructor here, and Messages should be
-read-only after construction.
+Reifies a statement as a Lua table.
 
+Messages are read-only, with an open-ended API which will be incrementally
+versioned from 1.
+
+
+
+*** Versioning
+
+<<tk>>
 
 
 **** imports
@@ -23,36 +30,6 @@ local readOnly = assert(core.readOnly)
 local _Message = meta {}
 #/lua
 
-
-*** Message.mold(msg)
-
-  Confirms validity of a Message, returning one of =(msg, check)= or
-=(nil, check)=.
-
-*Very* much an open question how this works.
-
-#!lua
-local _Message_fields = {
-   'method'  = true,
-   'message' = true,
-   'sendto'  = true,
-   'call'    = true,
-}
-#/lua
-
-
-*** new(msg)
-
-#!lua
-local function new(msg)
-   assert(type(msg) == 'table', "#1 must be a table")
-   local Msg = {}
-   for k, v in pairs(msg) do
-      Msg[k] = v
-   end
-   return readOnly(setmeta(Msg, Message))
-end
-#/lua
 
 *** Message API
 
@@ -97,94 +74,55 @@ For a request for action we need some of:
 - n:  Already mentioned, but for completeness, an integer >= 0 which specifies
       the number of parameters in the array portion of the Message.
 
-> DS: Why have =sendto= when we already need a mechanism to decide who even
->     gets a message in the first place? (At its simplest this is just called
->     "knowing who's at the other end of a particular queue", and that may be
->     sufficient.) This is something of a rhetorical question--I can see
->     situations where we'd use it, but it's usually going to be a Law of
->     Demeter violation, and frankly I'd tend towards leaving it out until we
->     actually need it.
 
-We'll need it immediately, when messages to modeS need to go to Historian.
+*** validate(msg : ?Message) -> msg : Message | (nil, reason : string)
 
-DS: Right, I was putting a lot on "a mechanism to decide who even gets a
-message in the first place" without realizing that this basically *is* that
-mechanism. I do wonder how it interacts with Mailman, and especially my notion
-of a MIMO Mailman with named "boxes". We certainly want to make sure that if
-there's more than one way to send a message to someone, you identify them the
-same way across the board.
+Confirms that the putative Message is using the API in a conformant style.
 
->
->     It also seems like there's a lot of redundancy between =method=,
->     =sendto=, =message= and =call=. First off we could just use ==method =
->     "__call"== for that case. Strictly speaking this is ambiguous between a
->     function property in slot =__call= and a true metamethod, but (a) so
->     many of our metatables are self-indexed that there is usually no
->     difference, and (b) if there is a difference and you care, Something Is
->     Wrong, please don't. So I'd be fine with just special-casing that if the
->     method name is "__call" we just call the receiver. Or not, this is
->     orthogonal to the other simplification I'm suggesting.
+#!lua
+local function validate(msg)
+   -- table?
+   if not type(msg) == 'table' then
+      return nil, "message is not a table!"
+   end
+
+   -- params?
+   if msg.n or #msg > 0 then
+      if not msg.method or msg.call then
+         return nil, "arguments provided for un-callable message!"
+      end
+   end
+
+   if msg.call then
+      if not type(msg.call) == 'string' or msg.call == true then
+         return nil, "message.call not a string or =true=!"
+      end
+   end
+
+   if msg.message then
+      return validate(msg.message)
+   end
+
+   return msg
+end
+#/lua
+
+
+*** new(msg)
+
+#!lua
+local function new(msg)
+   assert(type(msg) == 'table', "#1 must be a table")
+   local Msg = {}
+   for k, v in pairs(msg) do
+      Msg[k] = v
+   end
+   return readOnly(setmeta(Msg, Message))
+end
+#/lua
 
 A message is =target:message(...)=, a call is =target.call(...)= or if call is
 =true=, it's =target(...)=.
-
-As you point out, conflating calling with a method via =__call= gets mixed up
-with whether the metatable is a self-table, so I'd rather have a mechanism
-which works regardless of the minutiae of how we set up the instance.
-
-DS: Right, non-method function calls. Yeah, in that case we need both so might
-as well also disambiguate =target:__call(...)= from =target(...)=.
-
-At that point though I would do:
-
-- property: Just retrieve a property. No parameters allowed in this case.
-            =={ property = "foo" }== -> =target.foo=.
-- method: Call a method. =={ method = "foo", "bar" }== -> =target:foo("bar")=.
-- call: Call a function (or the receiver itself if ==call = true==).
-        =={ call = "foo", "bar" }== -> =target.foo("bar")=
-
-No =sendto=, handle that with a nested message like
-=={ property = "foo", message = { method = "bar", n = 1, "baz" } }==.
-
-Alternatively, have =name= (a symbol) and =action= (one of {"property",
-"call", "method"). This is convenient for implementation (we always need to
-retrieve something, it's convenient to alsways store it under the same key)
-but yes, it is a little string-ly typed.
-
->
->     That being, replace =sendto= and =message= with something like
->     =callpath= or =sendpath=, which is an array-table of keys to traverse in
->     order before calling the =method=. So =={ method = "baz", path = {
->     "foo", "bar" }}== would ultimately result in
->     =receiver.foo.bar.baz(...)=. But also, per my first paragraph, I would
->     tend to leave this out until we actually need it--indeed until we need
->     it *more than once*, the first time I would just write a forwarder
->     function on the receiver itself.
-
-I considered and rejected that architecture.
-
-Each target in a call path needs the same flexibility as the receiver of the
-message.  The parsimonious way to handle that is to pass an entire Message in
-the case where the primary receiver is forwarding the message to an Actor in
-its call heirarchy.
-
-We're going to want to bake message dispatch into the class definition of an
-Actor, they're all going to be able to receive them.  So it will automatically
-unwrap the envelope and dispatch the Message.
-
-DS: Right, need nesting to be able to handle the full range of possibilities.
-I updated the description of =message=, above.
-
-As an additional affordance, we could allow...well, see above, I'm thinking we
-don't actually need =sendto=, but we could allow it anyway *at construction
-time*, and allow it to be a dotted path, and expand that into a nested message
-like:
-
-#!lua #noKnit
-{ sendto = "foo.bar", method = "baz" }
--- becomes:
-{ property = "foo", message = { property = "bar", message = { method = "baz" }}}
-#/lua
 
 -----
 
@@ -202,8 +140,6 @@ working on this one for awhile to get it right.
            implications, in terms of wanting an Actor base class which knows
            its own name, and can craft Messages which provide that without
            explicitly adding it as a parameter.
-
-> DS: +1 this is good.
 
 - reply:  A flag.  When set to =true=, the Actor receiving the message is
           expected to package up the return value of the method call into a
