@@ -17,6 +17,9 @@ versioned from 1.
 
 #!lua
 local core = require "core:core"
+local s = require "status:status"
+
+s.chatty = true
 
 local meta = assert(core.Meta)
 
@@ -28,6 +31,7 @@ local readOnly = assert(core.readOnly)
 
 #!lua
 local _Message = meta {}
+_Message._VERSION = 1
 #/lua
 
 
@@ -79,6 +83,11 @@ For a request for action we need some of:
 
 Confirms that the putative Message is using the API in a conformant style.
 
+Since we have only one validator function and the API number is one, we will
+eschew the extra complexity of checking first the version (after molding the
+argument as a table) and then dispatching from an array collection of
+validators.
+
 #!lua
 local function validate(msg)
    -- table?
@@ -111,13 +120,16 @@ end
 *** new(msg)
 
 #!lua
+local valid = s.chatty and validate or function(a, b) return a, b end
+
+
 local function new(msg)
    assert(type(msg) == 'table', "#1 must be a table")
    local Msg = {}
    for k, v in pairs(msg) do
       Msg[k] = v
    end
-   return readOnly(setmeta(Msg, Message))
+   return valid (readOnly(setmeta(Msg, Message)))
 end
 #/lua
 
@@ -153,39 +165,14 @@ working on this one for awhile to get it right.
           off return values directly, and when that's the case, that's what we
           should do.
 
-> DS: How would this be the case?
-
-@atman: An example of this is the Maestro / Modeselektor coroutine loop.
-        Actor dispatch will always =return= the value of the dispatch: if
-        there's a =reply= flag, it packages those return values into a Message.
-
-When there isn't, as in the coro loop, we have additional logic which handles
-the return values: in this case, we call the dispatch inside =resume=, so
-no need to =pack= and =unpack= the result.
-
-DS: Right, I asked this and then later got clear about the
-synchronous/asynchronous distinction. I'm still not really getting the
-purpose/need for =reply= and =replyto=, honestly. Like, asynchronous messages,
-in my experience, generally don't have "replies". They may prompt the person
-receiving them to need to talk to someone, and that someone might happen to be
-the sender of the original message, thus making it a sort of "reply", but it
-still happens on the initiative of the receiver, rather than by request from
-the original sender.
-
-Also. This interacts with the whole thing of do we have a global Mailman with
-named boxes, or route everything through modeS, or what? Like, it's not
-automatically clear where to *start* when sending a reply--not the receiver,
-but the receiver could itself be many levels deep, and we discussed how the
-nesting thing is useful in that it *hides* that from the ultimate receiver, a
-message looks the same no matter what path it took to get there.
 
 - replyto:  I don't love this name, but =returnto= isn't great either, so it
             will do for a discussion.  The default reply is back to the sender,
             but the payload might not be intended directly for the sender, but
             rather someone living on one of his slots.
 
-> DS: I would YAGNI this for now, and implement it as =replypath= analogous with
-   =sendpath= if/when we need it.
+> @daniels: I would YAGNI this for now, and implement it as =replypath=
+   analogous with =sendpath= if/when we need it.
 
 @atman: Everything in this section is YAGNI. It's a draft.
 
@@ -199,38 +186,6 @@ The intention here is that =sender= is used to route the reply Message, and
 =replyto= becomes =sendto= in the reply (when present).  That gets us one
 level deep, and only covers the case where the reply Message goes back to the
 Actor who sent the first Message.
-
-> DS: So a function call and return is fundamentally asymmetric. The caller
->     needs to know who they're talking to and get everything in order, the
->     callee just offers the return value up to the world without knowing who
->     it's going to. With an asynchronous messaging system, fundamentally
->     every message has to know its receiver, which means in order to reply,
->     you need to know the sender of a message. This is great so far.
->
->     But at that point, what makes a reply different from any other message?
->     Seems like...nothing, really? And when the reply gets back to its
->     sender, how does the sender know what to do with it? We could route all
->     "replies" through a single =_dispatchReply= function or something, but
->     that seems inferior to just...receiving new messages that happen to be
->     related to one that was sent earlier. In which case there's no need for
->     =ret=, it's just another message.
->
->     So. I would suggest, for now, that we start with =sender= (and the
->     implementation on Agent that you suggested to handle it automatically),
->     and any message that needs a reply, well, the receiver just sends an
->     appropriate message back. If we start seeing a lot of uses of this
->     pattern, and if for instance different senders of the same message want
->     different replies, then I would suggest making =reply= a sort of
->     "message prototype", a Message with everything filled in except the
->     sender, receiver, and arguments, which the reply-er will finish filling
->     in and send back. That takes care of all the nuances of where it goes
->     without adding any new fields.
->
->     All that said, also see below about how this interacts with the
->     coroutine loop, which suddenly *isn't* asynchronous.
-
-@atman: good points.
-
 
 We can and should extend the protocol when we have more complex routing, but
 we should also avoid this!  Abstractions should pull their weight, and we
