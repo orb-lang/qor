@@ -31,6 +31,7 @@ local readOnly = assert(core.readOnly)
 
 
 local _Message = meta {}
+
 _Message._VERSION = 1
 
 
@@ -89,6 +90,8 @@ _Message._VERSION = 1
 
 
 
+assert(true)
+
 local function validate(msg)
    -- table?
    if not type(msg) == 'table' then
@@ -97,6 +100,9 @@ local function validate(msg)
 
    -- params?
    if msg.n or #msg > 0 then
+      if not msg.n then
+         return nil, "arguments provided without .n field!"
+      end
       if not msg.method or msg.call then
          return nil, "arguments provided for un-callable message!"
       end
@@ -131,4 +137,82 @@ local function new(msg)
    end
    return valid (readOnly(setmeta(Msg, Message)))
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+return new
 

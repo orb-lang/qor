@@ -31,6 +31,7 @@ local readOnly = assert(core.readOnly)
 
 ```lua
 local _Message = meta {}
+
 _Message._VERSION = 1
 ```
 
@@ -69,9 +70,9 @@ For a request for action we need some of:
 
 
 - message:  A Message which is dispatched to whatever is returned from
-    dispatching **this** message\. In other words, `{ call = "foo",
-    message = { method = "bar", "baz" } }` ultimately evaluates to
-    `target.foo():bar("baz")`\.  These may be nested arbitrarily deep
+    dispatching **this** message\. In other words, `{ call = "foo", ultimately evaluates to
+    
+    message = { method = "bar", "baz" } }`           `target.foo():bar("baz")`\.  These may be nested arbitrarily deep
     to produce a chain of calls\.
 
 
@@ -94,6 +95,8 @@ argument as a table\) and then dispatching from an array collection of
 validators\.
 
 ```lua
+assert(true)
+
 local function validate(msg)
    -- table?
    if not type(msg) == 'table' then
@@ -102,6 +105,9 @@ local function validate(msg)
 
    -- params?
    if msg.n or #msg > 0 then
+      if not msg.n then
+         return nil, "arguments provided without .n field!"
+      end
       if not msg.method or msg.call then
          return nil, "arguments provided for un-callable message!"
       end
@@ -215,3 +221,7 @@ So let's take a look at the Maestro action loop\.  At some point the Message
 specific parts of this document will get broken out into a distinct Message
 project, for now, these topics are related in a "what happens next" sort of
 way, more than anything\.
+
+```lua
+return new
+```
