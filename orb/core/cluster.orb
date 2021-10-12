@@ -35,9 +35,6 @@ end
 This is our default pattern for single inheritance with transference of
 metamethods.
 
-
-***** prerequisites
-
 #!lua
 local sub = assert(string.sub)
 
@@ -51,14 +48,7 @@ local isempty = table.isempty
                    end
                    return empty
                 end
-#/lua
 
-Due to the multi-pattern nature of the function, and its centrality to Cluster,
-we break =Meta= into sub-blocks.
-
-The first polymorphism is =⟨Meta & Meta.__index⟩=:
-
-#!lua
 function cluster.Meta(Meta)
    if Meta and Meta.__index then
       -- inherit
@@ -68,26 +58,6 @@ function cluster.Meta(Meta)
             tab[field] = value
          end
       end
-#/lua
-
-
-**** __meta: =⟨Meta & Meta.__meta⟩=
-
-The meta metatable.
-
-Index looks up symbol resolution, such that on a self-indexed table, the
-metafields and metamethods are available.  While this is untrue of a table
-in which =__index= does not point to itself.
-
-The cluster word =meta= will therefore post-copy out of a table called
-=__meta=, if such a metametatable should happen to exist as the rvalue of
-the =__meta= field.
-
-Valid keys are only strings starting with a double underscore.  Valid values
-would tend to be best thought of as tables and functions, with booleans
-playing their usual role.  To put a point upon it, rules are not imposed here.
-
-#!lua
       if Meta.__meta then
          tab.__meta = tab.__meta or {}
          for _, __ in next, Meta.__meta, nil do
@@ -96,14 +66,7 @@ playing their usual role.  To put a point upon it, rules are not imposed here.
       end
       tab.__index = tab
       return setmetatable(tab, Meta)
-#/lua
 
-
-**** =⟨Meta: table & Meta {}⟩ | ¬ Meta (∅)=
-
-Decorator or generator.
-
-#!lua
    elseif Meta
       and type(Meta) == 'table'
       and isempty(Meta) then
@@ -120,12 +83,52 @@ end
 #/lua
 
 
+** __meta
+
+The meta metatable.
+
+Index looks up symbol resolution, such that on a self-indexed table, the
+metafields and metamethods are available.  While this is untrue of a table
+in which =__index= does not point to itself.
+
+The cluster word =meta= will therefore post-copy out of a table called
+=__meta=, if such a metametatable should happen to exist as the rvalue of
+the =__meta= field.
+
+Valid keys are only strings starting with a double underscore.  Valid values
+would tend to be best thought of as tables and functions, with booleans
+playing their usual role.  To put a point upon it, rules are not imposed here.
+
+
+*** constructor(mt, new)
+
+Wraps up a module metatable in a callable-table-style constructor, assigning
+`idEst` appropriately on the metatable. `new` is assigned to `mt.__call`, or
+if nil, one is assumed to already be present.
+
+#!lua
+function cluster.constructor(mt, new)
+   if new then
+      mt.__call = new
+   end
+   local constructor = setmetatable({}, mt)
+   mt.idEst = constructor
+   return constructor
+end
+#/lua
+
+
 *** super(field)
 
   A mixin which allows for the accessing of a method up the inheritance chain
 from the shadowed field.
 
 Invoked as =obj :super 'field' (params)=.
+
+Deprecated--does not function properly with multi-level hierarchies, as lookup
+needs to start with the superclass of the class in which a method was
+*declared*, and we have no way to determine that from just the instance
+itself.
 
 #!lua
 --| if =fn= exists, bind fn(obj, ...)
@@ -162,6 +165,7 @@ function cluster.super(obj, field)
    return nil
 end
 #/lua
+
 
 #!lua
 return cluster

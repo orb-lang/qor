@@ -446,6 +446,31 @@ end
 
 
 
+
+
+function Tab.keysort(a, b)
+   if (type(a) == 'string' and type(b) == 'string')
+      or (type(a) == 'number' and type(b) == 'number') then
+      return a < b
+   elseif type(a) == 'number' and type(b) == 'string' then
+      return false
+   elseif type(a) == 'string' and type(b) == 'number' then
+      return true
+   elseif type(a) == 'string' or type(a) == 'number' then
+      -- we want these tags at the bottom
+      return true
+   else
+      return false
+   end
+end
+
+
+
+
+
+
+
+
 function Tab.reverse(tab)
    if type(tab) ~= "table" or #tab == 0 then
       return {}

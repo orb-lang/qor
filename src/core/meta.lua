@@ -2,11 +2,32 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local _base = require "core:core/_base"
+
+
+
+
+
+
 local meta = {}
-
-
-
-
 
 
 
@@ -54,51 +75,6 @@ end
 
 
 
-function meta.inherit(meta)
-  local MT = meta or {}
-  local M = setmetatable({}, MT)
-  M.__index = M
-  local m = setmetatable({}, M)
-  m.__index = m
-  return M, m
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function meta.export(mod, constructor)
-  mod.__call = constructor
-  return setmetatable({}, mod)
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -118,31 +94,6 @@ local function hasmetamethod(mmethod, tab)
 end
 
 meta.hasmetamethod = hasmetamethod
-
-
-
-
-
-
-
-
-
-
-
-
-
-local pairs = assert(pairs)
-
-function meta.endow(Meta)
-   local MC = {}
-   for k, v in pairs(Meta) do
-      MC[k] = v
-   end
-   return MC
-end
-
-
-
 
 
 
