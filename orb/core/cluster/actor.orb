@@ -112,23 +112,22 @@ end
 #/lua
 
 
-** act.dispatchmethod(actor, msg)
+** act.dispatchmessage(actor, msg)
+
+  Dispatches messages according to the [[design document]
+[@helm:design/maestro-and-messages]].
 
 #!lua
+local gmatch = assert(string.gmatch)
 local function dispatchmessage(actor, msg)
    while msg do
-      -- #todo replace this with
-      -- construction-time translation to nested message?
-
-      -- handle recursive case first
-      if msg.message then
-         actor :dispatchmessage(msg.message)
-         return actor
-      end
-
+      -- #todo replace this with construction-time translation to nested message?
       if msg.sendto then
-         actor = actor[msg.sendto]
-      elseif msg.property then
+         for prop in gmatch(msg.sendto, "([^.]+)[.]?") do
+            actor = actor[prop]
+         end
+      end
+      if msg.property then
          actor = actor[msg.property]
       elseif msg.call == true then
          actor = actor(unpack(msg))
@@ -137,12 +136,13 @@ local function dispatchmessage(actor, msg)
       elseif msg.method then
          actor = actor[msg.method](actor, unpack(msg))
       else
-         error("Message must have one of property, call, or method")
+         error("Message must have one of property, call, or method: " .. (require "repr:repr".ts(msg)))
       end
       msg = msg.message
    end
    return actor
 end
+act.dispatchmessage = dispatchmessage
 #/lua
 
 
