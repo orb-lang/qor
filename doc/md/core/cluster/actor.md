@@ -116,9 +116,12 @@ end
 
 ```lua
 local function dispatchmessage(actor, msg)
-   while msg do
-      -- #todo replace this with
-      -- construction-time translation to nested message?
+   local _cyc = {}
+
+   local function _dispatch(actor, msg)
+      -- detect potential cycles
+      if _cyc[msg] then error "cycle in Message" end
+      _cyc[msg] = true
 
       -- handle recursive case first
       if msg.message then
@@ -139,8 +142,10 @@ local function dispatchmessage(actor, msg)
       else
          error("Message must have one of property, call, or method")
       end
-      msg = msg.message
    end
+
+   _dispatch(actor, msg)
+
    return actor
 end
 ```
