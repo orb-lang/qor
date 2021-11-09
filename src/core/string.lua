@@ -44,10 +44,8 @@ String.assertfmt = assertfmt
 
 
 
-io.lines( filename )
-
-local function stringable(is_str)
-   return type(is_str) or hasmetamethod(__tostring)
+function String.stringable(is_str)
+   return type(is_str) -- or hasmetamethod(__tostring)
 end
 
 
