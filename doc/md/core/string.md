@@ -1,6 +1,10 @@
 # String extensions
 
 
+- [ ] \#Todo core\.stringable: type\(str?\) = 'string' or hasmetamethod \_\_tostring
+
+
+
 ```lua
 local String = {}
 ```
@@ -35,6 +39,17 @@ anything else\.
 
 ```lua
 String.assertfmt = assertfmt
+```
+
+
+### stringable\(is\_str\)
+
+```lua
+io.lines( filename )
+
+local function stringable(is_str)
+   return type(is_str) or hasmetamethod(__tostring)
+end
 ```
 
 

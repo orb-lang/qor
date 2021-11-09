@@ -1,5 +1,8 @@
 * String extensions
 
+- [ ] #Todo core.stringable: type(str?) = 'string' or hasmetamethod __tostring
+
+
 
 #!lua
 local String = {}
@@ -35,6 +38,17 @@ anything else.
 
 #!lua
 String.assertfmt = assertfmt
+#/lua
+
+
+*** stringable(is_str)
+
+#!lua
+io.lines( filename )
+
+local function stringable(is_str)
+   return type(is_str) or hasmetamethod(__tostring)
+end
 #/lua
 
 

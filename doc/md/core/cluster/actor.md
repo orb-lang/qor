@@ -112,7 +112,7 @@ end
 ```
 
 
-## act\.dispatchmethod\(actor, msg\)
+## act\.dispatchmessage\(actor, msg\)
 
 ```lua
 local function dispatchmessage(actor, msg)
