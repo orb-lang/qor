@@ -103,7 +103,7 @@ playing their usual role\.  To put a point upon it, rules are not imposed here\.
 ### constructor\(mt, new\)
 
 Wraps up a module metatable in a callable\-table\-style constructor, assigning
-\`idEst\` appropriately on the metatable\. \`new\` is assigned to \`mt\.\_\_call\`, or
+`idEst` appropriately on the metatable\. `new` is assigned to `mt.__call`, or
 if nil, one is assumed to already be present\.
 
 ```lua
@@ -114,6 +114,40 @@ function cluster.constructor(mt, new)
    local constructor = setmetatable({}, mt)
    mt.idEst = constructor
    return constructor
+end
+```
+
+
+### indexafter\(idx\_fn, idx\_super\)
+
+A decorator which returns a closure, suitable for `__index`, which first
+looks up against the function and then against `idx_super`, which can be a
+function or a table\.
+
+For a hotter code path, we detect the type of `idx_super` and return one of
+two closures depending on the nature of the lookup\.
+
+```lua
+function cluster.indexafter(idx_fn, idx_super)
+   if type(idx_super) == 'table' then
+      return function(tab, key)
+         local val = idx_fn(tab, key)
+         if val then
+            return val
+         else
+            return idx_super[key]
+         end
+      end
+   elseif type(idx_super) == 'function' then
+      return function(tab, key)
+         local val = idx_fn(tab, key)
+         if val then
+            return val
+         else
+            return idx_super(tab,key)
+         end
+      end
+   end
 end
 ```
 

@@ -43,9 +43,11 @@ String.assertfmt = assertfmt
 
 *** stringable(is_str)
 
-#!lua
+#!lua #noKnit
+assert(true)
+
 function String.stringable(is_str)
-   return type(is_str) -- or hasmetamethod(__tostring)
+   return type(is_str) == 'string' -- or hasmetamethod(__tostring)
 end
 #/lua
 

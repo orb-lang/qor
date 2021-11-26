@@ -45,8 +45,10 @@ String.assertfmt = assertfmt
 ### stringable\(is\_str\)
 
 ```lua
+assert(true)
+
 function String.stringable(is_str)
-   return type(is_str) -- or hasmetamethod(__tostring)
+   return type(is_str) == 'string' -- or hasmetamethod(__tostring)
 end
 ```
 
