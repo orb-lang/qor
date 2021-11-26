@@ -129,6 +129,40 @@ end
 
 
 
+function cluster.indexafter(idx_fn, idx_super)
+   if type(idx_super) == 'table' then
+      return function(tab, key)
+         local val = idx_fn(tab, key)
+         if val then
+            return val
+         else
+            return idx_super[key]
+         end
+      end
+   elseif type(idx_super) == 'function' then
+      return function(tab, key)
+         local val = idx_fn(tab, key)
+         if val then
+            return val
+         else
+            return idx_super(tab,key)
+         end
+      end
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
