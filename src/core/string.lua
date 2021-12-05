@@ -44,22 +44,13 @@ String.assertfmt = assertfmt
 
 
 
-<<<<<<< HEAD
-function String.stringable(is_str)
-   return type(is_str) == 'string'
-     -- or (type(is_str) == 'table' and hasmetamethod(__tostring))
-end
-||||||| parent of 39c0353... formatting
-function String.stringable(is_str)
-   return type(is_str) -- or hasmetamethod(__tostring)
-end
-=======
 
 
 
 
 
->>>>>>> 39c0353... formatting
+
+
 
 
 

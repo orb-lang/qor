@@ -48,14 +48,9 @@ String.assertfmt = assertfmt
 assert(true)
 
 function String.stringable(is_str)
-<<<<<<< HEAD
    return type(is_str) == 'string'
      -- or (type(is_str) == 'table' and hasmetamethod(__tostring))
-||||||| parent of 39c0353... formatting
-   return type(is_str) -- or hasmetamethod(__tostring)
-=======
-   return type(is_str) == 'string' -- or hasmetamethod(__tostring)
->>>>>>> 39c0353... formatting
+|
 end
 ```
 
