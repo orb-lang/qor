@@ -107,11 +107,18 @@ end
 
 
 
-function cluster.constructor(mt, new)
+
+
+
+function cluster.constructor(mt, new, instance)
+   instance = instance or {}
    if new then
       mt.__call = new
+   elseif not mt.__call then
+      error "nil metatable passed to constructor without __call metamethod"
    end
-   local constructor = setmetatable({}, mt)
+
+   local constructor = setmetatable(instance, mt)
    mt.idEst = constructor
    return constructor
 end
@@ -150,6 +157,41 @@ function cluster.indexafter(idx_fn, idx_super)
    end
 end
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local _instances = setmetatable({}, { __mode = 'k'})
+
+function cluster.instancememo(instance, message)
+   local memos = { [message] = {} }
+   -- grab the method, we're going to need it later
+   local method = instance[message]
+   _instances[instance] = memos
+   local function memo_method(inst, p, ...)
+      local param_set = assert(_instances[inst][message],
+                             "missing instance or message")
+      local results = param_set[p]
+      if results then return unpack(results) end
+
+      results = pack(method(inst, p, ...))
+      param_set[p] = results
+      return unpack(results)
+   end
+   instance[message] = memo_method
+end
 
 
 
