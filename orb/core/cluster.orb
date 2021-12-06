@@ -152,6 +152,50 @@ end
 #/lua
 
 
+*** slotmessage(instance, message, method, reentrant)
+
+This is effectively syntax sugar, which transforms =instance.message.slot(...)=
+into =instance:method("slot", ...)= .
+
+We do it the cheap way, by making up some functions and container tables and
+reusing them.  This means that =slotmessage= is *not reentrant*, and the
+user should not ever do ==local hold = instance.ret == or provide a method
+which yields within a coroutine.
+
+The flag =reentrant= is provided for if and when I want to do this the right
+way instead of the cheap way.  Currently it throws an error if provided.
+
+#!lua-example #noKnit
+-- used to set and find the instance on the indexer
+local UID, METHOD = {}, {}
+
+local function _launcher(launch, ...)
+   local method, obj, slot = launch.method, launch.obj, launch.slot
+   launch.obj, launch.slot, launch.method  = nil, nil, nil
+   return method(obj, slot, ...)
+end
+
+local launch = setmetatable({}, { __call = _launcher })
+
+local function _indexer(tab, key)
+   launch.obj, launch.method = tab[OBJ], tab[METHOD]
+   launch.slot = key
+   return launch
+end
+
+local slot_M = { __index = _indexer,
+                 __newindex = function()
+                                 error "how did this end up an lvalue?"
+                              end }
+
+function cluster.slotmessage(instance, message, method, reentrant)
+   instance[message] = setmetatable({ [UID] = instance,
+                                      [METHOD] = method, }, slot_M)
+end
+
+#/lua-example
+
+
 *** super(field)
 
   A mixin which allows for the accessing of a method up the inheritance chain

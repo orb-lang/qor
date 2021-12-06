@@ -165,6 +165,50 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 --| if =fn= exists, bind fn(obj, ...)
 local function _maybe_bind(obj, fn)
   if not fn then return nil end
