@@ -112,20 +112,14 @@ end
 ```
 
 
-<<<<<<< HEAD
-## act\.dispatchmessage\(actor, msg\)
-||||||| e2eadf6
-## act\.dispatchmethod\(actor, msg\)
-=======
+
 ## act\.dispatchmessage\(actor, msg\)
 
   Dispatches messages according to the [design document](https://gitlab.com/special-circumstance/helm/-/blob/trunk/doc/md/design/maestro-and-messages.md)\.
->>>>>>> a4312a7759b00a047bbc3c04eb410ced6e664755
 
 ```lua
 local gmatch = assert(string.gmatch)
 local function dispatchmessage(actor, msg)
-<<<<<<< HEAD
    local _cyc = {}
 
    local function _dispatch(actor, msg)
@@ -139,21 +133,8 @@ local function dispatchmessage(actor, msg)
          return actor
       end
 
-||||||| e2eadf6
-   while msg do
-      -- #todo replace this with
-      -- construction-time translation to nested message?
 
-      -- handle recursive case first
-      if msg.message then
-         actor :dispatchmessage(msg.message)
-         return actor
-      end
-
-=======
    while msg do
-      -- #todo replace this with construction-time translation to nested message?
->>>>>>> a4312a7759b00a047bbc3c04eb410ced6e664755
       if msg.sendto then
          for prop in gmatch(msg.sendto, "([^.]+)[.]?") do
             actor = actor[prop]

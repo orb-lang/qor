@@ -343,37 +343,6 @@ end
 ```
 
 
-### cycdetect\(fn\)
-
-  Takes a function with the signature `fn(tab, ...)` and returns a function
-which, presuming that the function walks a potentially cyclic tree of tables,
-will error rather than infinitely looping\.
-
-
-```lua
-function fn.cycdetect(fn)
-   local _cyc = {}
-
-   local function fire(tab, trigger, ...)
-      return fire(trigger(tab, ...))
-   end
-
-   local function trigger()
-      assert(type(tab) == 'table', "#1 must be a table")
-      if _cyc[tab] then error "cycle encountered in traversal" end
-      _cyc[tab] = true
-
-   end
-
-   local  function cyc(tab, ...)
-      return fire(tab, trigger, ...)
-   end
-
-   return curry(cyc(fn))
-end
-```
-
-
 ## Errors and asserts
 
 

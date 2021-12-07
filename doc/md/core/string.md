@@ -44,20 +44,13 @@ String.assertfmt = assertfmt
 
 ### stringable\(is\_str\)
 
-
 ```lua
 assert(true)
 
 function String.stringable(is_str)
    return type(is_str) == 'string'
-<<<<<<< HEAD
       or (type(is_str) == 'table' and hasmetamethod(__tostring))
 |
-||||||| de8f75e
-     -- or (type(is_str) == 'table' and hasmetamethod(__tostring))
-=======
-       or (type(is_str) == 'table' and hasmetamethod(__tostring))
->>>>>>> key-value-builder
 end
 ```
 

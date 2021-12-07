@@ -115,7 +115,11 @@ end
 
 
 
-<<<<<<< HEAD
+
+
+
+
+local gmatch = assert(string.gmatch)
 local function dispatchmessage(actor, msg)
    local _cyc = {}
 
@@ -123,20 +127,15 @@ local function dispatchmessage(actor, msg)
       -- detect potential cycles
       if _cyc[msg] then error "cycle in Message" end
       _cyc[msg] = true
-||||||| e2eadf6
-local function dispatchmessage(actor, msg)
+
+      -- handle recursive case first
+      if msg.message then
+         actor :dispatchmessage(msg.message)
+         return actor
+      end
+
+
    while msg do
-      -- #todo replace this with
-      -- construction-time translation to nested message?
-=======
->>>>>>> a4312a7759b00a047bbc3c04eb410ced6e664755
-
-
-
-local gmatch = assert(string.gmatch)
-local function dispatchmessage(actor, msg)
-   while msg do
-      -- #todo replace this with construction-time translation to nested message?
       if msg.sendto then
          for prop in gmatch(msg.sendto, "([^.]+)[.]?") do
             actor = actor[prop]
