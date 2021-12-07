@@ -44,6 +44,7 @@ String.assertfmt = assertfmt
 
 
 
+<<<<<<< HEAD
 
 
 
@@ -51,6 +52,18 @@ String.assertfmt = assertfmt
 
 
 
+||||||| de8f75e
+function String.stringable(is_str)
+   return type(is_str) == 'string'
+     -- or (type(is_str) == 'table' and hasmetamethod(__tostring))
+end
+=======
+
+function String.stringable(is_str)
+   return type(is_str) == 'string'
+       or (type(is_str) == 'table' and hasmetamethod(__tostring))
+end
+>>>>>>> key-value-builder
 
 
 

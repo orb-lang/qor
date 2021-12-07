@@ -140,6 +140,7 @@ end
 
 
 
+<<<<<<< HEAD
 local insert, remove = assert(table.insert), assert(table.remove)
 
 
@@ -245,6 +246,113 @@ end
 
 
 
+||||||| de8f75e
+=======
+local insert, remove = assert(table.insert), assert(table.remove)
+
+
+function cluster.methodchain(method)
+
+   local value_catch = {}
+   local remove = assert(table.remove)
+
+   local function value__call(value_catch, value, ...)
+      method(value_catch[1], value_catch[2], value, ...)
+      value_catch[2] = nil
+      return remove(value_catch)
+   end
+
+   setmetatable(value_catch, { __call = value__call })
+
+   return function (obj, first)
+      insert(value_catch, obj)
+      insert(value_catch, first)
+      return value_catch
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+function cluster.indexafter(idx_fn, idx_super)
+   if type(idx_super) == 'table' then
+      return function(tab, key)
+         local val = idx_fn(tab, key)
+         if val then
+            return val
+         else
+            return idx_super[key]
+         end
+      end
+   elseif type(idx_super) == 'function' then
+      return function(tab, key)
+         local val = idx_fn(tab, key)
+         if val then
+            return val
+         else
+            return idx_super(tab,key)
+         end
+      end
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local _instances = setmetatable({}, { __mode = 'k'})
+
+function cluster.instancememo(instance, message)
+   local memos = { [message] = {} }
+   -- grab the method, we're going to need it later
+   local method = instance[message]
+   _instances[instance] = memos
+   local function memo_method(inst, p, ...)
+      local param_set = assert(_instances[inst][message],
+                             "missing instance or message")
+      local results = param_set[p]
+      if results then return unpack(results) end
+
+      results = pack(method(inst, p, ...))
+      param_set[p] = results
+      return unpack(results)
+   end
+   instance[message] = memo_method
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> key-value-builder
 
 
 

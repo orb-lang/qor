@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 #\* Cluster
+||||||| de8f75e
+# Cluster
+=======
+ \`\* Cluster
+>>>>>>> key-value-builder
 
 
 One of the language\-development goals we have with the Bridge project is to
@@ -100,19 +106,43 @@ would tend to be best thought of as tables and functions, with booleans
 playing their usual role\.  To put a point upon it, rules are not imposed here\.
 
 
+<<<<<<< HEAD
 
 ### constructor\(mt, new, instance?\)
+||||||| de8f75e
+#### constructor\(mt, new\)
+=======
+### constructor\(mt, new, instance?\)
+>>>>>>> key-value-builder
 
 Wraps up a module metatable in a callable\-table\-style constructor, assigning
+<<<<<<< HEAD
+`idEst` appropriately on the metatable\. `new` is assigned to `mt.__call`, or
+if `nil`, we check to make sure one has already been provided\.
+||||||| de8f75e
+\`idEst\` appropriately on the metatable\. \`new\` is assigned to \`mt\.\_\_call\`, or
+if nil, one is assumed to already be present\.
+=======
 `idEst` appropriately on the metatable\. `new` is assigned to `mt.__call`, or
 if `nil`, we check to make sure one has already been provided\.
 
 If `instance` is provided, it is used for the instance, which is otherwise
 created from a fresh table\.
+>>>>>>> key-value-builder
 
+If `instance` is provided, it is used for the instance, which is otherwise
+created from a fresh table\.
+
+<<<<<<< HEAD
 ```lua
 function cluster.constructor(mt, new, instance)
    instance = instance or {}
+||||||| de8f75e
+function cluster.constructor(mt, new)
+=======
+function cluster.constructor(mt, new, instance)
+   instance = instance or {}
+>>>>>>> key-value-builder
    if new then
       mt.__call = new
    elseif not mt.__call then
@@ -139,6 +169,7 @@ might be appreciably faster and worth keeping around for the occasional hot
 loop\.
 
 
+<<<<<<< HEAD
 ```lua
 local insert, remove = assert(table.insert), assert(table.remove)
 
@@ -200,6 +231,151 @@ end
 
 
 ### instancememo\(instance, message\)
+||||||| de8f75e
+=======
+```lua
+local insert, remove = assert(table.insert), assert(table.remove)
+
+
+function cluster.methodchain(method)
+>>>>>>> key-value-builder
+
+<<<<<<< HEAD
+Takes an instance, and a message, and memoizes that particular message, for
+the instance, against the first parameter\.  That is, it will save the return
+values of any call against that method, and key them against the *instance*,
+not the method, returning any prior captured values\.
+||||||| de8f75e
+=======
+   local value_catch = {}
+   local remove = assert(table.remove)
+>>>>>>> key-value-builder
+
+<<<<<<< HEAD
+\#Future
+that when provided, the memo will also check that any keys indicated with
+`key = true` also have the values they had before\.  This also constrains
+those objects to be tables, but is not intended as a type system so much as
+a tripwire indicating that the prior memoized value isn't valid\.
+
+```lua
+local _instances = setmetatable({}, { __mode = 'k'})
+
+function cluster.instancememo(instance, message)
+   local memos = { [message] = {} }
+   -- grab the method, we're going to need it later
+   local method = instance[message]
+   _instances[instance] = memos
+   local function memo_method(inst, p, ...)
+      local param_set = assert(_instances[inst][message],
+                             "missing instance or message")
+      local results = param_set[p]
+      if results then return unpack(results) end
+
+      results = pack(method(inst, p, ...))
+      param_set[p] = results
+      return unpack(results)
+   end
+   instance[message] = memo_method
+end
+```
+||||||| de8f75e
+=======
+   local function value__call(value_catch, value, ...)
+      method(value_catch[1], value_catch[2], value, ...)
+      value_catch[2] = nil
+      return remove(value_catch)
+   end
+
+   setmetatable(value_catch, { __call = value__call })
+>>>>>>> key-value-builder
+
+   return function (obj, first)
+      insert(value_catch, obj)
+      insert(value_catch, first)
+      return value_catch
+   end
+end
+```
+
+<<<<<<< HEAD
+### addsuper\(Meta\)
+||||||| de8f75e
+=======
+### indexafter\(idx\_fn, idx\_super\)
+>>>>>>> key-value-builder
+
+<<<<<<< HEAD
+  An implementation of super\-methods which respects the Lua Meta\-Object
+Protocol\.  This is a metatable decorator which errors out if the index
+heirarchy can't be successfully climbed\.
+||||||| de8f75e
+=======
+A decorator which returns a closure, suitable for `__index`, which first
+looks up against the function and then against `idx_super`, which can be a
+function or a table\.
+>>>>>>> key-value-builder
+
+<<<<<<< HEAD
+On success, it adds a magic method `: super()` which returns a reusable
+container table, which must be called with a message in string form, which is
+looked up against the supertable and bound to the instance object when
+called\.
+||||||| de8f75e
+### super\(field\)
+=======
+For a hotter code path, we detect the type of `idx_super` and return one of
+two closures depending on the nature of the lookup\.
+
+```lua
+function cluster.indexafter(idx_fn, idx_super)
+   if type(idx_super) == 'table' then
+      return function(tab, key)
+         local val = idx_fn(tab, key)
+         if val then
+            return val
+         else
+            return idx_super[key]
+         end
+      end
+   elseif type(idx_super) == 'function' then
+      return function(tab, key)
+         local val = idx_fn(tab, key)
+         if val then
+            return val
+         else
+            return idx_super(tab,key)
+         end
+      end
+   end
+end
+```
+>>>>>>> key-value-builder
+
+<<<<<<< HEAD
+An illustration is in order:
+
+```lua
+local Gizmo = meta(Thing)
+local Widget = meta(Widget)
+super(Widget)
+
+-- ...
+
+new_widget("crankolater") :super 'stock' ()
+```
+||||||| de8f75e
+  A mixin which allows for the accessing of a method up the inheritance chain
+from the shadowed field\.
+=======
+>>>>>>> key-value-builder
+
+<<<<<<< HEAD
+will generate a Widget instance, then call the supertable of
+||||||| de8f75e
+Invoked as `obj :super 'field' (params)`\.
+=======
+### instancememo\(instance, message\)
 
 Takes an instance, and a message, and memoizes that particular message, for
 the instance, against the first parameter\.  That is, it will save the return
@@ -259,6 +435,7 @@ new_widget("crankolater") :super 'stock' ()
 ```
 
 will generate a Widget instance, then call the supertable of
+>>>>>>> key-value-builder
 
 \#Todo
 
