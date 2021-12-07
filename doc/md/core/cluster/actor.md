@@ -132,6 +132,7 @@ local function dispatchmessage(actor, msg)
          actor :dispatchmessage(msg.message)
          return actor
       end
+   end
 
 
    while msg do
