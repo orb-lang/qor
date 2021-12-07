@@ -27,10 +27,10 @@ end
 ## Identity and Membership
 
 
-## Inheritance
+### Inheritance
 
 
-### Meta
+#### Meta
 
 This is our default pattern for single inheritance with transference of
 metamethods\.
@@ -83,7 +83,7 @@ end
 ```
 
 
-## \_\_meta
+#### \_\_meta
 
 The meta metatable\.
 
@@ -100,13 +100,14 @@ would tend to be best thought of as tables and functions, with booleans
 playing their usual role\.  To put a point upon it, rules are not imposed here\.
 
 
-### constructor\(mt, new\)
+#### constructor\(mt, new\)
 
 Wraps up a module metatable in a callable\-table\-style constructor, assigning
 \`idEst\` appropriately on the metatable\. \`new\` is assigned to \`mt\.\_\_call\`, or
 if nil, one is assumed to already be present\.
 
 ```lua
+
 function cluster.constructor(mt, new)
    if new then
       mt.__call = new
@@ -116,6 +117,25 @@ function cluster.constructor(mt, new)
    return constructor
 end
 ```
+
+
+### methodchain\(method\)
+
+
+  Allows for easy application of the pattern
+`obj :message "param" "param" -> obj`\.
+
+This first implementation uses a 'launch table' on a per\-method basis, and
+is not suitable for reentrant use\. I have a plan in mind for this, but want
+the easier to write version first, because well, easier to write, and also
+might be appreciably faster and worth keeping around for the occasional hot
+loop\.
+
+
+
+
+
+
 
 
 ### super\(field\)

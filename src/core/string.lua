@@ -45,7 +45,8 @@ String.assertfmt = assertfmt
 
 
 function String.stringable(is_str)
-   return type(is_str) -- or hasmetamethod(__tostring)
+   return type(is_str) == 'string'
+     -- or (type(is_str) == 'table' and hasmetamethod(__tostring))
 end
 
 

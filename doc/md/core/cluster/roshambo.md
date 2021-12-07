@@ -9,7 +9,7 @@
 >
 > of BSD license
 >
-> copyright 2019 e\.v\.
+> copyright 2021 e\.v\.
 
 
 ## Use
