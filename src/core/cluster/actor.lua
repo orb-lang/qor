@@ -115,6 +115,7 @@ end
 
 
 
+<<<<<<< HEAD
 local function dispatchmessage(actor, msg)
    local _cyc = {}
 
@@ -122,16 +123,26 @@ local function dispatchmessage(actor, msg)
       -- detect potential cycles
       if _cyc[msg] then error "cycle in Message" end
       _cyc[msg] = true
+||||||| e2eadf6
+local function dispatchmessage(actor, msg)
+   while msg do
+      -- #todo replace this with
+      -- construction-time translation to nested message?
+=======
+>>>>>>> a4312a7759b00a047bbc3c04eb410ced6e664755
 
-      -- handle recursive case first
-      if msg.message then
-         actor :dispatchmessage(msg.message)
-         return actor
-      end
 
+
+local gmatch = assert(string.gmatch)
+local function dispatchmessage(actor, msg)
+   while msg do
+      -- #todo replace this with construction-time translation to nested message?
       if msg.sendto then
-         actor = actor[msg.sendto]
-      elseif msg.property then
+         for prop in gmatch(msg.sendto, "([^.]+)[.]?") do
+            actor = actor[prop]
+         end
+      end
+      if msg.property then
          actor = actor[msg.property]
       elseif msg.call == true then
          actor = actor(unpack(msg))
@@ -140,7 +151,7 @@ local function dispatchmessage(actor, msg)
       elseif msg.method then
          actor = actor[msg.method](actor, unpack(msg))
       else
-         error("Message must have one of property, call, or method")
+         error("Message must have one of property, call, or method: " .. (require "repr:repr".ts(msg)))
       end
    end
 
@@ -148,6 +159,7 @@ local function dispatchmessage(actor, msg)
 
    return actor
 end
+act.dispatchmessage = dispatchmessage
 
 
 
