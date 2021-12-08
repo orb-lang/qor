@@ -126,18 +126,23 @@ end
 #/lua
 
 
-*** methodchain(method)
+*** methodchain(method, key_method?)
 
 
   Allows for easy application of the pattern
 =obj :message "param" "param" -> obj=.
 
+If =key_method= is provided, it must have the signature =(obj, key)
+-> obj, key= and will be applied before the value call.
+
+
 
 #!lua
 local insert, remove = assert(table.insert), assert(table.remove)
 
+local _cache = {}
 
-function cluster.methodchain(method)
+function cluster.methodchain(method, key_method)
    local function value__call(value_catch, value, ...)
       method(value_catch[1], value_catch[2], value, ...)
       value_catch[2] = nil
@@ -145,7 +150,21 @@ function cluster.methodchain(method)
    end
 
    return function (obj, first)
-      return setmetatable({obj, first}, { __call = value__call })
+      local launch;
+
+      if key_method then
+         obj, first = key_method(obj, first)
+      end
+      if #_cache == 0 then
+         _cache[1], _cache[2] = obj, first
+         launch = _cache
+      else
+         launch = {obj, first}
+         -- we do this optimistically, figuring most method chains complete
+         -- and ones which don't, might not
+         _cache = launch
+      end
+      return setmetatable(launch, { __call = value__call })
    end
 end
 #/lua
