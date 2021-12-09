@@ -112,7 +112,6 @@ end
 #/lua
 
 
-
 ** act.dispatchmessage(actor, msg)
 
   Dispatches messages according to the [[design document]
@@ -121,43 +120,44 @@ end
 #!lua
 local gmatch = assert(string.gmatch)
 local function dispatchmessage(actor, msg)
-   local _cyc = {}
-
-   local function _dispatch(actor, msg)
-      -- detect potential cycles
-      if _cyc[msg] then error "cycle in Message" end
-      _cyc[msg] = true
-
-      -- handle recursive case first
-      if msg.message then
-         actor :dispatchmessage(msg.message)
-         return actor
-      end
-   end
-
-
+   local result
    while msg do
+      -- #todo replace this with construction-time translation to nested message?
       if msg.sendto then
          for prop in gmatch(msg.sendto, "([^.]+)[.]?") do
             actor = actor[prop]
          end
       end
       if msg.property then
-         actor = actor[msg.property]
+         result = pack(actor[msg.property])
       elseif msg.call == true then
-         actor = actor(unpack(msg))
+         result = pack(actor(unpack(msg)))
       elseif msg.call then
-         actor = actor[msg.call](unpack(msg))
+         local fn = actor[msg.call]
+         if not fn then
+            -- #todo this leaves out useful information in the case of a
+            -- nested message, and also doesn't know how to represent the
+            -- starting/root actor. We really want to stringify the whole
+            -- chain in a meaningful way
+            error("attempt to call a nil function " .. msg.call
+                  .. " on " .. tostring(msg.sendto))
+         end
+         result = pack(fn(unpack(msg)))
       elseif msg.method then
-         actor = actor[msg.method](actor, unpack(msg))
+         local fn = actor[msg.method]
+         if not fn then
+            -- Similar concern as with .call, also this is annoyingly similar
+            error("attempt to call a nil method " .. msg.method
+                  .. " on " .. tostring(msg.sendto))
+         end
+         result = pack(fn(actor, unpack(msg)))
       else
          error("Message must have one of property, call, or method: " .. (require "repr:repr".ts(msg)))
       end
+      actor = result[1]
+      msg = msg.message
    end
-
-   _dispatch(actor, msg)
-
-   return actor
+   return unpack(result)
 end
 act.dispatchmessage = dispatchmessage
 #/lua
