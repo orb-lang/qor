@@ -569,6 +569,7 @@ end
 
 
 
+
 local insert = assert(table.insert)
 
 local sp_er = "table<core>.splice: "
@@ -589,29 +590,33 @@ end
 
 function Tab.splice(tab, index, to_add)
    assert(type(tab) == "table", _e_1)
-   assert(type(index) == "number" or index == nil, _e_2)
+   if to_add == nil then
+      to_add = index
+      index = nil
+   end
    if index == nil then
       index = #tab + 1
    end
+   assert(type(index) == "number", _e_2)
    assert(type(to_add) == "table", _e_3)
-    index = index - 1
-    local queue = { head = 0, tail = 0}
-    local i = 1
-    -- replace elements, spilling onto queue
-    for j = 1, #to_add do
-        push(queue, tab[i + index])
-        tab[i + index] = to_add[j]
-        i = i + 1
-    end
-    -- run the queue up the remainder of the table
-    local elem = pop(queue)
-    while elem ~= nil do
-       push(queue, tab[i + index])
-       tab[i + index] = elem
-       i = i + 1
-       elem = pop(queue)
-    end
-    return tab
+
+   index = index - 1
+   local queue = { head = 0, tail = 0}
+   local i = 1
+   -- replace elements, spilling onto queue
+   for j = 1, #to_add do
+      push(queue, tab[i + index])
+      tab[i + index] = to_add[j]
+      i = i + 1
+   end
+   -- run the queue up the remainder of the table
+   local elem = pop(queue)
+   while elem ~= nil do
+      push(queue, tab[i + index])
+      tab[i + index] = elem
+      i = i + 1
+      elem = pop(queue)
+   end
 end
 
 
