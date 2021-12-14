@@ -558,15 +558,16 @@ end
 ```
 
 
-### splice\(tab, index, to\_add\)
+### splice\(tab\[, index\], to\_add\)
 
   Puts the full contents of `into` to\_add `tab` at `index`\.  The argument
-order is compatible with existing functions and method syntax\.
+order is compatible with existing functions and method syntax, i\.e\. `index`
+may be omitted altogether even though it is not the last argument\.
 
-This returns the table, although it shouldn't\.
-
-If `index` is `nil`, the contents of `to_add` will be inserted at the end of
+If `index` is `nil` or omitted, the contents of `to_add` will be inserted at the end of
 `tab`\.
+
+Returns nothing, again in accordance with existing functions\.
 
 ```lua
 local insert = assert(table.insert)
@@ -589,29 +590,33 @@ end
 
 function Tab.splice(tab, index, to_add)
    assert(type(tab) == "table", _e_1)
-   assert(type(index) == "number" or index == nil, _e_2)
+   if to_add == nil then
+      to_add = index
+      index = nil
+   end
    if index == nil then
       index = #tab + 1
    end
+   assert(type(index) == "number", _e_2)
    assert(type(to_add) == "table", _e_3)
-    index = index - 1
-    local queue = { head = 0, tail = 0}
-    local i = 1
-    -- replace elements, spilling onto queue
-    for j = 1, #to_add do
-        push(queue, tab[i + index])
-        tab[i + index] = to_add[j]
-        i = i + 1
-    end
-    -- run the queue up the remainder of the table
-    local elem = pop(queue)
-    while elem ~= nil do
-       push(queue, tab[i + index])
-       tab[i + index] = elem
-       i = i + 1
-       elem = pop(queue)
-    end
-    return tab
+
+   index = index - 1
+   local queue = { head = 0, tail = 0}
+   local i = 1
+   -- replace elements, spilling onto queue
+   for j = 1, #to_add do
+      push(queue, tab[i + index])
+      tab[i + index] = to_add[j]
+      i = i + 1
+   end
+   -- run the queue up the remainder of the table
+   local elem = pop(queue)
+   while elem ~= nil do
+      push(queue, tab[i + index])
+      tab[i + index] = elem
+      i = i + 1
+      elem = pop(queue)
+   end
 end
 ```
 
