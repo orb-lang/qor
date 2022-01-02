@@ -134,6 +134,7 @@ Should probably take a third parameter to limit the number of matches\.
 
 ```lua
 function String.findall(str, patt)
+   local find = type(str) == 'string' and find or str.find
    local matches = {}
    local index = 1
    local left, right
@@ -339,6 +340,26 @@ function String.slurp(filename)
   local content = f:read("*all")
   f:close()
   return content
+end
+```
+
+
+### String\.spit\(filename, file\)
+
+I'm\.\.\. adding this in late 2021?? what happened?
+
+Guess I wasn't doing as much spitting as I used t/ y'know what? nevermind\.
+
+in it to win it
+
+```lua
+function String.spit(filename, file)
+  local f = io.open(tostring(filename), "w+")
+  if not f then
+     error ("no such file: " .. tostring(filename))
+  end
+  local ok = f:write(file)
+  f:close()
 end
 ```
 

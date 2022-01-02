@@ -140,9 +140,13 @@ If `key_method` is provided, it must have the signature `(obj, key) and will be 
 ```lua
 local insert, remove = assert(table.insert), assert(table.remove)
 
-local _cache = {}
+
 
 function cluster.methodchain(method, key_method)
+
+   -- per-method cache of the value-caller
+   local _cache = {}
+
    local function value__call(value_catch, value, ...)
       method(value_catch[1], value_catch[2], value, ...)
       value_catch[2] = nil

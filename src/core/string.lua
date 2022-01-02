@@ -133,6 +133,7 @@ end
 
 
 function String.findall(str, patt)
+   local find = type(str) == 'string' and find or str.find
    local matches = {}
    local index = 1
    local left, right
@@ -338,6 +339,26 @@ function String.slurp(filename)
   local content = f:read("*all")
   f:close()
   return content
+end
+
+
+
+
+
+
+
+
+
+
+
+
+function String.spit(filename, file)
+  local f = io.open(tostring(filename), "w+")
+  if not f then
+     error ("no such file: " .. tostring(filename))
+  end
+  local ok = f:write(file)
+  f:close()
 end
 
 
