@@ -114,5 +114,20 @@ end
 
 
 
+
+
+
+
+
+
+
+
+function meta.weak(mode)
+   mode = mode or 'kv'
+   return setmetatable({}, { __mode = mode })
+end
+
+
+
 return meta
 

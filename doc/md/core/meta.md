@@ -98,7 +98,7 @@ meta.hasmetamethod = hasmetamethod
 
 ### instanceof\(obj, Class\)
 
-Answers whether `obj` is an "instance of" `Class`, which may be either the
+  Answers whether `obj` is an "instance of" `Class`, which may be either the
 name of a builtin type \("number", "string", etc\), or a module return value
 which will be compared against `obj.idEst`\.
 
@@ -109,6 +109,21 @@ function meta.instanceof(obj, Class)
    else
       return type(obj) == 'table' and obj.idEst == Class
    end
+end
+```
+
+
+
+### weak\(mode\)
+
+Simplifies the drudgery of constructing basic weak tables\.
+
+Mode defaults to `'kv'`\.
+
+```lua
+function meta.weak(mode)
+   mode = mode or 'kv'
+   return setmetatable({}, { __mode = mode })
 end
 ```
 
