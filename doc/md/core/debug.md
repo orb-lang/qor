@@ -82,5 +82,25 @@ end
 
 
 ```lua
+local function _tracer(tab)
+   return tab[1]
+end
+
+local lines;
+local function _repr(tab, window, c)
+   lines = lines or require "core:core/string" . lines
+   return lines(tab[1])
+end
+
+local __trace_M = { __repr = _repr,
+                    __tostring = _tracer}
+
+function Debug.reprtrace()
+   return setmetatable({debug.traceback("", 2):sub(2)}, __trace_M)
+end
+```
+
+
+```lua
 return Debug
 ```
