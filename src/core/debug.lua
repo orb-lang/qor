@@ -82,6 +82,12 @@ end
 
 
 
+
+
+
+
+
+
 local function _tracer(tab)
    return tab[1]
 end
@@ -95,8 +101,16 @@ end
 local __trace_M = { __repr = _repr,
                     __tostring = _tracer}
 
-function Debug.reprtrace()
-   return setmetatable({debug.traceback("", 2):sub(2)}, __trace_M)
+local traceback = assert(debug.traceback)
+
+function Debug.reprtrace(msg)
+   local trace;
+   if not msg then
+      trace = traceback("", 2):sub(2)
+   else
+      trace = traceback(msg, 2)
+   end
+   return setmetatable({trace}, __trace_M)
 end
 
 

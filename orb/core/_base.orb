@@ -12,6 +12,19 @@ local _base = {}
 #/lua
 
 
+*** no_op()
+
+Sometimes you just need =(fn $)= y'know?
+
+Why not have just one?
+
+#!lua
+function _base.no_op()
+   return
+end
+#/lua
+
+
 *** thunk(fn, ...)
 
 Returns a function which, called, will call the function with the given

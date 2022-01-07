@@ -18,6 +18,19 @@ local _base = {}
 
 
 
+
+function _base.no_op()
+   return
+end
+
+
+
+
+
+
+
+
+
 function _base.thunk(fn, ...)
    local args = pack(...)
    return function()
