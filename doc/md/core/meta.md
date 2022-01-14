@@ -6,7 +6,7 @@
 Right now this isn't well\-organized, and I need to change that\.
 
 But I have to do it carefully, because `meta` touches the code all over the
-place, and even though it's almost identical to `Meta` in [cluster](https://gitlab.com/special-circumstance/core/-/blob/trunk/doc/md/core/cluster.md), it might break something to just replace it\.
+place, and even though it's almost identical to `Meta` in [cluster](https://gitlab.com/special-circumstance/qor/-/blob/trunk/doc/md/core/cluster.md), it might break something to just replace it\.
 
 When the refactor is complete, this will be functions acting on metatables,
 not using them to implement cluster, which is the extensions to the

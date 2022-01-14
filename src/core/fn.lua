@@ -29,6 +29,16 @@ local fn = {}
 
 
 
+fn.no_op = _base.no_op
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,38 +1,99 @@
 # Core
 
 
-For now, this is a compatibility shim: we're going to import everything from
-all the submodules, and return one big table\.
+  Core provides the primitive extensions to the Lua language used by every
+other system in the bridge\.
 
-This **should** mean we can do a big search\-replace to change all
-`singletons/core` to `core:core`\.
 
-Then go through and require the appropriate submodules until we're not
-using `core:core` at all\.
+Core itself is a lazy loader, with the following interface\.
 
-After that, we want to put each submodule on a table, using a lazy\-load so
-that we only get a specific module if we try and use it\.
+To include `core` without paying for what you don't use, or worrying much
+about getting what you need when you need it, do this:
 
 ```lua
-local mods = {}
-local core = {}
-local insert = assert(table.insert)
-insert(mods, require "core:core/cluster")
-insert(mods, require "core:core/coro")
-insert(mods, require "core:core/fn")
-insert(mods, require "core:core/math")
-insert(mods, require "core:core/meta")
-insert(mods, require "core:core/module")
-insert(mods, require "core:core/string")
-insert(mods, require "core:core/table")
-insert(mods, require "core:core/thread")
-insert(mods, require "core:core/env")
-insert(mods, require "core:core/uv")
+local core = require "core"
+```
 
-for _, mod in ipairs(mods) do
-   for k,v in pairs(mod) do
-      core[k] = v
+Any field access will require the requested table\.
+
+To make core eager, call it:
+
+```lua
+local core = require "core" ()
+```
+
+This presents the same interface but with every subtable already in memory\.
+
+To add the subtables as fields of another table, such as an environment,
+pass this as the argument:
+
+```lua
+require "core" (getfenv(1))
+```
+
+The tables, such as `table`, named after global tables in the global table,
+are designed as conservative replacements for their namesakes\.  Consevative in
+that any field present in 'Lua classic' will have an identical value if that
+value is a function\.
+
+The lazy loader is a closed\-over \_\_index and look like this:
+
+```lua
+local function lazy_load_gen(requires)
+   return function(tab, key)
+      if requires[key] then
+         -- put the return on the core table
+         tab[key] = require(requires[key])
+         return tab[key]
+      else
+         error("core doesn't have a module " .. tostring(key))
+      end
    end
 end
-return core
 ```
+
+The callable being efficiently implemented thus:
+
+```lua
+local function call_gen(requires)
+   return function(tab, env)
+      local _;
+      for k in pairs(requires) do
+         _ = tab[k]
+         if env then
+            -- assign the now cached value as a global or at least slot
+            env[k] = tab[k]
+         end
+      end
+
+      return tab
+   end
+end
+```
+
+Which is a bit funny looking, but does mean that any tweaks or enhancements to
+the indexer will be seen in the caller without further ado\.
+
+Core ends up looking like this:
+
+```lua
+local core_modules = {
+   cluster    = "qor:core/cluster",
+   coro       = "qor:core/coro",
+   fn         = "qor:core/fn",
+   math       = "qor:core/math",
+   meta       = "qor:core/meta",
+   ["module"] = "qor:core/module",
+   string     = "qor:core/string",
+   table      = "qor:core/table",
+   thread     = "qor:core/thread",
+   env        = "qor:core/env",
+   uv         = "qor:core/uv",
+}
+```
+
+```lua
+return setmetatable({}, { __index = lazy_load_gen(core_modules),
+                                __call  = call_gen(core_modules) })
+```
+

@@ -80,6 +80,9 @@ end
 
 
 
+
+
+
 local function _hasfield(tab, field)
    if type(tab) == "table" and rawget(tab, field) then
       return tab[field]
@@ -98,10 +101,13 @@ local function _hasfield(tab, field)
    return nil
 end
 
-local function _hf__index(_, field)
-   return function(tab)
+
+
+local function _hf__index(has_field, field)
+   has_field[field] = function(tab)
       return _hasfield(tab, field)
    end
+   return has_field[field], "hmm"
 end
 
 local function _hf__call(_, tab, field)

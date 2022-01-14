@@ -79,6 +79,9 @@ end
 
 A nicety which can be used both for predication and assignment\.
 
+The closure returned is cached after the first call, so this amortizes nicely
+for anticipated use patterns\.
+
 ```lua
 local function _hasfield(tab, field)
    if type(tab) == "table" and rawget(tab, field) then
@@ -97,11 +100,14 @@ local function _hasfield(tab, field)
    end
    return nil
 end
+```
 
-local function _hf__index(_, field)
-   return function(tab)
+```lua
+local function _hf__index(has_field, field)
+   has_field[field] = function(tab)
       return _hasfield(tab, field)
    end
+   return has_field[field], "hmm"
 end
 
 local function _hf__call(_, tab, field)
