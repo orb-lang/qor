@@ -23,6 +23,16 @@ local fn = {}
 #/lua
 
 
+** fn.no_op
+
+A function which does nothing and returns nothing (rather than =nil=, which
+takes a stack frame).
+
+#!lua
+fn.no_op = _base.no_op
+#/lua
+
+
 *** curry(fn, param)
 
   Returns a function which pre-applies the given parameter to the first
