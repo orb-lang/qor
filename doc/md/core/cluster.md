@@ -30,7 +30,7 @@ end
 ### Inheritance
 
 
-#### Meta
+#### meta
 
 This is our default pattern for single inheritance with transference of
 metamethods\.
@@ -49,7 +49,7 @@ local isempty = table.isempty
                    return empty
                 end
 
-function cluster.Meta(Meta)
+function cluster.meta(Meta)
    if Meta and Meta.__index then
       -- inherit
       local tab = {}
@@ -81,6 +81,22 @@ function cluster.Meta(Meta)
    error ("cannot make metatable from type" .. type(Meta))
 end
 ```
+
+
+##### Meta
+
+A shim with a status import and warning to get us out of using capital\-M Meta\.
+
+```lua
+local s;
+
+function cluster.Meta(Meta)
+   s = s or require "status:status" ()
+   s:warn("use of Meta is deprecated")
+   return cluster.meta(Meta)
+end
+```
+
 
 
 #### \_\_meta

@@ -39,6 +39,8 @@
 
 
 
+
+
 local function lazy_load_gen(requires)
    return function(tab, key)
       if requires[key] then
@@ -65,7 +67,6 @@ local function call_gen(requires)
             env[k] = tab[k]
          end
       end
-
       return tab
    end
 end
@@ -81,6 +82,7 @@ local core_modules = {
    cluster    = "qor:core/cluster",
    coro       = "qor:core/coro",
    fn         = "qor:core/fn",
+   debug      = "qor:core/debug",
    math       = "qor:core/math",
    meta       = "qor:core/meta",
    ["module"] = "qor:core/module",

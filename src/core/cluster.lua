@@ -49,7 +49,7 @@ local isempty = table.isempty
                    return empty
                 end
 
-function cluster.Meta(Meta)
+function cluster.meta(Meta)
    if Meta and Meta.__index then
       -- inherit
       local tab = {}
@@ -80,6 +80,22 @@ function cluster.Meta(Meta)
    end
    error ("cannot make metatable from type" .. type(Meta))
 end
+
+
+
+
+
+
+
+
+local s;
+
+function cluster.Meta(Meta)
+   s = s or require "status:status" ()
+   s:warn("use of Meta is deprecated")
+   return cluster.meta(Meta)
+end
+
 
 
 

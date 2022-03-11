@@ -5,6 +5,8 @@
 other system in the bridge\.
 
 
+## Design
+
 Core itself is a lazy loader, with the following interface\.
 
 To include `core` without paying for what you don't use, or worrying much
@@ -22,7 +24,7 @@ To make core eager, call it:
 local core = require "core" ()
 ```
 
-This presents the same interface but with every subtable already in memory\.
+This presents the same interface, but with every subtable already in memory\.
 
 To add the subtables as fields of another table, such as an environment,
 pass this as the argument:
@@ -32,9 +34,9 @@ require "core" (getfenv(1))
 ```
 
 The tables, such as `table`, named after global tables in the global table,
-are designed as conservative replacements for their namesakes\.  Consevative in
-that any field present in 'Lua classic' will have an identical value if that
-value is a function\.
+are designed as conservative replacements for their namesakes\.  Conservative
+in that any field present in 'Lua classic' will have an identical value if
+that value is a function\.
 
 The lazy loader is a closed\-over \_\_index and look like this:
 
@@ -65,7 +67,6 @@ local function call_gen(requires)
             env[k] = tab[k]
          end
       end
-
       return tab
    end
 end
@@ -81,6 +82,7 @@ local core_modules = {
    cluster    = "qor:core/cluster",
    coro       = "qor:core/coro",
    fn         = "qor:core/fn",
+   debug      = "qor:core/debug",
    math       = "qor:core/math",
    meta       = "qor:core/meta",
    ["module"] = "qor:core/module",
