@@ -97,7 +97,7 @@ function cluster.Meta(Meta)
    local nl_idx = trace:find("\n")
    trace = trace:sub(nl_idx + 1)
    nl_idx = trace:find("\n")
-   s:warn("use of Meta is deprecated: %s", trace:sub(1, nl_idx - 1))
+   s:warn("use of Meta is deprecated, use meta: %s", trace:sub(1, nl_idx - 1))
    return cluster.meta(Meta)
 end
 
