@@ -173,6 +173,23 @@ end
 
 
 
+function fn.compose(f, g)
+   return function(...)
+      return g(f(...))
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

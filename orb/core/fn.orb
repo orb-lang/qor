@@ -168,6 +168,23 @@ end
 #/lua
 
 
+*** compose(f, g)
+
+Returns a function which calls g on the result of calling f with arguments.
+
+#!lua
+function fn.compose(f, g)
+   return function(...)
+      return g(f(...))
+   end
+end
+#/lua
+
+Note that we can and maybe should use the same detection technique we use for
+currying, to unwrap intermediates, so that =compose(compose(f,g), h)= becomes
+one function with the line =return h(g(f(...)))=.
+
+
 *** itermap(fn, iter)
 
 Applies =fn= to each element returned from =iter=, in turn.
