@@ -50,8 +50,19 @@ local isempty = table.isempty
                 end
 
 function cluster.meta(Meta)
+   Meta = Meta or {}
+
+   -- decoration
+   if Meta
+      and type(Meta) == 'table'
+      and isempty(Meta) then
+
+      Meta.__index = Meta
+      return Meta
+   end
+
+   -- inheritance
    if Meta and Meta.__index then
-      -- inherit
       local tab = {}
       for field, value in next, Meta, nil do
          if sub(field, 1, 2) == "__" then
@@ -66,18 +77,8 @@ function cluster.meta(Meta)
       end
       tab.__index = tab
       return setmetatable(tab, Meta)
-
-   elseif Meta
-      and type(Meta) == 'table'
-      and isempty(Meta) then
-      -- decorate
-      Meta.__index = Meta
-      return Meta
-   elseif not Meta then
-      local _M = {}
-      _M.__index = _M
-      return _M
    end
+
    error ("cannot make metatable from type" .. type(Meta))
 end
 

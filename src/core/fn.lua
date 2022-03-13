@@ -109,7 +109,6 @@ fn.curry = curry
 
 
 
-
 fn.thunk = assert(_base.thunk)
 
 

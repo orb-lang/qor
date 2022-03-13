@@ -103,7 +103,6 @@ fn.curry = curry
 #/lua
 
 
-
 *** thunk(fn, ...)
 
 Returns a function which, called, will call the function with the given
