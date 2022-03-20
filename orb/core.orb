@@ -4,6 +4,10 @@
   Core provides the primitive extensions to the Lua language used by every
 other system in the bridge.
 
+#!lua
+local _base = require "qor:core/_base"
+#/lua
+
 
 ** Design
 
@@ -38,39 +42,6 @@ are designed as conservative replacements for their namesakes.  Conservative
 in that any field present in 'Lua classic' will have an identical value if
 that value is a function.
 
-The lazy loader is a closed-over __index and look like this:
-
-#!lua
-local function lazy_load_gen(requires)
-   return function(tab, key)
-      if requires[key] then
-         -- put the return on the core table
-         tab[key] = require(requires[key])
-         return tab[key]
-      else
-         error("core doesn't have a module " .. tostring(key))
-      end
-   end
-end
-#/lua
-
-The callable being efficiently implemented thus:
-
-#!lua
-local function call_gen(requires)
-   return function(tab, env)
-      local _;
-      for k in pairs(requires) do
-         _ = tab[k]
-         if env then
-            -- assign the now cached value as a global or at least slot
-            env[k] = tab[k]
-         end
-      end
-      return tab
-   end
-end
-#/lua
 
 Which is a bit funny looking, but does mean that any tweaks or enhancements to
 the indexer will be seen in the caller without further ado.
@@ -95,7 +66,6 @@ local core_modules = {
 #/lua
 
 #!lua
-return setmetatable({}, { __index = lazy_load_gen(core_modules),
-                                __call  = call_gen(core_modules) })
+return _base.lazyloader(core_modules)
 #/lua
 

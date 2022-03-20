@@ -5,6 +5,7 @@
 
 
 
+local _base = require "qor:core/_base"
 
 
 
@@ -40,36 +41,6 @@
 
 
 
-
-local function lazy_load_gen(requires)
-   return function(tab, key)
-      if requires[key] then
-         -- put the return on the core table
-         tab[key] = require(requires[key])
-         return tab[key]
-      else
-         error("core doesn't have a module " .. tostring(key))
-      end
-   end
-end
-
-
-
-
-
-local function call_gen(requires)
-   return function(tab, env)
-      local _;
-      for k in pairs(requires) do
-         _ = tab[k]
-         if env then
-            -- assign the now cached value as a global or at least slot
-            env[k] = tab[k]
-         end
-      end
-      return tab
-   end
-end
 
 
 
@@ -95,6 +66,5 @@ local core_modules = {
 
 
 
-return setmetatable({}, { __index = lazy_load_gen(core_modules),
-                                __call  = call_gen(core_modules) })
+return _base.lazyloader(core_modules)
 

@@ -17,8 +17,8 @@ holder of that reference should call the Actor directly\.
 Lua offers no way to enforce this, so we'll just have to be careful\.
 
 Other communication must take place through various proxies\.  We have the
-[Window](https://gitlab.com/special-circumstance/qor/-/blob/trunk/doc/md/window/window.md), which offers a proxy table with fine\-grained
-access to the underlying Actor's table, and the [mailbox](https://gitlab.com/special-circumstance/qor/-/blob/trunk/doc/md/mailbox/mailbox.md),
+[Window](NO default.domain IN MANIFESTqor/MISSING_POST_PROJECTdoc/md/window/window.md), which offers a proxy table with fine\-grained
+access to the underlying Actor's table, and the [mailbox](NO default.domain IN MANIFESTqor/MISSING_POST_PROJECTdoc/md/mailbox/mailbox.md),
 a two\-way queue for message passing\.
 
 There will inevitably be methods and functions useful in constructing and
@@ -114,7 +114,7 @@ end
 
 ## act\.dispatchmessage\(actor, msg\)
 
-  Dispatches messages according to the [design document](https://gitlab.com/special-circumstance/helm/-/blob/trunk/doc/md/design/maestro-and-messages.md)\.
+  Dispatches messages according to the [design document](NO default.domain IN MANIFESThelm/MISSING_POST_PROJECTdoc/md/design/maestro-and-messages.md)\.
 
 ```lua
 local gmatch = assert(string.gmatch)

@@ -450,7 +450,7 @@ end
 ### keysort\(a, b\)
 
 Sort callback function that puts strings first, numbers next, and everything
-else at the end in no particular order\. Used by [https://gitlab.com/special-circumstance/repr/-/blob/trunk/doc/md/tabulate.md](https://gitlab.com/special-circumstance/repr/-/blob/trunk/doc/md/tabulate.md) to sort
+else at the end in no particular order\. Used by [NO default.domain IN MANIFESTrepr/MISSING_POST_PROJECTdoc/md/tabulate.md](NO default.domain IN MANIFESTrepr/MISSING_POST_PROJECTdoc/md/tabulate.md) to sort
 table keys\.
 
 ```lua

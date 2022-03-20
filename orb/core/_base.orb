@@ -73,6 +73,63 @@ function _base.iscallable(val)
 end
 #/lua
 
+
+*** lazyloader(lazy_table) -> lazyloader
+
+  This produces a callable table, from a map from table names to =require=
+compatible module strings.
+
+Subsequently, =lazyloader.field= will call =require= on the appropriate string,
+returning the value after caching it.
+
+The lazy loader may be called at any point =(lazyloader(env?))=, which will
+eagerly load every module from the lazy table.  If =env= is provided, these
+key / value pairs are also written to that table, which will make them global
+in the intended case where =env= is in fact a fenv somewhere.
+
+We do this by making two closures over the table, one for the index:
+
+#!lua
+local function lazy_load_gen(requires)
+   return function(tab, key)
+      if requires[key] then
+         -- put the return on the core table
+         tab[key] = require(requires[key])
+         return tab[key]
+      else
+         error("core doesn't have a module " .. tostring(key))
+      end
+   end
+end
+#/lua
+
+And one for calling:
+
+#!lua
+local function call_gen(requires)
+   return function(tab, env)
+      local _;
+      for k in pairs(requires) do
+         _ = tab[k]
+         if env then
+            -- assign the now cached value as a global or at least slot
+            env[k] = tab[k]
+         end
+      end
+      return tab
+   end
+end
+#/lua
+
+The function merely builds a callable from the provided table.
+
+#!lua
+function _base.lazyloader(lazy_table)
+   return setmetatable({}, { __index = lazy_load_gen(lazy_table),
+                             __call  = call_gen(lazy_table) })
+end
+#/lua
+
 #!lua
 return _base
 #/lua
