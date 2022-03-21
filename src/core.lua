@@ -5,7 +5,6 @@
 
 
 
-local _base = require "qor:core/_base"
 
 
 
@@ -46,10 +45,7 @@ local _base = require "qor:core/_base"
 
 
 
-
-
-
-local core_modules = {
+return require "qor:core/_base" . lazyloader {
    cluster    = "qor:core/cluster",
    coro       = "qor:core/coro",
    fn         = "qor:core/fn",
@@ -63,8 +59,4 @@ local core_modules = {
    env        = "qor:core/env",
    uv         = "qor:core/uv",
 }
-
-
-
-return _base.lazyloader(core_modules)
 

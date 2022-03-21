@@ -4,10 +4,6 @@
   Core provides the primitive extensions to the Lua language used by every
 other system in the bridge\.
 
-```lua
-local _base = require "qor:core/_base"
-```
-
 
 ## Design
 
@@ -46,10 +42,10 @@ that value is a function\.
 Which is a bit funny looking, but does mean that any tweaks or enhancements to
 the indexer will be seen in the caller without further ado\.
 
-Core ends up looking like this:
+So the module is just this:
 
 ```lua
-local core_modules = {
+return require "qor:core/_base" . lazyloader {
    cluster    = "qor:core/cluster",
    coro       = "qor:core/coro",
    fn         = "qor:core/fn",
@@ -63,9 +59,5 @@ local core_modules = {
    env        = "qor:core/env",
    uv         = "qor:core/uv",
 }
-```
-
-```lua
-return _base.lazyloader(core_modules)
 ```
 
