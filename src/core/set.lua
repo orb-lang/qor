@@ -51,11 +51,23 @@ setmetatable(set, set_Build)
 
 
 function set_Build.__call(_new, tab)
-   tab = tab or {}
    assert(type(tab) == 'table', "#1 to Set must be a table or nil")
-   for i, v in ipairs(tab) do
-      tab[v] = true
+   local top = #tab
+   local shunt;  -- we need this for number keys
+   for i = 1, top do
+      local v = tab[i]
+      if type(v) == 'number' then
+         shunt = shunt or {}
+         shunt[v] = true
+      else
+         tab[v] = true
+      end
       tab[i] = nil
+   end
+   if shunt then
+      for v in pairs(shunt) do
+         tab[v] = true
+      end
    end
    return setmetatable(tab, set_M)
 end
@@ -74,7 +86,7 @@ end
 
 function set_M.__call(set, ...)
    for i = 1, select('#', ...) do
-      set_M[select(i, ...)] = true
+      set[select(i, ...)] = true
    end
 end
 
