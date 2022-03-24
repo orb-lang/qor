@@ -30,8 +30,8 @@
 
 
 
-local set, set_Build, set_M = {}, {}, {}
-setmetatable(set, set_Build)
+local Set, Set_Build, Set_M = {}, {}, {}
+setmetatable(Set, Set_Build)
 
 
 
@@ -50,7 +50,7 @@ setmetatable(set, set_Build)
 
 
 
-function set_Build.__call(_new, tab)
+function Set_Build.__call(_new, tab)
    assert(type(tab) == 'table', "#1 to Set must be a table or nil")
    local top = #tab
    local shunt;  -- we need this for number keys
@@ -69,7 +69,7 @@ function set_Build.__call(_new, tab)
          tab[v] = true
       end
    end
-   return setmetatable(tab, set_M)
+   return setmetatable(tab, Set_M)
 end
 
 
@@ -84,13 +84,55 @@ end
 
 
 
-function set_M.__call(set, ...)
+
+
+
+function Set_M.__call(set, ...)
    for i = 1, select('#', ...) do
       set[select(i, ...)] = true
    end
 end
 
+Set.insert = Set_M.__call
 
 
-return set
+
+
+
+
+function Set.remove(set, ...)
+
+end
+
+
+
+local wrap, yield = assert(coroutine.wrap), assert(coroutine.yield)
+local tabulate, Token
+
+function Set_M.__repr(set, window, c)
+   tabulate = tabulate or require "repr:tabulate"
+   Token = Token or require "repr:token"
+
+   return wrap(function()
+      yield(Token("#{ ", { color = "base", event = "array"}))
+      local first = true
+      window.depth = window.depth + 1
+      for v, _ in pairs(set) do
+         if first then
+            first = false
+         else
+            yield(Token(", ", { color = "base", event = "sep" }))
+         end
+         for t in tabulate(v, window, c) do
+            yield(t)
+         end
+      end
+      window.depth = window.depth - 1
+      yield(Token(" }", { color = "base", event = "end" }))
+   end)
+end
+
+
+
+return Set
 

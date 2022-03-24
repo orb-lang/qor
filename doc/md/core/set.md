@@ -30,8 +30,8 @@ can't represent through operators and metasyntax\.
 The collection of tables we build this with is a bit bespoke:
 
 ```lua
-local set, set_Build, set_M = {}, {}, {}
-setmetatable(set, set_Build)
+local Set, Set_Build, Set_M = {}, {}, {}
+setmetatable(Set, Set_Build)
 ```
 
 Since we do *not* want any \_\_indexing on our instances, and we have different
@@ -50,7 +50,7 @@ if, for example, one wants to use a common table to build up several Sets\.
 The technique for that is found in the next section\.
 
 ```lua
-function set_Build.__call(_new, tab)
+function Set_Build.__call(_new, tab)
    assert(type(tab) == 'table', "#1 to Set must be a table or nil")
    local top = #tab
    local shunt;  -- we need this for number keys
@@ -69,28 +69,70 @@ function set_Build.__call(_new, tab)
          tab[v] = true
       end
    end
-   return setmetatable(tab, set_M)
+   return setmetatable(tab, Set_M)
 end
 ```
 
 
-### set\(\.\.\.\) \->
+### set\(\.\.\.\) \->, aka Set\.insert
 
   Calling a set adds all the elements to the Set\.  As is normal with inserting
 into tables, we do not return the set\.
+
+So to reuse an array table in several sets, `unpack` it into a call on the
+Set you're setting up\.
 
 There are only two mutations of sets offered, and this is one, the other one
 is `set.remove(set, ...)` which removes elements as listed, and returns the
 element iff they were there to be removed\.
 
 ```lua
-function set_M.__call(set, ...)
+function Set_M.__call(set, ...)
    for i = 1, select('#', ...) do
       set[select(i, ...)] = true
    end
 end
+
+Set.insert = Set_M.__call
+```
+
+
+### Set\.remove\(set, \.\.\.\)
+
+```lua
+function Set.remove(set, ...)
+
+end
 ```
 
 ```lua
-return set
+local wrap, yield = assert(coroutine.wrap), assert(coroutine.yield)
+local tabulate, Token
+
+function Set_M.__repr(set, window, c)
+   tabulate = tabulate or require "repr:tabulate"
+   Token = Token or require "repr:token"
+
+   return wrap(function()
+      yield(Token("#{ ", { color = "base", event = "array"}))
+      local first = true
+      window.depth = window.depth + 1
+      for v, _ in pairs(set) do
+         if first then
+            first = false
+         else
+            yield(Token(", ", { color = "base", event = "sep" }))
+         end
+         for t in tabulate(v, window, c) do
+            yield(t)
+         end
+      end
+      window.depth = window.depth - 1
+      yield(Token(" }", { color = "base", event = "end" }))
+   end)
+end
+```
+
+```lua
+return Set
 ```
