@@ -9,8 +9,18 @@ local Mod = {}
 
 
 
-local assert = assert(require "core:core/_base" . assertfmt)
+local _base = require "qor:core/_base"
+local assertfmt = assert(_base.assertfmt)
 local require, pack, unpack = assert(require), assert(pack), assert(unpack)
+
+
+
+
+
+
+
+
+Mod.lazyloader = assert(_base.lazyloader)
 
 
 

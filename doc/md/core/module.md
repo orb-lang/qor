@@ -9,8 +9,18 @@ local Mod = {}
 
 ```lua
 
-local assert = assert(require "core:core/_base" . assertfmt)
+local _base = require "qor:core/_base"
+local assertfmt = assert(_base.assertfmt)
 local require, pack, unpack = assert(require), assert(pack), assert(unpack)
+```
+
+
+### lazyloader\(tab\)
+
+Defined in the [base module](NO default.domain IN MANIFESTqor/MISSING_POST_PROJECTdoc/md/core/_base.md)\.
+
+```lua
+Mod.lazyloader = assert(_base.lazyloader)
 ```
 
 
@@ -36,7 +46,7 @@ end
 
 ### request
 
-The optional veresion of `require`\.
+The optional version of `require`\.
 
 ```lua
 local pcall = assert(pcall)

@@ -325,21 +325,21 @@ local function _call_with_hooks(uid, ...)
       local rets = pack(fn(unpack(new_arg)))
       -- make into one pack, because you can only apply multiple arguments at
       -- the end of a function call
-      for i = 1, rets.n do
-         new_arg[#new_arg + 1] = rets[i]
+      for i = 1, new_arg.n do
+         rets[#rets + 1] = new_arg[i]
       end
-      new_arg.n = new_arg.n + rets.n
+      rets.n = new_arg.n + rets.n
       return post(unpack(rets))
    elseif pre then
       return fn(pre(...))
    elseif post then
       local args, rets = pack(...), pack(fn(...))
       -- same trick here...
-      for i = 1, args.n do
-         rets[#rets + 1] = args[i]
+      for i = 1, rets.n do
+         args[#args + 1] = rets[i]
       end
-      rets.n = rets.n + args.n
-      return post(unpack(rets))
+      args.n = rets.n + args.n
+      return post(unpack(args))
    else
       return fn(...)
    end
@@ -364,10 +364,14 @@ function fn.hookable(fn, pre, post)
                     end
    -- register the hookable in the dynamics registry
    _dynamics_registry[hookable] = uid
+   if pre then
+      prehook(hookable, pre)
+   end
+   if post then
+      posthook(hookable, post)
+   end
    return hookable
 end
-
-
 
 
 
