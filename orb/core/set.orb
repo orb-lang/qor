@@ -82,9 +82,8 @@ into tables, we do not return the set.
 So to reuse an array table in several sets, =unpack= it into a call on the
 Set you're setting up.
 
-There are only two mutations of sets offered, and this is one, the other one
-is =set.remove(set, ...)= which removes elements as listed, and returns the
-element iff they were there to be removed.
+There are only two ways to add elements to sets, and this is one, with the
+only other mutable operation being =set.remove(set, ...)=.
 
 #!lua
 function Set_M.__call(set, ...)
@@ -97,13 +96,63 @@ Set.insert = Set_M.__call
 #/lua
 
 
-*** Set.remove(set, ...)
+*** set[index] = true
+
+The other way to add elements is to set them to =true=.
+
+We make sure the user doesn't /initially/ set values to anything but =true=,
+but =__newindex= only applies to missing values, so elements can be set to
+anything the user cares to, including =nil=, which is the only other intended
+revalue.
+
+We use truthiness rather than boolean truth, so this is reasonably forgiving
+of storing unexpected values for Set elements.  We're striking the right
+balance between simplicity, speed, and correctness here.
+
+Be that as it may, I urge the user to restrict values in Set tables to =true=
+or =nil=.
 
 #!lua
-function Set.remove(set, ...)
-
+function Set_M.__newindex(set, key, value)
+   assert(value == true or value == nil, "value must be true or nil")
+   rawset(set, key, value)
 end
 #/lua
+
+
+*** Set.remove(set, ...) -> removed_elements : any
+
+Removes any elements which are in the set, returning all the removed elements
+in the parameter order, but with no =nil= values for elements which were not
+removed.
+
+#!lua
+insert = assert(table.insert)
+function Set.remove(set, ...)
+   local removed;
+   for i = 1, select('#', ...) do
+      local elem = select(i, ...)
+      if set[elem] then
+         removed = removed or {}
+         insert(removed, elem)
+         set[elem] = nil
+      end
+   end
+   if removed then
+      return(unpack(removed))
+   end
+end
+#/lua
+
+
+*** __repr
+
+We have an existing repr for Sets, which works just as well here once we
+remove the indirection.
+
+#Todo we should use a sort on keys which is stable across literal values, to
+make normal Sets a useable return form for sessions.  We have one somewhere in
+repr.
 
 #!lua
 local wrap, yield = assert(coroutine.wrap), assert(coroutine.yield)
@@ -132,6 +181,17 @@ function Set_M.__repr(set, window, c)
    end)
 end
 #/lua
+
+
+** Operators: NYI
+
+  Writing the Set operations is beyond my interest in implementing at the moment.
+
+The semantics are already defined in the other Set module, and it's a matter
+of porting the algorithms and writing adequate sessions.
+
+We are using set operations, at least in Voltron, so they're coming up soon.
+
 
 #!lua
 return Set

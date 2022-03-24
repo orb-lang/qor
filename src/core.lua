@@ -58,5 +58,6 @@ return require "qor:core/_base" . lazyloader {
    thread     = "qor:core/thread",
    env        = "qor:core/env",
    uv         = "qor:core/uv",
+   set        = "qor:core/set",
 }
 

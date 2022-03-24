@@ -86,7 +86,6 @@ end
 
 
 
-
 function Set_M.__call(set, ...)
    for i = 1, select('#', ...) do
       set[select(i, ...)] = true
@@ -100,9 +99,59 @@ Set.insert = Set_M.__call
 
 
 
-function Set.remove(set, ...)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+function Set_M.__newindex(set, key, value)
+   assert(value == true or value == nil, "value must be true or nil")
+   rawset(set, key, value)
 end
+
+
+
+
+
+
+
+
+
+
+insert = assert(table.insert)
+function Set.remove(set, ...)
+   local removed;
+   for i = 1, select('#', ...) do
+      local elem = select(i, ...)
+      if set[elem] then
+         removed = removed or {}
+         insert(removed, elem)
+         set[elem] = nil
+      end
+   end
+   if removed then
+      return(unpack(removed))
+   end
+end
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -131,6 +180,17 @@ function Set_M.__repr(set, window, c)
       yield(Token(" }", { color = "base", event = "end" }))
    end)
 end
+
+
+
+
+
+
+
+
+
+
+
 
 
 
