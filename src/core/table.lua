@@ -423,30 +423,8 @@ end
 
 
 
-
-
-
-
-local function _select(collection, tab, key, cycle)
-   cycle = cycle or {}
-   for k,v in pairs(tab) do
-      if key == k then
-         collection[#collection + 1] = v
-      end
-      if type(v) == "table" and not cycle[v] then
-         cycle[v] = true
-         collection = _select(collection, v, key, cycle)
-      end
-   end
-   return collection
-end
-
-local s;
-function Tab.select(tab, key)
-   s = s or require "status:status"()
-   -- premote to angry to make this an error
-   s:warn "Don't use this function!!!"
-   return _select({}, tab, key)
+function Tab.select()
+   error "this no longer exists, and I thought it wasn't used."
 end
 
 
