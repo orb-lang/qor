@@ -186,7 +186,7 @@ local function _fix(tab)
    if getmetatable(tab) == Set_M then
       return tab
    else
-      return new(tab)
+      return Set(tab)
    end
 end
 
