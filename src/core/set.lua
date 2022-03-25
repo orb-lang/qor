@@ -184,14 +184,17 @@ end
 
 local function _fix(tab)
    if getmetatable(tab) == Set_M then
-      return tab
+      return tab, true
    else
-      return Set(tab)
+      return Set(tab), false
    end
 end
 
 local function _binOp(left, right)
-   return _fix(left), _fix(right)
+   local l_p, r_p;
+   left, l_p = _fix(left)
+   right, r_p = _fix(right)
+   return left, right, l_p, r_p
 end
 
 
@@ -202,18 +205,45 @@ end
 local clone = assert(require "table.clone")
 
 function Set_M.__add(left, right)
-   left, right = _binOp(left, right)
+   local l_isSet, r_isSet;
+   left, right, l_isSet, r_isSet = _binOp(left, right)
    local set, other;
    if #left > #right then
-      set = clone(left)
+      if l_isSet then
+         set = clone(left)
+      else
+         set = left
+      end
       other = right
    else
-      set = clone(right)
+      if r_isSet then
+         set = clone(right)
+      else
+         set = right
+      end
       other = left
    end
 
    for elem in pairs(other) do
       set[elem] = true
+   end
+   return setmetatable(set, Set_M)
+end
+
+
+
+
+
+
+
+
+function Set_M.__sub(left, right)
+   left, right =  _binOp(left, right)
+   local set = {}
+   for k in pairs(left) do
+      if not right[k] then
+         set[k] = true
+      end
    end
    return setmetatable(set, Set_M)
 end
