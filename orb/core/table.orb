@@ -441,7 +441,11 @@ local function _select(collection, tab, key, cycle)
    return collection
 end
 
+local s;
 function Tab.select(tab, key)
+   s = s or require "status:status"()
+   -- premote to angry to make this an error
+   s:warn "Don't use this function!!!"
    return _select({}, tab, key)
 end
 #/lua
@@ -467,6 +471,36 @@ function Tab.keysort(a, b)
       return true
    else
       return false
+   end
+end
+#/lua
+
+
+*** sortedpairs(tab, sort? threshold?)
+
+  Returns a pairwise iterator of the table which uses a sorting function on
+the keys.
+
+If =sort= is not provided, we use the default =keysort= above, otherwise any
+predicate returning =true | false= will work.
+
+#!lua
+local keysort = assert(Tab.keysort)
+local nkeys, _sort = assert(table.nkeys), assert(table.sort)
+local keys; -- as defined below
+
+function Tab.sortedpairs(tab, sort, threshold)
+   sort = sort or keysort
+   if threshold and threshold > nkeys(tab) then
+      return pairs(tab)
+   end
+   local _keys = keys(tab)
+   _sort(_keys, keysort)
+   local i, top = 0, #_keys
+   return function()
+      i = i + 1
+      if i > top then return nil end
+      return _keys[i], tab[_keys[i]]
    end
 end
 #/lua
@@ -521,6 +555,8 @@ function Tab.keys(tab)
 
    return keys, #keys
 end
+
+keys = Tab.keys
 #/lua
 
 

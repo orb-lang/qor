@@ -30,6 +30,7 @@ can't represent through operators and metasyntax.
 The collection of tables we build this with is a bit bespoke:
 
 #!lua
+local core = require "qor:core"
 local Set, Set_Build, Set_M = {}, {}, {}
 setmetatable(Set, Set_Build)
 #/lua
@@ -145,6 +146,80 @@ end
 #/lua
 
 
+** Set metamethods and operations
+
+  We put anything with a sensible signature into metamethods, because our
+architecture forbids the ordinary kind.
+
+It makes sense to intersperse these in with operations, which are provided by
+the =Set= cassette, not the =Set_M= metatable.
+
+
+*** __len
+
+This one is refreshingly simple now that the only keys are the elements of the
+set.
+
+#!lua
+local nkeys = assert(table.nkeys)
+
+function Set_M.__len(set)
+   return nkeys(set)
+end
+#/lua
+
+
+*** Operators
+
+  All operators create a new set, rather than mutating either of the inputs,
+and will accept an array table as either the left or right value of a binary
+operation.
+
+
+**** _binOp(left: Set?, right: Set?) -> set, set
+
+A consistent surface to allow either side of the operation to be an array
+table.
+
+#!lua
+local function _fix(tab)
+   if getmetatable(tab) == Set_M then
+      return tab
+   else
+      return new(tab)
+   end
+end
+
+local function _binOp(left, right)
+   return _fix(left), _fix(right)
+end
+#/lua
+
+
+*** __add   set + set
+
+#!lua
+local clone = assert(require "table.clone")
+
+function Set_M.__add(left, right)
+   left, right = _binOp(left, right)
+   local set, other;
+   if #left > #right then
+      set = clone(left)
+      other = right
+   else
+      set = clone(right)
+      other = left
+   end
+
+   for elem in pairs(other) do
+      set[elem] = true
+   end
+   return setmetatable(set, Set_M)
+end
+#/lua
+
+
 *** __repr
 
 We have an existing repr for Sets, which works just as well here once we
@@ -157,6 +232,7 @@ repr.
 #!lua
 local wrap, yield = assert(coroutine.wrap), assert(coroutine.yield)
 local tabulate, Token
+local sortedpairs = assert(core.table.sortedpairs)
 
 function Set_M.__repr(set, window, c)
    tabulate = tabulate or require "repr:tabulate"
@@ -166,7 +242,7 @@ function Set_M.__repr(set, window, c)
       yield(Token("#{ ", { color = "base", event = "array"}))
       local first = true
       window.depth = window.depth + 1
-      for v, _ in pairs(set) do
+      for v, _ in sortedpairs(set) do
          if first then
             first = false
          else

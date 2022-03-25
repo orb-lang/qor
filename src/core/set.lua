@@ -30,6 +30,7 @@
 
 
 
+local core = require "qor:core"
 local Set, Set_Build, Set_M = {}, {}, {}
 setmetatable(Set, Set_Build)
 
@@ -155,8 +156,83 @@ end
 
 
 
+
+
+
+
+
+local nkeys = assert(table.nkeys)
+
+function Set_M.__len(set)
+   return nkeys(set)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local function _fix(tab)
+   if getmetatable(tab) == Set_M then
+      return tab
+   else
+      return new(tab)
+   end
+end
+
+local function _binOp(left, right)
+   return _fix(left), _fix(right)
+end
+
+
+
+
+
+
+local clone = assert(require "table.clone")
+
+function Set_M.__add(left, right)
+   left, right = _binOp(left, right)
+   local set, other;
+   if #left > #right then
+      set = clone(left)
+      other = right
+   else
+      set = clone(right)
+      other = left
+   end
+
+   for elem in pairs(other) do
+      set[elem] = true
+   end
+   return setmetatable(set, Set_M)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
 local wrap, yield = assert(coroutine.wrap), assert(coroutine.yield)
 local tabulate, Token
+local sortedpairs = assert(core.table.sortedpairs)
 
 function Set_M.__repr(set, window, c)
    tabulate = tabulate or require "repr:tabulate"
@@ -166,7 +242,7 @@ function Set_M.__repr(set, window, c)
       yield(Token("#{ ", { color = "base", event = "array"}))
       local first = true
       window.depth = window.depth + 1
-      for v, _ in pairs(set) do
+      for v, _ in sortedpairs(set) do
          if first then
             first = false
          else
