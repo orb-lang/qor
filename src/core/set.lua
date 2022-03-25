@@ -52,7 +52,8 @@ setmetatable(Set, Set_Build)
 
 
 function Set_Build.__call(_new, tab)
-   assert(type(tab) == 'table', "#1 to Set must be a table or nil")
+   assert(type(tab) == 'table' or not tab, "#1 to Set must be a table or nil")
+   tab = tab or {}
    local top = #tab
    local shunt;  -- we need this for number keys
    for i = 1, top do
@@ -246,6 +247,79 @@ function Set_M.__sub(left, right)
       end
    end
    return setmetatable(set, Set_M)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+function Set_M.__mod(left, right)
+   left, right = _binOp(left, right)
+   local set = {}
+   for elem in pairs(left) do
+      if right[elem] then
+         set[elem] = true
+      end
+   end
+   return setmetatable(set, Set_M)
+end
+
+
+
+
+
+
+
+
+
+
+
+local function not_missing(left, right)
+   local maybe = true
+   for elem in pairs(left) do
+      maybe = maybe and right[elem]
+   end
+   return not not maybe
+end
+
+
+
+function Set_M.__eq(left, right)
+   if not #left == #right then return false end
+   return not_missing(left, right)
+end
+
+
+
+
+
+
+
+
+function Set_M.__lt(left, right)
+   if #left >= #right then return false end
+   return not_missing(left, right)
+end
+
+
+
+
+
+
+
+
+
+function Set_M.__lte(left, right)
+   if #left > #right then return false end
+   return not_missing(left, right)
 end
 
 

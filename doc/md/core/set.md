@@ -52,7 +52,8 @@ The technique for that is found in the next section\.
 
 ```lua
 function Set_Build.__call(_new, tab)
-   assert(type(tab) == 'table', "#1 to Set must be a table or nil")
+   assert(type(tab) == 'table' or not tab, "#1 to Set must be a table or nil")
+   tab = tab or {}
    local top = #tab
    local shunt;  -- we need this for number keys
    for i = 1, top do
@@ -199,7 +200,7 @@ end
 ```
 
 
-### \_\_add   set \+ set
+### Union: \_\_add   set \+ set
 
 ```lua
 local clone = assert(require "table.clone")
@@ -232,7 +233,7 @@ end
 ```
 
 
-### \_\_sub  set \- set
+### Difference: \_\_sub  set \- set
 
 Makes a new set missing any elements which are in the right set\.
 
@@ -246,6 +247,79 @@ function Set_M.__sub(left, right)
       end
    end
    return setmetatable(set, Set_M)
+end
+```
+
+
+### Intersection: \_\_mod  set % set
+
+  I'm using `%` for intersection because mod is relatively infrequent, and the
+mnemonic is that the `/` is the piscis of a Venn diagram showing a set
+intersection\.
+
+As among the most useful set operations, and the last we can provide with
+literal\-minded sets, it would be a pity to relegate it to a library function\.
+
+```lua
+function Set_M.__mod(left, right)
+   left, right = _binOp(left, right)
+   local set = {}
+   for elem in pairs(left) do
+      if right[elem] then
+         set[elem] = true
+      end
+   end
+   return setmetatable(set, Set_M)
+end
+```
+
+
+### \_\_eq set == set
+
+  Equality and subset comparisons require both sides to be of the same
+metatable to have the same metamethod, so we can't coerce the sides\.
+
+Since we can cheaply test `nkeys`, these three are the same core operation:
+
+```lua
+local function not_missing(left, right)
+   local maybe = true
+   for elem in pairs(left) do
+      maybe = maybe and right[elem]
+   end
+   return not not maybe
+end
+```
+
+```lua
+function Set_M.__eq(left, right)
+   if not #left == #right then return false end
+   return not_missing(left, right)
+end
+```
+
+
+### \_\_lt set < set
+
+Returns `true` if the left set is a proper subset of the right\.
+
+```lua
+function Set_M.__lt(left, right)
+   if #left >= #right then return false end
+   return not_missing(left, right)
+end
+```
+
+
+### \_lte set <= set
+
+Return `true` if the sets are identical, or if left is a proper subset of
+right\.
+
+```lua
+function Set_M.__lte(left, right)
+   if #left > #right then return false end
+   return not_missing(left, right)
 end
 ```
 
