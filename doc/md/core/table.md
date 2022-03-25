@@ -459,14 +459,15 @@ table keys\.
 
 ```lua
 function Tab.keysort(a, b)
-   if (type(a) == 'string' and type(b) == 'string')
-      or (type(a) == 'number' and type(b) == 'number') then
+   local A, B = type(a), type(b)
+   if (A == 'string' and B == 'string')
+      or (A == 'number' and B == 'number') then
       return a < b
-   elseif type(a) == 'number' and type(b) == 'string' then
+   elseif A == 'number' and B == 'string' then
       return false
-   elseif type(a) == 'string' and type(b) == 'number' then
+   elseif A == 'string' and B == 'number' then
       return true
-   elseif type(a) == 'string' or type(a) == 'number' then
+   elseif A == 'string' or A == 'number' then
       -- we want these tags at the bottom
       return true
    else
