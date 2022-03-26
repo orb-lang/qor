@@ -39,22 +39,40 @@ As of the first commit, I've simply modified the main function to live on the
 a module\.
 
 ```lua
-local select      = select
-local create      = coroutine.create
-local isyieldable = coroutine.isyieldable -- luacheck: ignore
-local resume      = coroutine.resume
-local running     = coroutine.running
-local status      = coroutine.status
-local wrap        = coroutine.wrap
-local yield       = coroutine.yield
+local select       = select
+local setmetatable = setmetatable
+local create       = coroutine.create
+local isyieldable  = coroutine.isyieldable -- luacheck: ignore
+local resume       = coroutine.resume
+local running      = coroutine.running
+local status       = coroutine.status
+local wrap         = coroutine.wrap
+local yield        = coroutine.yield
+
+local _tagged = setmetatable({}, {__mode = 'kv'})
+
+local str_tags = setmetatable({}, {__mode = 'v'})
 
 function thread.nest(tag)
+  if type(tag) == 'string' then
+     local _tag = str_tags[tag] or {}
+     str_tags[tag] = _tag
+     tag = _tag
+  end
+
+  tag = tag or {}
+
+  if _tagged[tag] then
+     return _tagged[tag]
+  end
+
   local coroutine = {
     isyieldable = isyieldable,
     running     = running,
     status      = status,
   }
-  tag = tag or {}
+
+  _tagged[tag] = coroutine
 
   local function for_wrap (co, ...)
     if tag == ... then
