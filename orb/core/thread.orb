@@ -13,10 +13,94 @@ local uv = require "luv"
 local thread = {}
 #/lua
 
-#!lua
-local running, yield = assert(coroutine.running),
-                       assert(coroutine.yield)
 
+*** nest(tag)
+
+  Assymetric coroutines are the best primitive a single-threaded language can
+have for cooperative threading.  They get a bad rap sometimes, exactly because
+they are primitive.  Any =yield= will find the next =resume= down on the call
+stack, which is easy and composable when the user controls both the =resume=
+and the =yield=.
+
+Sometimes what we want is a system that behaves just like ordinary coroutines,
+but with the =resume= and =yield= (and support functions) paired together, so
+that this system ignores any =yield= which doesn't come from within it.
+
+Wouldn't you know it, Phillipe Janda has solved this problem as well!  The
+solution (and full copyright) may be found [[here]*].  Alban Linard, the
+copyright holder, credits the former and I'm not surprised to hear it.
+
+[*]:  https://github.com/saucisson/lua-coronest/blob/master/LICENSE
+
+This will probably end up in a modified form, I'm checking it in with all the
+copyright information and will of course leave the link to the license for as
+long as it resolves.
+
+As of the first commit, I've simply modified the main function to live on the
+=thread= table, instead of being returned anoymously as one might expect from
+a module.
+
+#!lua #copyright 2014 Alban Linard #license MIT
+local select      = select
+local create      = coroutine.create
+local isyieldable = coroutine.isyieldable -- luacheck: ignore
+local resume      = coroutine.resume
+local running     = coroutine.running
+local status      = coroutine.status
+local wrap        = coroutine.wrap
+local yield       = coroutine.yield
+
+function thread.nest(tag)
+  local coroutine = {
+    isyieldable = isyieldable,
+    running     = running,
+    status      = status,
+  }
+  tag = tag or {}
+
+  local function for_wrap (co, ...)
+    if tag == ... then
+      return select (2, ...)
+    else
+      return for_wrap (co, co (yield (...)))
+    end
+  end
+
+  local function for_resume (co, st, ...)
+    if not st then
+      return st, ...
+    elseif tag == ... then
+      return st, select (2, ...)
+    else
+      return for_resume (co, resume (co, yield (...)))
+    end
+  end
+
+  function coroutine.create (f)
+    return create (function (...)
+      return tag, f (...)
+    end)
+  end
+
+  function coroutine.resume (co, ...)
+    return for_resume (co, resume (co, ...))
+  end
+
+  function coroutine.wrap (f)
+    local co = wrap (function (...)
+      return tag, f (...)
+    end)
+    return function (...)
+      return for_wrap (co, co (...))
+    end
+  end
+
+  function coroutine.yield (...)
+    return yield (tag, ...)
+  end
+
+  return coroutine
+end
 #/lua
 
 
