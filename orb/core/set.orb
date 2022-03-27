@@ -283,11 +283,12 @@ Since we can cheaply test =nkeys=, these three are the same core operation:
 
 #!lua
 local function not_missing(left, right)
-   local maybe = true
    for elem in pairs(left) do
-      maybe = maybe and right[elem]
+      if not right[elem] then
+         return false
+      end
    end
-   return not not maybe
+   return true
 end
 #/lua
 

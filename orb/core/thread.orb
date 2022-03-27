@@ -40,6 +40,12 @@ As of the first commit, I've simply modified the main function to live on the
 =thread= table, instead of being returned anoymously as one might expect from
 a module.
 
+I learned from this code a nice shorthand I wasn't aware of, ===val == ...===
+means the same as ===val == select(1, ...)===.  Which does make sense given
+that =...= is an anonymous tuple, but a single rvalue, so this is one of those
+cases where it's 'demoted' to the first value, much like =f(a(), b())= will
+use only the first return value of =a= but all of the return values of =b=.
+
 #!lua #copyright 2014 Alban Linard #license MIT
 local select       = select
 local setmetatable = setmetatable
@@ -50,12 +56,35 @@ local running      = coroutine.running
 local status       = coroutine.status
 local wrap         = coroutine.wrap
 local yield        = coroutine.yield
+#/lua
 
+***** nest caches
+
+  We use the first of these to make the return tables unique by tag, and the
+second to convert strings to a private reference.
+
+#!lua
 local _tagged = setmetatable({}, {__mode = 'kv'})
 
 local str_tags = setmetatable({}, {__mode = 'v'})
+#/lua
 
+
+**** nest(tag)
+
+#!lua
 function thread.nest(tag)
+#/lua
+
+First step is to convert a string tag into a unique table, which we use to
+represent the coroutine pairings.
+
+After this, we normalize missing tags into a unique table, and check our
+cache to see if we've already built a nesting system for the first arguement.
+
+If we have, we return it.
+
+#!lua
   if type(tag) == 'string' then
      local _tag = str_tags[tag] or {}
      str_tags[tag] = _tag
@@ -67,7 +96,16 @@ function thread.nest(tag)
   if _tagged[tag] then
      return _tagged[tag]
   end
+#/lua
 
+
+***** The Easy Part
+
+We make a new coroutine table as a drop-in replacement for stock =coroutine=.
+
+Three functions require no modification:
+
+#!lua
   local coroutine = {
     isyieldable = isyieldable,
     running     = running,
@@ -75,33 +113,90 @@ function thread.nest(tag)
   }
 
   _tagged[tag] = coroutine
+#/lua
 
-  local function for_wrap (co, ...)
-    if tag == ... then
-      return select (2, ...)
-    else
-      return for_wrap (co, co (yield (...)))
-    end
-  end
+Having cached our return value, we need functions with the same interface as
+those which remain.
 
-  local function for_resume (co, st, ...)
-    if not st then
-      return st, ...
-    elseif tag == ... then
-      return st, select (2, ...)
-    else
-      return for_resume (co, resume (co, yield (...)))
-    end
-  end
+A couple of those are easy.
 
+#!lua
   function coroutine.create (f)
     return create (function (...)
       return tag, f (...)
     end)
   end
 
+
+  function coroutine.yield (...)
+    return yield (tag, ...)
+  end
+#/lua
+
+The effect is to silently prepend the tag to the return value and yields,
+respectively.
+
+
+***** The Hard Part: Resuming
+
+It's worth remembering that these threads will confuse =resume= in particular
+if it sees one.  The goal is that they cooperate with each other, and stay out
+of the way of a 'default' use of yield/resume.
+
+This problem is solved with a rather splended and dense bit of code.
+
+#!lua
+  local function for_resume (co, ok, ...)
+    if not ok then
+      return ok, ...
+    elseif tag == ... then
+      return ok, select (2, ...)
+    else
+      return for_resume (co, resume (co, yield (...)))
+    end
+  end
+
   function coroutine.resume (co, ...)
     return for_resume (co, resume (co, ...))
+  end
+#/lua
+
+We'll start from =coroutine.resume= and work down the inner call.
+
+Our new =resume= has one line, and the innermost function merely calls the
+real =resume= in the expected way.
+
+Our helper =for_resume= picks up all those return values after the coroutine
+itself, when the coroutine yields or returns.
+
+The usual return signature from a coroutine is =ok, ...=, and ours will have
+=ok, tag, ...=.  If =ok= is false, =for_resume= is a pass-through.
+
+Otherwise we check for our tag, and if we see it, then we behave like resume
+would and return the remaining arguments.
+
+If we don't see our tag, we make a recursive tail call.  Inside out, this
+yields /our/ coroutine with the values passed through, resuming it whenever it
+it's resumed elsewhere.
+
+Hence /nested/ coroutines.  The easy-to-understand version of this system two
+pairs, the "inner" and "outer", where yields within the inner system stay
+there, and outer yields are promoted to the outer handler, but resume back
+into the inner system, which can continue to handle yields in the same way.
+
+This /should/ work as expected if the outermost handler expects ordinary
+coroutines.  I'm aiming to build =helm= and =actor= on that basis if I can.
+The alternative appears to be only ever using nests.
+
+Having deciphered =resume=, =wrap= is the functionalized version thereof:
+
+#!lua
+  local function for_wrap (co, ...)
+    if tag == ... then
+      return select (2, ...)
+    else
+      return for_wrap (co, co (yield (...)))
+    end
   end
 
   function coroutine.wrap (f)
@@ -112,14 +207,15 @@ function thread.nest(tag)
       return for_wrap (co, co (...))
     end
   end
+#/lua
 
-  function coroutine.yield (...)
-    return yield (tag, ...)
-  end
+Which creates an extra closure relative to ordinary =wrap=, a modest price to
+pay.
 
+#!lua
   return coroutine
 end
-#/lua
+#/lua changes #copyright 2022 Sam Atman
 
 
 *** onloop()
