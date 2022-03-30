@@ -23,13 +23,35 @@ local fn = {}
 ```
 
 
-## fn\.no\_op
+### fn\.no\_op
 
 A function which does nothing and returns nothing \(rather than `nil`, which
 takes a stack frame\)\.
 
 ```lua
 fn.no_op = _base.no_op
+```
+
+
+### fn\.optionfirst\(\.\.\.\)
+
+  This is a B\- name, but for functions which receive closures, it's really
+best if they're the last argument, so that they can be literal without
+obscuring the existence of other parameters\.
+
+Many of these have optional arguments, so we want a general "make the last
+argument the first and return them" function\.
+
+```lua
+function fn.optionfirst(...)
+   local arg = pack(...)
+   local top, rx = arg[arg.n], nil
+   for i = arg.n, 2, -1 do
+      arg[i] = arg[i - 1]
+   end
+   arg[1] = top
+   return unpack(arg)
+end
 ```
 
 

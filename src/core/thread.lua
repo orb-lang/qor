@@ -19,6 +19,9 @@ local thread = {}
 
 
 
+function thread.yieldpack(ok, ...)
+   return ok, pack(...)
+end
 
 
 
@@ -121,10 +124,13 @@ function thread.nest(tag)
 
 
 
+  local _ours = setmetatable({}, {__mode = 'k'})
   function coroutine.create (f)
-    return create (function (...)
+    local co =  create (function (...)
       return tag, f (...)
     end)
+    _ours[co] = true
+    return co
   end
 
 
@@ -152,7 +158,7 @@ function thread.nest(tag)
     elseif tag == ... then
       return ok, select (2, ...)
     else
-      return for_resume (co, resume (co, yield (...)))
+      return for_resume (co, resume (co, yield(...)))
     end
   end
 
@@ -213,8 +219,33 @@ function thread.nest(tag)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+  function coroutine.ours(co)
+     return not not _ours[co]
+  end
+
+
+
+
   return coroutine
 end
+
+
+
+
+
+
 
 
 

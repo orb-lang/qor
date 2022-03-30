@@ -43,6 +43,28 @@ fn.no_op = _base.no_op
 
 
 
+function fn.optionfirst(...)
+   local arg = pack(...)
+   local top, rx = arg[arg.n], nil
+   for i = arg.n, 2, -1 do
+      arg[i] = arg[i - 1]
+   end
+   arg[1] = top
+   return unpack(arg)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 local _curried = setmetatable({}, { __mode = 'k' })

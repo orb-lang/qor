@@ -14,6 +14,17 @@ local thread = {}
 ```
 
 
+#### yieldpack\(yield\(\.\.\.\)\)
+
+breaks out the boolean and returns everything else packed\.
+
+```lua
+function thread.yieldpack(ok, ...)
+   return ok, pack(...)
+end
+```
+
+
 ### nest\(tag\)
 
   Assymetric coroutines are the best primitive a single\-threaded language can
@@ -29,14 +40,6 @@ that this system ignores any `yield` which doesn't come from within it\.
 Wouldn't you know it, Phillipe Janda has solved this problem as well\!  The
 solution \(and full copyright\) may be found [here]( https://github.com/saucisson/lua-coronest/blob/master/LICENSE)\.  Alban Linard, the
 copyright holder, credits the former and I'm not surprised to hear it\.
-
-This will probably end up in a modified form, I'm checking it in with all the
-copyright information and will of course leave the link to the license for as
-long as it resolves\.
-
-As of the first commit, I've simply modified the main function to live on the
-`thread` table, instead of being returned anoymously as one might expect from
-a module\.
 
 I learned from this code a nice shorthand I wasn't aware of, `val == ...`
 means the same as `val == select(1, ...)`\.  Which does make sense given
@@ -119,10 +122,13 @@ those which remain\.
 A couple of those are easy\.
 
 ```lua
+  local _ours = setmetatable({}, {__mode = 'k'})
   function coroutine.create (f)
-    return create (function (...)
+    local co =  create (function (...)
       return tag, f (...)
     end)
+    _ours[co] = true
+    return co
   end
 
 
@@ -141,7 +147,7 @@ It's worth remembering that these threads will confuse `resume` in particular
 if it sees one\.  The goal is that they cooperate with each other, and stay out
 of the way of a 'default' use of yield/resume\.
 
-This problem is solved with a rather splended and dense bit of code\.
+This problem is solved with a rather splendid and dense bit of code\.
 
 ```lua
   local function for_resume (co, ok, ...)
@@ -150,7 +156,7 @@ This problem is solved with a rather splended and dense bit of code\.
     elseif tag == ... then
       return ok, select (2, ...)
     else
-      return for_resume (co, resume (co, yield (...)))
+      return for_resume (co, resume (co, yield(...)))
     end
   end
 
@@ -210,10 +216,35 @@ Having deciphered `resume`, `wrap` is the functionalized version thereof:
 Which creates an extra closure relative to ordinary `wrap`, a modest price to
 pay\.
 
+
+### Ours
+
+Returns `true` if this nest created the coroutine\.
+
+I added this for debugging but I anticipate it being a useful question to
+answer\.
+
+Reminder that the coroutines are only special to the nest, implication being
+that it's good to provide a membership test for those coroutines that isn't
+calling one of the other functions and seeing what happens\.
+
+```lua
+  function coroutine.ours(co)
+     return not not _ours[co]
+  end
+```
+
+
 ```lua
   return coroutine
 end
 ```
+
+
+#### The Use of Nests
+
+  Just a place to put a hunch that nested coroutines might be a good place to
+put the condition/restart system\.
 
 
 ### onloop\(\)
