@@ -154,9 +154,13 @@ local function for_resume (co, ok, ...)
       return ok, select (2, ...)
    else
       local rets = pack(yield(...))
+      s:verb("returned, rets.n = %d", rets.n)
+      if rets.n > 0 then
+        s:bore("first returned value: %s", tostring(rets[1]))
+      end
       if status(co) == 'dead' then
-         s:verb("won't resume dead coro, rets.n = %d", rets.n)
-         return unpack(rets)
+         s:verb("won't resume dead coro, stack %s", debug.traceback())
+         return true, unpack(rets)
       else
          return for_resume (co,
                                resume (co,
