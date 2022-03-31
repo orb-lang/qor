@@ -10,18 +10,14 @@ local uv = require "luv"
 
 
 
+
+
+local s = require "status:status" ()
+s.verbose = true
+
+
+
 local thread = {}
-
-
-
-
-
-
-
-
-function thread.yieldpack(ok, ...)
-   return ok, pack(...)
-end
 
 
 
@@ -152,18 +148,28 @@ function thread.nest(tag)
 
 
 
-  local function for_resume (co, ok, ...)
-    if not ok then
+local ts = require "repr:repr" .ts_color -- #todo remove
+local function for_resume (co, ok, ...)
+   if not ok then
       return ok, ...
-    elseif tag == ... then
+   elseif tag == ... then
       return ok, select (2, ...)
-    else
-      return for_resume (co, resume (co, yield(...)))
-    end
-  end
+   else
+      local rets = pack(yield(...))
+      if status(co) == 'dead' then
+         s:verb("won't resume dead coro, rets.n = %d", rets.n)
+         return unpack(rets)
+      else
+         return for_resume (co,
+                               resume (co,
+                                          unpack(rets)))
+      end
+   end
+end
 
   function coroutine.resume (co, ...)
-    return for_resume (co, resume (co, ...))
+    return for_resume (co,
+                          resume (co, ...))
   end
 
 
@@ -201,7 +207,9 @@ function thread.nest(tag)
     if tag == ... then
       return select (2, ...)
     else
-      return for_wrap (co, co (yield (...)))
+      return for_wrap (co,
+                          co (
+                               yield (...)))
     end
   end
 
@@ -210,7 +218,8 @@ function thread.nest(tag)
       return tag, f (...)
     end)
     return function (...)
-      return for_wrap (co, co (...))
+      return for_wrap (co,
+                          co (...))
     end
   end
 

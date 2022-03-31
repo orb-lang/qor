@@ -709,6 +709,35 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+function Tab.packinto(tab, ...)
+   tab.n = select('#', ...)
+   for i = 1, tab.n do
+      tab[i] = select(i, ...)
+   end
+   return tab
+end
+
+
+
+
+
+
+
+
+
 function Tab.pget(tab, key)
    local ok, val = pcall(function() return tab[key] end)
    if ok then

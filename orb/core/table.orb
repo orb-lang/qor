@@ -703,6 +703,35 @@ function Tab.addall(tab, to_add)
 end
 #/lua
 
+
+*** packinto(tab, ...)
+
+  This is like pack, but it uses the given table instead of creating a new
+one.
+
+I'm torn on whether this should clear the table, and currently it doesn't do
+so, because it pays to make it clear when one is removing things from passed
+parameters.
+
+On the other hand, the semantic of this function is very much intended to be
+identical to =pack=, with the sole exception of the table being provided, so
+the contract of this function *does not* guarantee that anything other than
+the packed values and =.n= will have occupied slots on =tab= when it's
+returned.
+
+We won't detach a metatable however. That would be barbaric.
+
+#!lua
+function Tab.packinto(tab, ...)
+   tab.n = select('#', ...)
+   for i = 1, tab.n do
+      tab[i] = select(i, ...)
+   end
+   return tab
+end
+#/lua
+
+
 *** pget(tab, key)
 
 This will retrieve a value, given a key, without causing errors if the table
