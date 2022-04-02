@@ -18,8 +18,21 @@ local _base = require "core:core/_base"
 
 ** fn table
 
+
+
+*** Type Predicate: fn(fn?) -> boolean
+
+  Each core extension named after a type can be used to test a value for that
+primitive type.
+
 #!lua
-local fn = {}
+local function is_fn(_, fn)
+   return type(fn) == 'function'
+end
+#/lua
+
+#!lua
+local fn = setmetatable({}, { __call = is_fn })
 #/lua
 
 

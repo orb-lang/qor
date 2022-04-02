@@ -18,8 +18,21 @@ local _base = require "core:core/_base"
 
 ## fn table
 
+
+
+### Type Predicate: fn\(fn?\) \-> boolean
+
+  Each core extension named after a type can be used to test a value for that
+primitive type\.
+
 ```lua
-local fn = {}
+local function is_fn(_, fn)
+   return type(fn) == 'function'
+end
+```
+
+```lua
+local fn = setmetatable({}, { __call = is_fn })
 ```
 
 
@@ -316,9 +329,9 @@ Note that Lua has no concept of how many parameters are "supposed to" be
 passed to a function, and from `pack`'s perspective there is a difference
 between `return nil` and just `return`\.  So if `f(a, b, c)` sometimes returns
 `d` and sometimes returns nothing with a bare `return` keyword, or just by
-falling off the end of the function, then sometimes you will get `post_f(d, a,, and sometimes just `post_f(a, b, c)`\.  So it's important to design
-hookable
-b, c)` functions so that they return a consistent number of parameters in
+falling off the end of the function, then sometimes you will get `post_f(d, a,
+b, c)`, and sometimes just `post_f(a, b, c)`\.  So it's important to design
+hookable functions so that they return a consistent number of parameters in
 all cases, padded with `nil`s if necessary\.  This is not idiomatic,
 particularly for functions which return an optional second value under some
 circumstances\.

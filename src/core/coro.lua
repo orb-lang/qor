@@ -16,8 +16,20 @@ local thunk = assert(_base.thunk)
 
 
 
+local function is_coro(_, coro)
+   return type(coro) == 'thread'
+end
 
-local coro = {}
+
+
+
+
+
+
+
+
+local coro = setmetatable({}, { __call = is_coro })
+
 for k,v in next, coroutine do
    coro[k] = v
 end

@@ -7,8 +7,20 @@ local _base = require "core:core/_base"
 
 
 
+
+
+
+
+
+local function is_table(_, tab)
+   return type(tab) == 'table'
+end
+
+
+
+
 local meta = require "core/meta"
-local Tab = {}
+local Tab = setmetatable({}, { __call = is_table })
 for k, v in pairs(table) do
    Tab[k] = v
 end

@@ -6,9 +6,21 @@ local _base = require "core:core/_base"
 ```
 
 
+### Type Predicate: table\(tab\) \-> boolean
+
+  Each core extension named after a typ can be used to test a value for that
+primitive type\.
+
+```lua
+local function is_table(_, tab)
+   return type(tab) == 'table'
+end
+```
+
+
 ```lua
 local meta = require "core/meta"
-local Tab = {}
+local Tab = setmetatable({}, { __call = is_table })
 for k, v in pairs(table) do
    Tab[k] = v
 end

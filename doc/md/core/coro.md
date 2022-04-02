@@ -10,6 +10,17 @@ local _base = require "core:core/_base"
 local thunk = assert(_base.thunk)
 ```
 
+### Type Predicate: coro\(str?\) \-> boolean
+
+  Each core extension named after a type can be used to test a value for that
+primitive type\.
+
+```lua
+local function is_coro(_, coro)
+   return type(coro) == 'thread'
+end
+```
+
 
 ## coro table
 
@@ -17,7 +28,8 @@ We put all of the `coroutine` table on `coro`, so it's an enhanced replacement
 for the library:
 
 ```lua
-local coro = {}
+local coro = setmetatable({}, { __call = is_coro })
+
 for k,v in next, coroutine do
    coro[k] = v
 end

@@ -19,7 +19,20 @@ local _base = require "core:core/_base"
 
 
 
-local fn = {}
+
+
+
+
+
+
+
+local function is_fn(_, fn)
+   return type(fn) == 'function'
+end
+
+
+
+local fn = setmetatable({}, { __call = is_fn })
 
 
 

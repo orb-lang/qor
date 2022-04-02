@@ -5,7 +5,18 @@
 
 
 
-local String = {}
+
+
+
+
+local function is_string(_, str)
+   return type(str) == 'string'
+end
+
+
+
+
+local String = setmetatable({}, { __call = is_string })
 
 
 
@@ -132,7 +143,7 @@ end
 
 
 
-function String.findall(str, patt)
+local function findall(str, patt)
    local find = type(str) == 'string' and find or str.find
    local matches = {}
    local index = 1
@@ -150,6 +161,8 @@ function String.findall(str, patt)
       return nil
    end
 end
+
+String.findall = findall
 
 
 
@@ -282,6 +295,7 @@ end
 
 
 
+
 function String.lines(str)
    local pos = 1;
    return function()
@@ -301,6 +315,75 @@ function String.lines(str)
       end
       return line
    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local _nl_map = setmetatable({}, { __mode = 'kv' })
+
+local function _findPos(nl_map, target, start)
+   local line = start or 1
+   local cursor = 0
+   local col
+   while true do
+      if line > #nl_map then
+         -- technically two possibilities: node.last is after the
+         -- end of str, or it's on a final line with no newline.
+         -- the former would be quite exceptional, so we assume the latter
+         -- here.
+         -- so we need the old cursor back:
+         cursor = nl_map[line - 1][1] + 1
+         return line, target - cursor + 1
+      end
+      local next_nl = nl_map[line][1]
+      if target > next_nl then
+         -- advance
+         cursor = next_nl + 1
+         line = line + 1
+      else
+         return line, target - cursor + 1
+      end
+   end
+end
+
+
+
+function String.linepos(str, offset)
+   local nl_map
+   if _nl_map[str] then
+      nl_map = _nl_map[str]
+   else
+      nl_map = findall(str, "\n")
+      -- should we add a final here? I think so, #str + 1, fake newline
+      _nl_map[str] = nl_map
+   end
+   if not nl_map then
+      -- there are no newlines:
+      return 1, offset
+   end
+   -- otherwise find the offsets
+   local line, col = _findPos(nl_map, offset)
+
+   return line, col
 end
 
 

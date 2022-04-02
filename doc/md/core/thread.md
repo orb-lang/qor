@@ -82,17 +82,17 @@ cache to see if we've already built a nesting system for the first arguement\.
 If we have, we return it\.
 
 ```lua
-  if type(tag) == 'string' then
-     local _tag = str_tags[tag] or {}
-     str_tags[tag] = _tag
-     tag = _tag
-  end
+if type(tag) == 'string' then
+   local _tag = str_tags[tag] or {}
+   str_tags[tag] = _tag
+   tag = _tag
+end
 
-  tag = tag or {}
+tag = tag or {}
 
-  if _tagged[tag] then
-     return _tagged[tag]
-  end
+if _tagged[tag] then
+   return _tagged[tag]
+end
 ```
 
 
@@ -103,13 +103,13 @@ We make a new coroutine table as a drop\-in replacement for stock `coroutine`\.
 Three functions require no modification:
 
 ```lua
-  local coroutine = {
-    isyieldable = isyieldable,
-    running     = running,
-    status      = status,
-  }
+local coroutine = {
+   isyieldable = isyieldable,
+   running     = running,
+   status      = status,
+}
 
-  _tagged[tag] = coroutine
+_tagged[tag] = coroutine
 ```
 
 Having cached our return value, we need functions with the same interface as
@@ -118,23 +118,24 @@ those which remain\.
 A couple of those are easy\.
 
 ```lua
-  local _ours = setmetatable({}, {__mode = 'k'})
-  function coroutine.create (f)
-    local co =  create (function (...)
-      return tag, f (...)
-    end)
-    _ours[co] = true
-    return co
-  end
+local _ours = setmetatable({}, {__mode = 'k'})
 
+function coroutine.create(f)
+   local co =  create(function(...)
+      return tag, f(...)
+   end)
+   _ours[co] = true
+   return co
+end
 
-  function coroutine.yield (...)
-    return yield (tag, ...)
-  end
+function coroutine.yield(...)
+   return yield(tag, ...)
+end
 ```
 
 The effect is to silently prepend the tag to the return value and yields,
-respectively\.
+respectively\.  We keep track of coroutines created in this fashion so we can
+provide a function to test for our coroutines\.
 
 
 ##### The Hard Part: Resuming
@@ -146,39 +147,32 @@ of the way of a 'default' use of yield/resume\.
 This problem is solved with a rather splendid and dense bit of code\.
 
 ```lua
-local ts = require "repr:repr" .ts_color -- #todo remove
-local function for_resume (co, ok, ...)
+
+local function for_resume(co, ok, ...)
    if not ok then
       return ok, ...
    elseif tag == ... then
-      return ok, select (2, ...)
+      return ok, select(2, ...)
    else
-      local rets = pack(yield(...))
-      s:verb("returned, rets.n = %d", rets.n)
-      if rets.n > 0 then
-        s:bore("first returned value: %s", tostring(rets[1]))
-      end
-      if status(co) == 'dead' then
-         s:verb("won't resume dead coro, stack %s", debug.traceback())
-         return true, unpack(rets)
-      else
-         return for_resume (co,
-                               resume (co,
-                                          unpack(rets)))
-      end
+       return for_resume(co,
+                            resume(co,
+                                      yield(...)))
    end
 end
 
-  function coroutine.resume (co, ...)
-    return for_resume (co,
-                          resume (co, ...))
-  end
+function coroutine.resume(co, ...)
+   return for_resume(co,
+                        resume(co, ...))
+end
 ```
+
+The tail calls are indented to give a distinct stack frame to each place
+something can go wrong\!
 
 We'll start from `coroutine.resume` and work down the inner call\.
 
 Our new `resume` has one line, and the innermost function merely calls the
-real `resume` in the expected way\.
+builtin `resume` in the expected way\.
 
 Our helper `for_resume` picks up all those return values after the coroutine
 itself, when the coroutine yields or returns\.
@@ -198,58 +192,56 @@ pairs, the "inner" and "outer", where yields within the inner system stay
 there, and outer yields are promoted to the outer handler, but resume back
 into the inner system, which can continue to handle yields in the same way\.
 
-This *should* work as expected if the outermost handler expects ordinary
-coroutines\.  I'm aiming to build `helm` and `actor` on that basis if I can\.
-The alternative appears to be only ever using nests\.
+This works as expected if the outermost handler expects ordinary coroutines\.
 
 Having deciphered `resume`, `wrap` is the functionalized version thereof:
 
 ```lua
-  local function for_wrap (co, ...)
-    if tag == ... then
-      return select (2, ...)
-    else
-      return for_wrap (co,
-                          co (
-                               yield (...)))
-    end
-  end
+local function for_wrap(co, ...)
+   if tag == ... then
+      return select(2, ...)
+   else
+      return for_wrap(co,
+                         co(
+                            yield(...)))
+   end
+end
 
-  function coroutine.wrap (f)
-    local co = wrap (function (...)
+function coroutine.wrap (f)
+   local co = wrap (function (...)
       return tag, f (...)
-    end)
-    return function (...)
-      return for_wrap (co,
-                          co (...))
-    end
-  end
+   end)
+   return function(...)
+      return for_wrap(co,
+                        co(...))
+   end
+end
 ```
 
-Which creates an extra closure relative to ordinary `wrap`, a modest price to
-pay\.
 
-
-### Ours
+### ours\(co\) \-> boolean
 
 Returns `true` if this nest created the coroutine\.
 
-I added this for debugging but I anticipate it being a useful question to
-answer\.
+I added this for debugging, but I anticipate it being a useful question to
+answer, if, for example, we've been passed a coroutine and have two functions
+with which to yield it\.
 
-Reminder that the coroutines are only special to the nest, implication being
-that it's good to provide a membership test for those coroutines that isn't
-calling one of the other functions and seeing what happens\.
+As a reminder, the only thing this function tells us is if our nest created
+the coroutine\.  It isn't the coroutines which are special, with the exceptionan important one\) of the final return value, but rather the nests\.
 
+\(
 ```lua
-  function coroutine.ours(co)
-     return not not _ours[co]
-  end
+function coroutine.ours(co)
+   return not not _ours[co]
+end
 ```
 
+```lua
+return coroutine
+```
 
 ```lua
-  return coroutine
 end
 ```
 
@@ -259,6 +251,24 @@ end
   Just a place to put a hunch that nested coroutines might be a good place to
 put the condition/restart system\.
 
+
+
+## Thread Predicates
+
+
+### complete\(ok, co\)
+
+Encapsulates the frequent check for a normal exit into one function\.
+
+```lua
+function thread.complete(ok, co)
+   if ok and status(co) == 'dead' then
+      return true
+   else
+      return false
+   end
+end
+```
 
 ### onloop\(\)
 
