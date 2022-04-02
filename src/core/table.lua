@@ -241,35 +241,6 @@ end
 
 
 
-
-
-
-
-function Tab.isarray(tab)
-   local i = 1
-   for k,_ in next, tab do
-      if k ~= i then return false end
-      i = i + 1
-   end
-   return true
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 local insert = assert(table.insert)
 
 function Tab.arraymap(tab, fn)

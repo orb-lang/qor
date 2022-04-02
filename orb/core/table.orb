@@ -227,35 +227,6 @@ end
 #/lua
 
 
-*** isarray(tab)
-
-Determines if =tab= is an array, i.e. a table whose only keys are a contiguous
-range of integers starting at 1.
-
-This seems potentially unsafe--pairs() technically may return keys in any order.
-In practice integer keys seem to be returned first and in-order, and certainly
-*if* there are only integer keys I imagine this holds true no matter what. If
-there are non-integer keys, well, things being out of order will cause us to
-fail fast, which is a good thing, so...bonus, I guess.
-
-NB: this function bears no resemblance to the actual behavior of Lua, which
-is frankly somewhat horrifying if one goes off-reservation with table
-behavior. (The actual Lua behavior uses a binary search, so some "holes"--
-e.g. {1, nil, 3}--will affect #, while others won't. We are more careful, at
-the cost of some performance.)
-
-#!lua
-function Tab.isarray(tab)
-   local i = 1
-   for k,_ in next, tab do
-      if k ~= i then return false end
-      i = i + 1
-   end
-   return true
-end
-#/lua
-
-
 *** arraymap(tab, fn)
 
 Iterates the array portion of =tab=, applying =fn= and storing the first

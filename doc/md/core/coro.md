@@ -10,7 +10,7 @@ local _base = require "core:core/_base"
 local thunk = assert(_base.thunk)
 ```
 
-### Type Predicate: coro\(str?\) \-> boolean
+### Type Predicate: coro\(coro?\) \-> boolean
 
   Each core extension named after a type can be used to test a value for that
 primitive type\.
