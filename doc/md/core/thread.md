@@ -70,7 +70,7 @@ local str_tags = setmetatable({}, {__mode = 'v'})
 #### nest\(tag\)
 
 ```lua
-local unique = require "cluster:unique"
+local unique = require "qor:core".unique
 
 function thread.nest(tag)
 ```

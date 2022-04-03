@@ -81,6 +81,23 @@ end
 
 
 
+local newproxy = newproxy or function() return {} end
+
+
+
+function _base.unique()
+   return newproxy()
+end
+
+
+
+
+
+
+
+
+
+
 
 
 

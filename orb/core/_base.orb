@@ -74,6 +74,23 @@ end
 #/lua
 
 
+*** unique()
+
+Uses =newproxy= if available, providing a fresh table otherwise.
+
+Call =unique= when you want a value whose only property is uniqueness.
+
+#!lua
+local newproxy = newproxy or function() return {} end
+#/lua
+
+#!lua
+function _base.unique()
+   return newproxy()
+end
+#/lua
+
+
 *** lazyloader(lazy_table) -> lazyloader
 
   This produces a callable table, from a map from table names to =require=
