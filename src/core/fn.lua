@@ -12,7 +12,8 @@
 
 
 
-local _base = require "core:core/_base"
+local _base = require "qor:core/_base"
+local unique = assert(_base.unique)
 
 
 
@@ -266,8 +267,8 @@ local _dynamics_call = setmetatable({}, {__mode = 'k'})
 local _dynamics_registry  = setmetatable({}, {__mode = 'kv'})
 
 local function dynamic(fn)
-   -- make a unique table as key
-   local uid = {}
+   -- make a unique as key
+   local uid = unique()
    _dynamics_call[uid] = fn
    local function dyn_fn(...)
       return _dynamics_call[uid](...)
@@ -392,7 +393,7 @@ fn.prehook, fn.posthook = prehook, posthook
 
 function fn.hookable(fn, pre, post)
    -- make a uid, add to _dynamics_call
-   local uid = {}
+   local uid = unique()
    _dynamics_call[uid] = fn
    local hookable = function(...)
                        return _call_with_hooks(uid, ...)
