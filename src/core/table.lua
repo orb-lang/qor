@@ -271,6 +271,18 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 function Tab.compact(tab, n)
    n = assert(n or tab.n, "a numeric value must be provided for non-ntables")
    local cursor, slot, empty = 1, nil, nil

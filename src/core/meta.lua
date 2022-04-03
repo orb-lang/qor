@@ -38,21 +38,36 @@ local meta = {}
 
 
 
-
-
 function meta.meta(MT, tab)
-   tab = tab or {}
-   if MT and MT.__index then
-      -- inherit
-      return setmetatable(tab, MT)
-   elseif MT then
-      -- decorate
-      MT.__index = MT
-      return MT
-   else
-      -- new metatable
-      local _M = tab
-      _M.__index = _M
+   error "this is no longer provided"
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function meta.metatables(tab)
+   local dupes = { tab = true }
+   local _M = tab
+   return function()
+      _M = getmetatable(_M)
+      if (_M == nil) or dupes[_M] then return nil end
+      dupes[_M] = true
       return _M
    end
 end

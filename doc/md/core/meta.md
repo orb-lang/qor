@@ -32,26 +32,41 @@ local meta = {}
 
 ### meta\.meta
 
-In my code there is a repeated pattern of use that is basic enough that I'm
-entering it into the global namespace as simple `meta`\.
+One of many metas, and this one I hope not in use\.
 
-\#NB
-from Cluster, import it as `meta`, and when this one is gone, we'll delete it\.
+We'll find out quick:
 
 ```lua
 function meta.meta(MT, tab)
-   tab = tab or {}
-   if MT and MT.__index then
-      -- inherit
-      return setmetatable(tab, MT)
-   elseif MT then
-      -- decorate
-      MT.__index = MT
-      return MT
-   else
-      -- new metatable
-      local _M = tab
-      _M.__index = _M
+   error "this is no longer provided"
+end
+```
+
+
+### metatables\(tab\)
+
+  Returns an iterator over all metatables of the table\.
+
+This corrects an important and pervasive bug in our code, one which has never
+yet shown up but is there nonetheless\.
+
+Because of the `__metatable` metamethod, a call to `getmetatable` can return
+literally anything\.  We assume, wrongly, that this return value will be either
+a table or falsey, and `metatables` will not try and correct for this: if a
+`__metatable` method returns something that isn't a table or `false`, we
+return it\.
+
+What the `metatables` iterator does is cycle checking, and when it finds one
+it returns `nil`\.
+
+```lua
+function meta.metatables(tab)
+   local dupes = { tab = true }
+   local _M = tab
+   return function()
+      _M = getmetatable(_M)
+      if (_M == nil) or dupes[_M] then return nil end
+      dupes[_M] = true
       return _M
    end
 end

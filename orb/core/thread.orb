@@ -72,6 +72,8 @@ local str_tags = setmetatable({}, {__mode = 'v'})
 **** nest(tag)
 
 #!lua
+local unique = require "cluster:unique"
+
 function thread.nest(tag)
 #/lua
 
@@ -85,12 +87,12 @@ If we have, we return it.
 
 #!lua
 if type(tag) == 'string' then
-   local _tag = str_tags[tag] or {}
+   local _tag = str_tags[tag] or unique()
    str_tags[tag] = _tag
    tag = _tag
 end
 
-tag = tag or {}
+tag = tag or unique()
 
 if _tagged[tag] then
    return _tagged[tag]
@@ -124,6 +126,7 @@ local _ours = setmetatable({}, {__mode = 'k'})
 
 function coroutine.create(f)
    local co =  create(function(...)
+      assert(type(tag) == 'userdata')
       return tag, f(...)
    end)
    _ours[co] = true

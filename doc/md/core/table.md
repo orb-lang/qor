@@ -255,6 +255,18 @@ end
 ```
 
 
+### \#NYI: copy\(tab, start, end, from\), truncate\(new\_top\)
+
+  I'll want efficient implementations of both of these to implement queue
+compaction in Deque\.  The current approach means that long\-running queues
+which are never completely empty will get larger and larger, because we use
+`false` as a placekeeper to prevent the Deque from being spilled onto the
+hash portion of the table\.
+
+Copy is slightly tricky in the one case that we're copying forward onto a
+slice which overlaps our original, so I'll get back to this\.
+
+
 ### compact\(tab, n\)
 
   Makes the array portion of a table compact up to `n`, by moving any values

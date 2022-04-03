@@ -70,6 +70,8 @@ local str_tags = setmetatable({}, {__mode = 'v'})
 #### nest\(tag\)
 
 ```lua
+local unique = require "cluster:unique"
+
 function thread.nest(tag)
 ```
 
@@ -83,12 +85,12 @@ If we have, we return it\.
 
 ```lua
 if type(tag) == 'string' then
-   local _tag = str_tags[tag] or {}
+   local _tag = str_tags[tag] or unique()
    str_tags[tag] = _tag
    tag = _tag
 end
 
-tag = tag or {}
+tag = tag or unique()
 
 if _tagged[tag] then
    return _tagged[tag]
@@ -122,6 +124,7 @@ local _ours = setmetatable({}, {__mode = 'k'})
 
 function coroutine.create(f)
    local co =  create(function(...)
+      assert(type(tag) == 'userdata')
       return tag, f(...)
    end)
    _ours[co] = true
@@ -228,9 +231,9 @@ answer, if, for example, we've been passed a coroutine and have two functions
 with which to yield it\.
 
 As a reminder, the only thing this function tells us is if our nest created
-the coroutine\.  It isn't the coroutines which are special, with the exceptionan important one\) of the final return value, but rather the nests\.
+the coroutine\.  It isn't the coroutines which are special, with the exception
+\(an important one\) of the final return value, but rather the nests\.
 
-\(
 ```lua
 function coroutine.ours(co)
    return not not _ours[co]
