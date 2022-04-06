@@ -322,46 +322,25 @@ end
 
 Returns the line and column corresponding to the given offset.
 
-Therefore we build up indices into newlines lazily on the first call, and use
-or extend that map for any subsequent searches of that string.
+The first call for a given string builds up a map of newlines, any subsequent
+call will either continue this map or perform a binary search over what
+currently exists.
 
-- [#Todo]  This is a straight port of the code in Node, which needs to be
-           converted to actually use binary search as documented above.
+This is merely good, we could chase optimal by choosing a stride based on the
+average line length instead.
 
-  - [X]  Binary search over map
 
-  - [X]  Lazy map construction: continue building up the map or binary search
-         backward
-
+**** weak string cache
 
 #!lua
 local _nl_map = setmetatable({}, { __mode = 'k' })
-
-local function _findPos(nl_map, target, start)
-   local line = start or 1
-   local cursor = 0
-   local col
-   while true do
-      if line > #nl_map then
-         -- technically two possibilities: node.last is after the
-         -- end of str, or it's on a final line with no newline.
-         -- the former would be quite exceptional, so we assume the latter
-         -- here.
-         -- so we need the old cursor back:
-         cursor = nl_map[line - 1][1] + 1
-         return line, target - cursor + 1
-      end
-      local next_nl = nl_map[line][1]
-      if target > next_nl then
-         -- advance
-         cursor = next_nl + 1
-         line = line + 1
-      else
-         return line, (target - cursor) + 1
-      end
-   end
-end
 #/lua
+
+
+**** locate(value, lower, upper)
+
+  Returns the column if the value is in bounds, or =nil, boolean= where the
+second value is =true= if the value is below the boundar.
 
 #!lua
 local function locate(value, lower, upper)
@@ -374,7 +353,17 @@ local function locate(value, lower, upper)
       return nil, false
    end
 end
+#/lua
 
+
+**** tryLine(target, linum, nl_map)
+
+Looks for the target on =linum=.
+
+Returns either the line and column, or =nil, boolean=, the second value
+returning =true= if the correct line is lower, =false= for higher.
+
+#!lua
 local function tryLine(target, linum, nl_map)
    --   math.ceil makes this "wobbly" around the limits, so
    --   we clamp accordingly
@@ -392,6 +381,12 @@ local function tryLine(target, linum, nl_map)
    end
 end
 #/lua
+
+
+*** nextLine(str, target, idx, nl_map)
+
+The lazy mapping form of =tryLine=, although here we return the next index to
+try if we haven't found the line and column.
 
 #!lua
 local function nextLine(str, target, idx, nl_map)
@@ -413,6 +408,11 @@ local function nextLine(str, target, idx, nl_map)
    end
 end
 #/lua
+
+
+**** linepos(str, offset)
+
+Combines these strategies to get the job done.
 
 #!lua
 local ceil = assert(math.ceil)
@@ -457,8 +457,8 @@ function String.linepos(str, offset)
       -- lower is a boolean until it's a column
       col = lower
    end
-   return line, col
 
+   return line, col
 end
 #/lua
 

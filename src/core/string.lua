@@ -333,36 +333,13 @@ end
 
 
 
-
-
-
-
 local _nl_map = setmetatable({}, { __mode = 'k' })
 
-local function _findPos(nl_map, target, start)
-   local line = start or 1
-   local cursor = 0
-   local col
-   while true do
-      if line > #nl_map then
-         -- technically two possibilities: node.last is after the
-         -- end of str, or it's on a final line with no newline.
-         -- the former would be quite exceptional, so we assume the latter
-         -- here.
-         -- so we need the old cursor back:
-         cursor = nl_map[line - 1][1] + 1
-         return line, target - cursor + 1
-      end
-      local next_nl = nl_map[line][1]
-      if target > next_nl then
-         -- advance
-         cursor = next_nl + 1
-         line = line + 1
-      else
-         return line, (target - cursor) + 1
-      end
-   end
-end
+
+
+
+
+
 
 
 
@@ -377,6 +354,16 @@ local function locate(value, lower, upper)
    end
 end
 
+
+
+
+
+
+
+
+
+
+
 local function tryLine(target, linum, nl_map)
    --   math.ceil makes this "wobbly" around the limits, so
    --   we clamp accordingly
@@ -385,7 +372,6 @@ local function tryLine(target, linum, nl_map)
    elseif linum < 1 then
       linum = 1
    end
-   --]]
    local prev_nl, next_nl = nl_map[linum - 1] or 0, nl_map[linum]
    local col, lower_than = locate(target, prev_nl, next_nl)
    if col then
@@ -394,6 +380,12 @@ local function tryLine(target, linum, nl_map)
       return nil, lower_than
    end
 end
+
+
+
+
+
+
 
 
 
@@ -415,6 +407,11 @@ local function nextLine(str, target, idx, nl_map)
      return nil, next_nl + 1
    end
 end
+
+
+
+
+
 
 
 
@@ -460,8 +457,8 @@ function String.linepos(str, offset)
       -- lower is a boolean until it's a column
       col = lower
    end
-   return line, col
 
+   return line, col
 end
 
 
