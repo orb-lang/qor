@@ -284,7 +284,6 @@ but the rules are potentially quite complicated wrt special Unicode characters
 like ZWJ and NBSP, so let's stick with the simple standard for now.
 
 #!lua
-local find = assert(string.find)
 function String.isidentifier(str)
    return find(str, "^[a-zA-Z_][a-zA-Z0-9_]+$") == 1
 end
@@ -338,7 +337,7 @@ or extend that map for any subsequent searches of that string.
 
 
 #!lua
-local _nl_map = setmetatable({}, { __mode = 'kv' })
+local _nl_map = setmetatable({}, { __mode = 'k' })
 
 local function _findPos(nl_map, target, start)
    local line = start or 1
@@ -360,30 +359,51 @@ local function _findPos(nl_map, target, start)
          cursor = next_nl + 1
          line = line + 1
       else
-         return line, target - cursor + 1
+         return line, (target - cursor) + 1
       end
    end
 end
 #/lua
 
 #!lua
+local function nextLine(str, target, idx, nl_map)
+   local prev_nl, next_nl = nl_map[#nl_map] or 0,
+                            find(str, "\n", idx)
+
+   if not next_nl then
+      next_nl = #str + 1 -- (I think? fake newline)
+   end
+   nl_map[#nl_map + 1] = next_nl
+   if target > next_nl then
+      return nil, next_nl + 1
+   else
+      -- this is just to bust the cache until I write the memoized search
+      local top = #nl_map
+      table.clear(nl_map)
+      return top, target - prev_nl
+   end
+
+end
+#/lua
+
+#!lua
 function String.linepos(str, offset)
-   local nl_map
+   local nl_map;
+   assert(offset <= #str, "can't find a position longer than the string!")
    if _nl_map[str] then
       nl_map = _nl_map[str]
    else
-      nl_map = findall(str, "\n")
-      -- should we add a final here? I think so, #str + 1, fake newline
+      nl_map = {}
       _nl_map[str] = nl_map
    end
-   if not nl_map then
-      -- there are no newlines:
-      return 1, offset
-   end
    -- otherwise find the offsets
-   local line, col = _findPos(nl_map, offset)
+   local line, idx = nil, 1
+   while not line do
+      line, idx = nextLine(str, offset, idx, nl_map)
+   end
 
-   return line, col
+   return line, idx -- which becomes column when line is truthy
+
 end
 #/lua
 

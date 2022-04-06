@@ -4,12 +4,26 @@
   A core library extending [[libuv][httk://]], specifically the [[luv]
 [httk://]] bindings.
 
+
+*** Status
+
+To be consistent with other synonym tables, this should contain all of UV.
+
+I'm delaying that because I think presenting a cleaner table-oriented
+interface is the better approach.
+
+Might rename this module "loop" to reflect that.
+
+
 #!lua
 local assert = assert or error "no assert"
 
 local Uv = {}
 
 local uv = assert(require "luv")
+
+local s = require "status:status" ()
+s.chatty = true
 #/lua
 
 
@@ -32,6 +46,32 @@ function Uv.deferby(event, ms)
    timer:start(ms, 0, _event)
 
    return;
+end
+#/lua
+
+
+*** Uv.once(event)
+
+Probably extend this to take arguments.  =event= must be a thread or callable.
+
+This is ok for one-shot applications, I'll want to write a generator so we
+can reuse handles for anything long running.
+
+#!lua
+local resume = assert(coroutine.resume)
+
+function Uv.once(event)
+   local idle = uv.new_idle()
+   idle:start(function()
+      idle:stop()
+      idle:close()
+      s:chat("executing event of type %s", type(event))
+      if type(event) == 'thread' then
+         resume(event)
+      else
+         event()
+      end
+   end)
 end
 #/lua
 
