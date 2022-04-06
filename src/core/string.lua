@@ -366,23 +366,45 @@ end
 
 
 
+local function locate(value, lower, upper)
+   if value >= lower and value <= upper then
+      return value - lower
+   elseif value < lower then
+      return nil, true
+   else
+      return nil, false
+   end
+end
+
+local function tryLine(target, linum, nl_map)
+   local prev_nl, next_nl = nl_map[linum - 1] or 0, nl_map[linum]
+   local col, lower_than = locate(target, prev_nl, next_nl)
+   if col then
+      return linum, col
+   else
+      return nil, lower_than
+   end
+end
+
+
+
 local function nextLine(str, target, idx, nl_map)
    local prev_nl, next_nl = nl_map[#nl_map] or 0,
                             find(str, "\n", idx)
 
    if not next_nl then
-      next_nl = #str + 1 -- (I think? fake newline)
-   end
-   nl_map[#nl_map + 1] = next_nl
-   if target > next_nl then
-      return nil, next_nl + 1
-   else
-      -- this is just to bust the cache until I write the memoized search
-      local top = #nl_map
-      table.clear(nl_map)
-      return top, target - prev_nl
+      -- this works because we pre-exclude target > #str
+      next_nl = #str + 1
    end
 
+   nl_map[#nl_map + 1] = next_nl
+   local line, col = tryLine(target, #nl_map, nl_map)
+   if line then
+      table.clear(nl_map)
+      return line, col
+   else
+     return nil, next_nl + 1
+   end
 end
 
 
