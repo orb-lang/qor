@@ -402,7 +402,7 @@ local function nextLine(str, target, idx, nl_map)
    nl_map[#nl_map + 1] = next_nl
    local line, col = tryLine(target, #nl_map, nl_map)
    if line then
-      table.clear(nl_map)
+      --table.clear(nl_map)
       return line, col
    else
      return nil, next_nl + 1
@@ -420,13 +420,28 @@ function String.linepos(str, offset)
       nl_map = {}
       _nl_map[str] = nl_map
    end
-   -- otherwise find the offsets
-   local line, idx = nil, 1
-   while not line do
-      line, idx = nextLine(str, offset, idx, nl_map)
-   end
+   local mapped_to = nl_map[#nl_map] or 0
 
-   return line, idx -- which becomes column when line is truthy
+   local line, col, idx = nil, nil, 1
+   if offset > mapped_to then
+      -- build up the map and return what we find
+      idx = mapped_to + 1
+      repeat
+         line, col = nextLine(str, offset, idx, nl_map)
+         if not line then
+            idx = col
+         end
+      until line
+   else
+      -- linear search first...
+      repeat
+         line, col = tryLine(offset, idx, nl_map)
+         if not line and col == false then
+            idx = idx + 1
+         end
+      until line
+   end
+   return line, col
 
 end
 ```
