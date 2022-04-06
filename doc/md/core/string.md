@@ -369,9 +369,10 @@ end
 
 ```lua
 local function locate(value, lower, upper)
-   if value >= lower and value <= upper then
+   if value > lower
+      and value <= upper then
       return value - lower
-   elseif value < lower then
+   elseif value <= lower then
       return nil, true
    else
       return nil, false
@@ -379,6 +380,14 @@ local function locate(value, lower, upper)
 end
 
 local function tryLine(target, linum, nl_map)
+   --   math.ceil makes this "wobbly" around the limits, so
+   --   we clamp accordingly
+   if linum > #nl_map then
+      linum = nl_map
+   elseif linum < 1 then
+      linum = 1
+   end
+   --]]
    local prev_nl, next_nl = nl_map[linum - 1] or 0, nl_map[linum]
    local col, lower_than = locate(target, prev_nl, next_nl)
    if col then
@@ -411,6 +420,8 @@ end
 ```
 
 ```lua
+local ceil = assert(math.ceil)
+
 function String.linepos(str, offset)
    local nl_map;
    assert(offset <= #str, "can't find a position longer than the string!")
@@ -433,13 +444,23 @@ function String.linepos(str, offset)
          end
       until line
    else
-      -- linear search first...
+      -- binary search
+      local stride = ceil(#nl_map / 2)
+      local idx = stride
+      local lower;
       repeat
-         line, col = tryLine(offset, idx, nl_map)
-         if not line and col == false then
-            idx = idx + 1
+         line, lower = tryLine(offset, idx, nl_map)
+         if not line then
+            stride = ceil(stride / 2)
+            if lower then
+               idx = idx - stride
+            else
+               idx = idx + stride
+            end
          end
       until line
+      -- lower is a boolean until it's a column
+      col = lower
    end
    return line, col
 
