@@ -34,12 +34,12 @@ Returns an array of the keys of a table, as well as the number of keys.
 #!lua
 local function keys(tab)
    assert(type(tab) == "table", "keys must receive a table")
-   local keys = {}
+   local _keys = {}
    for k, _ in pairs(tab) do
-      keys[#keys + 1] = k
+      _keys[#_keys + 1] = k
    end
 
-   return keys, #keys
+   return _keys, #_keys
 end
 
 Tab.keys = keys
@@ -514,6 +514,52 @@ function Tab.sortedpairs(tab, sort, threshold)
       if i > top then return nil end
       return _keys[i], tab[_keys[i]]
    end
+end
+#/lua
+
+
+*** allkeys(tab, sort?) -> {keys*}, number
+
+  Returns all keys which we can determine may be indexed against the subject
+table.  All keys at the top of the prototype chain are returned before any of
+the keys below it.
+
+=sort= is tested for truthiness and =keysort= is used on /each layer/ of keys
+before they are returned.
+
+This deduplicates keys, so if a key is defined twice, it is returned only the
+first time it is defined.
+
+#!lua
+local insert = assert(table.insert)
+
+local function indexed(_M)
+   return (type(_M) == 'table') and _M.__index
+end
+
+function Tab.allkeys(tab, sort)
+   local _M = getmetatable(tab)
+   if not indexed(_M) then return keys(tab) end
+
+   local indices = {(keys(tab))}
+   repeat
+      if indexed(_M) then
+         local _keys = keys(_M.__index)
+         insert(indices, _keys)
+      end
+      _M = getmetatable(_M.__index)
+   until not _M
+   local allkeys, seen = {}, {}
+   for i = #indices, 1, -1 do
+      for j = 1, #indices[i] do
+         local k = indices[i][j]
+         if not seen[k] then
+            insert(allkeys, k)
+            seen[k] = true
+         end
+      end
+   end
+   return allkeys, #allkeys
 end
 #/lua
 
