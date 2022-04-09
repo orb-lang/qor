@@ -539,7 +539,7 @@ local function indexed(_M)
    return (type(_M) == 'table') and _M.__index
 end
 
-function Tab.allkeys(tab, sorting)
+local function allkeys(tab, sorting)
    local _M = getmetatable(tab)
    if not indexed(_M) then
       local _k = keys(tab)
@@ -572,6 +572,8 @@ function Tab.allkeys(tab, sorting)
    end
    return allkeys, #allkeys
 end
+
+Tab.allkeys = allkeys
 #/lua
 
 
@@ -586,47 +588,17 @@ It will (just to be clear) return all *values* as whatever indexing the
 subject table returns, rather than the value which the table defining that
 slot has, if anything.
 
-Note: this is one of an increasing number of applications where we find
-ourselves unduly hampered by some uses of an __index function.  There are
-plenty of cases where the keys which will be answered by that function are
-static and available, and we will likely end up putting those keys somewhere
-accessible in =__meta=.
 
-At that point (or before perhaps) I will break out an =allkeys= from this and
-use that to generate the input to the iterator.
-
-Well. Exercising this initial implementation has made it clear that =allkeys=
-is both the hard part to write, and the easy part to test. =allpairs= is an
-almost trivial application of it.
 
 #!lua
-local insert = assert(table.insert)
 
-local function indexed(_M)
-   return type(_M) == 'table' and _M.__index and true
-end
-
-function Tab.allpairs(tab)
-   local _M = getmetatable(tab)
-   if not indexed(_M) then return pairs(tab) end
-
-   local indices = {_M.__index}
-   while true do
-      local _keys = keys(_M.__index)
-      insert(indices, _keys)
-      _M = getmetatable(_M)
-      if not indexed(_M) then
-         break
-      end
-   end
-   local allkeys = flatten(indices)
-   local idx = 1
+function Tab.allpairs(tab, sort)
+   local all_keys = allkeys(tab, sort)
+   local i = 0
    return function()
-      local key = allkeys[idx]
-      idx = idx + 1
-      if key then
-         return key, tab[key]
-      end
+      i = i + 1
+      local k = all_keys[i]
+      return k, tab[k]
    end
 end
 #/lua

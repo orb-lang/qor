@@ -539,7 +539,7 @@ local function indexed(_M)
    return (type(_M) == 'table') and _M.__index
 end
 
-function Tab.allkeys(tab, sorting)
+local function allkeys(tab, sorting)
    local _M = getmetatable(tab)
    if not indexed(_M) then
       local _k = keys(tab)
@@ -573,6 +573,7 @@ function Tab.allkeys(tab, sorting)
    return allkeys, #allkeys
 end
 
+Tab.allkeys = allkeys
 
 
 
@@ -591,42 +592,13 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-local insert = assert(table.insert)
-
-local function indexed(_M)
-   return type(_M) == 'table' and _M.__index and true
-end
-
-function Tab.allpairs(tab)
-   local _M = getmetatable(tab)
-   if not indexed(_M) then return pairs(tab) end
-
-   local indices = {_M.__index}
-   while true do
-      local _keys = keys(_M.__index)
-      insert(indices, _keys)
-      _M = getmetatable(_M)
-      if not indexed(_M) then
-         break
-      end
-   end
-   local allkeys = flatten(indices)
-   local idx = 1
+function Tab.allpairs(tab, sort)
+   local all_keys = allkeys(tab, sort)
+   local i = 0
    return function()
-      local key = allkeys[idx]
-      idx = idx + 1
-      if key then
-         return key, tab[key]
-      end
+      i = i + 1
+      local k = all_keys[i]
+      return k, tab[k]
    end
 end
 
