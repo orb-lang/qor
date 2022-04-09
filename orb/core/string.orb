@@ -368,7 +368,7 @@ local function tryLine(target, linum, nl_map)
    --   math.ceil makes this "wobbly" around the limits, so
    --   we clamp accordingly
    if linum > #nl_map then
-      linum = nl_map
+      linum = #nl_map
    elseif linum < 1 then
       linum = 1
    end

@@ -32,6 +32,42 @@ end
 
 
 
+local function keys(tab)
+   assert(type(tab) == "table", "keys must receive a table")
+   local keys = {}
+   for k, _ in pairs(tab) do
+      keys[#keys + 1] = k
+   end
+
+   return keys, #keys
+end
+
+Tab.keys = keys
+
+
+
+
+
+
+
+
+
+function Tab.values(tab)
+   assert(type(tab) == "table", "values must receive a table")
+   for _, v in pairs(tab) do
+      vals[#vals + 1] = v
+   end
+
+   return vals, #vals
+end
+
+
+
+
+
+
+
+
 
 
 
@@ -119,7 +155,7 @@ local function _hf__index(has_field, field)
    has_field[field] = function(tab)
       return _hasfield(tab, field)
    end
-   return has_field[field], "hmm"
+   return has_field[field]
 end
 
 local function _hf__call(_, tab, field)
@@ -153,6 +189,18 @@ local function _clone(tab, depth)
    return setmetatable(clone, getmetatable(tab))
 end
 Tab.clone = _clone
+
+
+
+
+
+
+
+
+
+
+
+Tab.clone1 = require "table.clone"
 
 
 
@@ -347,7 +395,7 @@ end
 
 
 
-function Tab.flatten(tab, level)
+local function flatten(tab, level)
    local ret, copies = {}, {}
    local function _flat(t, depth)
       if level and depth > level then
@@ -368,6 +416,8 @@ function Tab.flatten(tab, level)
    _flat(tab, 0)
    return ret
 end
+
+Tab.flatten = flatten
 
 
 
@@ -418,17 +468,6 @@ end
 
 
 
-function Tab.select()
-   error "this no longer exists, and I thought it wasn't used."
-end
-
-
-
-
-
-
-
-
 
 
 function Tab.keysort(a, b)
@@ -461,7 +500,6 @@ end
 
 local keysort = assert(Tab.keysort)
 local nkeys, _sort = assert(table.nkeys), assert(table.sort)
-local keys; -- as defined below
 
 function Tab.sortedpairs(tab, sort, threshold)
    sort = sort or keysort
@@ -475,6 +513,63 @@ function Tab.sortedpairs(tab, sort, threshold)
       i = i + 1
       if i > top then return nil end
       return _keys[i], tab[_keys[i]]
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local insert = assert(table.insert)
+
+local function indexed(_M)
+   return type(_M) == 'table' and _M.__index and true
+end
+
+function Tab.allpairs(tab)
+   local _M = getmetatable(tab)
+   if not indexed(_M) then return pairs(tab) end
+
+   local indices = {_M.__index}
+   while true do
+      local _keys = keys(_M.__index)
+      insert(indices, _keys)
+      _M = getmetatable(_M)
+      if not indexed(_M) then
+         break
+      end
+   end
+   local allkeys = flatten(indices)
+   local idx = 1
+   return function()
+      local key = allkeys[idx]
+      idx = idx + 1
+      if key then
+         return key, tab[key]
+      end
    end
 end
 
@@ -520,40 +615,6 @@ end
 
 
 
-function Tab.keys(tab)
-   assert(type(tab) == "table", "keys must receive a table")
-   local keys = {}
-   for k, _ in pairs(tab) do
-      keys[#keys + 1] = k
-   end
-
-   return keys, #keys
-end
-
-keys = Tab.keys
-
-
-
-
-
-
-function Tab.values(tab)
-   assert(type(tab) == "table", "values must receive a table")
-   local vals = {}
-   for _, v in pairs(tab) do
-      vals[#vals + 1] = v
-   end
-
-   return vals, #vals
-end
-
-
-
-
-
-
-
-
 
 
 
@@ -585,8 +646,6 @@ end
 
 
 
-
-local insert = assert(table.insert)
 
 local sp_er = "table<core>.splice: "
 local _e_1 = sp_er .. "$1 must be a table"
@@ -754,7 +813,7 @@ function Tab.safeget(tab, key)
    while tab ~= nil do
       local val = rawget(tab, key)
       if val ~= nil then return val end
-      local M = getmetatable(tab)
+      local M =  (tab)
       if M then
          tab = rawget(M, '__index')
          if type(tab) ~= 'table' then

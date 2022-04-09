@@ -27,6 +27,42 @@ end
 ```
 
 
+### keys\(tab\)
+
+Returns an array of the keys of a table, as well as the number of keys\.
+
+```lua
+local function keys(tab)
+   assert(type(tab) == "table", "keys must receive a table")
+   local keys = {}
+   for k, _ in pairs(tab) do
+      keys[#keys + 1] = k
+   end
+
+   return keys, #keys
+end
+
+Tab.keys = keys
+```
+
+
+### values\(tab\)
+
+Returns an array of the values of a table, as well as the number of values\.
+
+
+```lua
+function Tab.values(tab)
+   assert(type(tab) == "table", "values must receive a table")
+   for _, v in pairs(tab) do
+      vals[#vals + 1] = v
+   end
+
+   return vals, #vals
+end
+```
+
+
 ## n\_table
 
   Sometimes we want to be able to include `nil` in an array\-type table\.  The
@@ -119,7 +155,7 @@ local function _hf__index(has_field, field)
    has_field[field] = function(tab)
       return _hasfield(tab, field)
    end
-   return has_field[field], "hmm"
+   return has_field[field]
 end
 
 local function _hf__call(_, tab, field)
@@ -153,6 +189,18 @@ local function _clone(tab, depth)
    return setmetatable(clone, getmetatable(tab))
 end
 Tab.clone = _clone
+```
+
+
+### clone1\(tab\)
+
+Our LuaJIT distribution comes with a fast JITtable clone function, which is
+limited to shallow clones only\.
+
+We can `require "table.clone"` it, but it's better made available as `clone1`\.
+
+```lua
+Tab.clone1 = require "table.clone"
 ```
 
 
@@ -347,7 +395,7 @@ flatten(tab, 1)
 ```
 
 ```lua
-function Tab.flatten(tab, level)
+local function flatten(tab, level)
    local ret, copies = {}, {}
    local function _flat(t, depth)
       if level and depth > level then
@@ -368,6 +416,8 @@ function Tab.flatten(tab, level)
    _flat(tab, 0)
    return ret
 end
+
+Tab.flatten = flatten
 ```
 
 
@@ -413,17 +463,6 @@ end
 ```
 
 
-### gone: select\(tab, key\) \-> err\!
-
-This isn't being used, I'm pretty sure, but let's make it yell for awhile\.
-
-```lua
-function Tab.select()
-   error "this no longer exists, and I thought it wasn't used."
-end
-```
-
-
 ### keysort\(a, b\)
 
 Sort callback function that puts strings first, numbers next, and everything
@@ -461,7 +500,6 @@ predicate returning `true | false` will work\.
 ```lua
 local keysort = assert(Tab.keysort)
 local nkeys, _sort = assert(table.nkeys), assert(table.sort)
-local keys; -- as defined below
 
 function Tab.sortedpairs(tab, sort, threshold)
    sort = sort or keysort
@@ -475,6 +513,63 @@ function Tab.sortedpairs(tab, sort, threshold)
       i = i + 1
       if i > top then return nil end
       return _keys[i], tab[_keys[i]]
+   end
+end
+```
+
+
+### allpairs\(tab\) \-> \(\) \-> key, value
+
+Returns every valid key/value pair it can find\.
+
+This begins with the 'highest' fields of the index chain, working its way down
+to the slots only filled on the subject table\.
+
+It will \(just to be clear\) return all **values** as whatever indexing the
+subject table returns, rather than the value which the table defining that
+slot has, if anything\.
+
+Note: this is one of an increasing number of applications where we find
+ourselves unduly hampered by some uses of an \_\_index function\.  There are
+plenty of cases where the keys which will be answered by that function are
+static and available, and we will likely end up putting those keys somewhere
+accessible in `__meta`\.
+
+At that point \(or before perhaps\) I will break out an `allkeys` from this and
+use that to generate the input to the iterator\.
+
+Well\. Exercising this initial implementation has made it clear that `allkeys`
+is both the hard part to write, and the easy part to test\. `allpairs` is an
+almost trivial application of it\.
+
+```lua
+local insert = assert(table.insert)
+
+local function indexed(_M)
+   return type(_M) == 'table' and _M.__index and true
+end
+
+function Tab.allpairs(tab)
+   local _M = getmetatable(tab)
+   if not indexed(_M) then return pairs(tab) end
+
+   local indices = {_M.__index}
+   while true do
+      local _keys = keys(_M.__index)
+      insert(indices, _keys)
+      _M = getmetatable(_M)
+      if not indexed(_M) then
+         break
+      end
+   end
+   local allkeys = flatten(indices)
+   local idx = 1
+   return function()
+      local key = allkeys[idx]
+      idx = idx + 1
+      if key then
+         return key, tab[key]
+      end
    end
 end
 ```
@@ -511,40 +606,6 @@ function Tab.deleterange(tab, start, stop)
    for i = start, #tab do
       tab[i] = tab[i + offset]
    end
-end
-```
-
-
-### keys\(tab\)
-
-Returns an array of the keys of a table\.
-
-```lua
-function Tab.keys(tab)
-   assert(type(tab) == "table", "keys must receive a table")
-   local keys = {}
-   for k, _ in pairs(tab) do
-      keys[#keys + 1] = k
-   end
-
-   return keys, #keys
-end
-
-keys = Tab.keys
-```
-
-
-### values\(tab\)
-
-```lua
-function Tab.values(tab)
-   assert(type(tab) == "table", "values must receive a table")
-   local vals = {}
-   for _, v in pairs(tab) do
-      vals[#vals + 1] = v
-   end
-
-   return vals, #vals
 end
 ```
 
@@ -586,8 +647,6 @@ If `index` is `nil` or omitted, the contents of `to_add` will be inserted at the
 Returns nothing, again in accordance with existing functions\.
 
 ```lua
-local insert = assert(table.insert)
-
 local sp_er = "table<core>.splice: "
 local _e_1 = sp_er .. "$1 must be a table"
 local _e_2 = sp_er .. "$2 must be a number"
@@ -754,7 +813,7 @@ function Tab.safeget(tab, key)
    while tab ~= nil do
       local val = rawget(tab, key)
       if val ~= nil then return val end
-      local M = getmetatable(tab)
+      local M =  (tab)
       if M then
          tab = rawget(M, '__index')
          if type(tab) ~= 'table' then
