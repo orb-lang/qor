@@ -499,15 +499,15 @@ end
 
 
 local keysort = assert(Tab.keysort)
-local nkeys, _sort = assert(table.nkeys), assert(table.sort)
+local nkeys, sort = assert(table.nkeys), assert(table.sort)
 
-function Tab.sortedpairs(tab, sort, threshold)
-   sort = sort or keysort
+function Tab.sortedpairs(tab, sorter, threshold)
+   sorter = sorter or keysort
    if threshold and threshold > nkeys(tab) then
       return pairs(tab)
    end
    local _keys = keys(tab)
-   _sort(_keys, keysort)
+   sort(_keys, sorter)
    local i, top = 0, #_keys
    return function()
       i = i + 1
@@ -531,15 +531,23 @@ end
 
 
 
+
+
 local insert = assert(table.insert)
 
 local function indexed(_M)
    return (type(_M) == 'table') and _M.__index
 end
 
-function Tab.allkeys(tab, sort)
+function Tab.allkeys(tab, sorting)
    local _M = getmetatable(tab)
-   if not indexed(_M) then return keys(tab) end
+   if not indexed(_M) then
+      local _k = keys(tab)
+      if sorting then
+         sort(_k, keysort)
+      end
+      return _k
+   end
 
    local indices = {(keys(tab))}
    repeat
@@ -551,6 +559,9 @@ function Tab.allkeys(tab, sort)
    until not _M
    local allkeys, seen = {}, {}
    for i = #indices, 1, -1 do
+      if sorting then
+         sort(indices[i], keysort)
+      end
       for j = 1, #indices[i] do
          local k = indices[i][j]
          if not seen[k] then

@@ -499,15 +499,15 @@ predicate returning `true | false` will work\.
 
 ```lua
 local keysort = assert(Tab.keysort)
-local nkeys, _sort = assert(table.nkeys), assert(table.sort)
+local nkeys, sort = assert(table.nkeys), assert(table.sort)
 
-function Tab.sortedpairs(tab, sort, threshold)
-   sort = sort or keysort
+function Tab.sortedpairs(tab, sorter, threshold)
+   sorter = sorter or keysort
    if threshold and threshold > nkeys(tab) then
       return pairs(tab)
    end
    local _keys = keys(tab)
-   _sort(_keys, keysort)
+   sort(_keys, sorter)
    local i, top = 0, #_keys
    return function()
       i = i + 1
@@ -518,16 +518,18 @@ end
 ```
 
 
-### allkeys\(tab, sort?\) \-> \{keys\*\}, number
+### allkeys\(tab, sorting?\) \-> \{keys\*\}, number
 
   Returns all keys which we can determine may be indexed against the subject
 table\.  All keys at the top of the prototype chain are returned before any of
 the keys below it\.
 
-`sort` is tested for truthiness and `keysort` is used on *each layer* of keys
-before they are returned\.
+`sorting` is tested for truthiness, if present, `keysort` is used on *each
+layer* of keys before they are returned\.  This is forward\-compatible with
+later passing an optional function to override keysort, but in any case, all
+top keys are returned before any bottom ones\.
 
-This deduplicates keys, so if a key is defined twice, it is returned only the
+This de\-duplicates keys\.  If a key is defined twice, it is returned only the
 first time it is defined\.
 
 ```lua
@@ -537,9 +539,15 @@ local function indexed(_M)
    return (type(_M) == 'table') and _M.__index
 end
 
-function Tab.allkeys(tab, sort)
+function Tab.allkeys(tab, sorting)
    local _M = getmetatable(tab)
-   if not indexed(_M) then return keys(tab) end
+   if not indexed(_M) then
+      local _k = keys(tab)
+      if sorting then
+         sort(_k, keysort)
+      end
+      return _k
+   end
 
    local indices = {(keys(tab))}
    repeat
@@ -551,6 +559,9 @@ function Tab.allkeys(tab, sort)
    until not _M
    local allkeys, seen = {}, {}
    for i = #indices, 1, -1 do
+      if sorting then
+         sort(indices[i], keysort)
+      end
       for j = 1, #indices[i] do
          local k = indices[i][j]
          if not seen[k] then
