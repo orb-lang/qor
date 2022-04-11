@@ -466,7 +466,7 @@ end
 ### keysort\(a, b\)
 
 Sort callback function that puts strings first, numbers next, and everything
-else at the end in no particular order\. Used by [NO default.domain IN MANIFESTrepr/MISSING_POST_PROJECTdoc/md/tabulate.md](NO default.domain IN MANIFESTrepr/MISSING_POST_PROJECTdoc/md/tabulate.md) to sort
+else at the end in no particular order\. Used by [https://gitlab.com/special-circumstance/repr/-/blob/trunk/doc/md/tabulate.md](https://gitlab.com/special-circumstance/repr/-/blob/trunk/doc/md/tabulate.md) to sort
 table keys\.
 
 ```lua
@@ -586,12 +586,9 @@ to the slots only filled on the subject table\.
 
 It will \(just to be clear\) return all **values** as whatever indexing the
 subject table returns, rather than the value which the table defining that
-slot has, if anything\.
-
-
+slot has, if they happen to be different\.
 
 ```lua
-
 function Tab.allpairs(tab, sort)
    local all_keys = allkeys(tab, sort)
    local i = 0

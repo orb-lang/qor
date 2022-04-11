@@ -589,9 +589,6 @@ Tab.allkeys = allkeys
 
 
 
-
-
-
 function Tab.allpairs(tab, sort)
    local all_keys = allkeys(tab, sort)
    local i = 0

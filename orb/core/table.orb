@@ -586,12 +586,9 @@ to the slots only filled on the subject table.
 
 It will (just to be clear) return all *values* as whatever indexing the
 subject table returns, rather than the value which the table defining that
-slot has, if anything.
-
-
+slot has, if they happen to be different.
 
 #!lua
-
 function Tab.allpairs(tab, sort)
    local all_keys = allkeys(tab, sort)
    local i = 0

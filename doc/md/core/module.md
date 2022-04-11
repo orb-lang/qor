@@ -17,7 +17,7 @@ local require, pack, unpack = assert(require), assert(pack), assert(unpack)
 
 ### lazyloader\(tab\)
 
-Defined in the [base module](NO default.domain IN MANIFESTqor/MISSING_POST_PROJECTdoc/md/core/_base.md)\.
+Defined in the [base module](https://gitlab.com/special-circumstance/qor/-/blob/trunk/doc/md/core/_base.md)\.
 
 ```lua
 Mod.lazyloader = assert(_base.lazyloader)

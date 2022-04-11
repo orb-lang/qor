@@ -1,0 +1,109 @@
+* Function Sets
+
+
+** What
+
+A set is a sort of composable membership test.
+
+Our literal sets are discrete: we take a collection and map the elements as
+keys, with the value =true=.  This =set[elem]= is our membership test, and
+we overload arithmetic to compose these.
+
+Function sets are indexable tables backed by functions, with operator
+overloading which composes both with other function sets and with discrete
+sets.
+
+Let's write shall we.
+
+#!lua
+local FSet, FSet_m = {}, {}
+#/lua
+
+It might be worth 'clusterizing' this once we have a recipe for functional
+indexing.
+
+
+**** operators
+
+All of these will call =new= in the process of creating a new FSet, so we
+predeclare them.
+
+#!lua
+local __add, __sub, __mod;
+#/lua
+
+*** new(fn: (one) -> true | nil) -> FSet
+
+  We adjust the function signature so that the table itself is ignored by the
+predicate function.
+
+Take care that the predicate function can throw no errors!
+
+
+**** spread(fn: (<T1>) -> <T2>) -> (one, <T1>) -> <T2>
+
+How's that for a type signature...
+
+#!lua
+local function spread(fn)
+   return function(_, a)
+      return fn(a)
+   end
+end
+#/lua
+
+#!lua
+local function readonly(tab, key, val)
+   error("can't assign " .. key .. " to a function set")
+end
+
+local function new(fn)
+   local fset = setmetatable({}, { __index = spread(fn),
+                                   __add = __add,
+                                   __sub = __sub,
+                                   __mod = __mod,
+                                   __newindex = readonly })
+   return fset
+end
+#/lua
+
+
+*** Union: __add   set + set
+
+#!lua
+__add = function(left, right)
+   local pred = function(elem)
+      return left[elem] or right[elem]
+   end
+   return new(pred)
+end
+#/lua
+
+
+*** Difference: __sub set - set
+
+#!lua
+__sub = function(left, right)
+   local pred = function(elem)
+      return (left[elem] and (not right[elem])) or nil
+   end
+   return new(pred)
+end
+#/lua
+
+
+*** Intersection: __mod set % set
+
+#!lua
+__mod = function(left, right)
+   local pred = function(elem)
+      return left[elem] and right[elem]
+   end
+   return new(pred)
+end
+#/lua
+
+
+#!lua
+return new
+#/lua
