@@ -2,6 +2,9 @@
 
 ```lua
 local Math = {}
+for k, v in pairs(math) do
+   Math[k] = v
+end
 ```
 
 ### Math\.inbounds\(value, lower, upper\)
