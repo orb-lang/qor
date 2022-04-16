@@ -619,19 +619,31 @@ end
 ```
 
 
-### deleterange\(tab, start, stop\)
+### deleterange\(tab, start, stop?\)
 
 Deletes the range of array indices from `start` to `stop`, inclusive,
 from `tab`\. If the range is empty \(`start` greater than `stop`\), does
-nothing\.
+nothing\.  If stop is not provided, it is `#tab`\.
 
 ```lua
-function Tab.deleterange(tab, start, stop)
+local function deleterange(tab, start, stop)
+   stop = stop or #tab
    if start > stop then return end
    local offset = stop - start + 1
    for i = start, #tab do
       tab[i] = tab[i + offset]
    end
+end
+
+Tab.deleterange = deleterange
+```
+
+
+### truncate\(tab, from\)
+
+```lua
+function Tab.truncate(tab, from)
+   return deleterange(tab, from)
 end
 ```
 
@@ -667,8 +679,8 @@ end
 order is compatible with existing functions and method syntax, i\.e\. `index`
 may be omitted altogether even though it is not the last argument\.
 
-If `index` is `nil` or omitted, the contents of `to_add` will be inserted at the end of
-`tab`\.
+If `index` is `nil` or omitted, the contents of `to_add` will be inserted at
+the end of `tab`\.
 
 Returns nothing, again in accordance with existing functions\.
 
@@ -779,6 +791,30 @@ Adds all key\-value pairs of the `to_add` table to `tab`\.
 function Tab.addall(tab, to_add)
    for k, v in pairs (to_add) do
       tab[k] = v
+   end
+end
+```
+
+
+### keystovalue\(tab, keys, val\)
+
+Sets every key in the 'set' to the provided value\.
+
+Handles both `{"foo", "bar", "baz"}` tables and `{foo = true}`
+tables, without prejudice, mixed tables will get indices assigned, not values
+at index\.
+
+```lua
+local isarray = assert(table.isarray)
+function Tab.keystovalue(tab, keys, val)
+   if isarray(tab) then
+      for _, k in ipairs(keys) do
+         tab[k] = val
+      end
+   else
+      for k in pairs(keys) do
+         tab[k] = val
+      end
    end
 end
 ```

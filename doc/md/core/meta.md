@@ -45,6 +45,11 @@ end
 
 ### metatables\(tab\)
 
+\#NB
+metatables themselves is something we only do by accident, it's the `__index`
+field which has the prototype chain and this only gives good results by
+accident\.
+
   Returns an iterator over all metatables of the table\.
 
 This corrects an important and pervasive bug in our code, one which has never
@@ -58,6 +63,7 @@ return it\.
 
 What the `metatables` iterator does is cycle checking, and when it finds one
 it returns `nil`\.
+
 
 ```lua
 function meta.metatables(tab)
@@ -100,11 +106,7 @@ local function hasmetamethod(mmethod, tab)
    if not M then
       return false
    end
-   if sub(mmethod,1,2) == "__" then
-      return rawget(M, mmethod)
-   else
-      return rawget(M, "__" .. mmethod)
-   end
+   return rawget(M, mmethod) or rawget(M, '__' .. mmethod)
 end
 
 meta.hasmetamethod = hasmetamethod

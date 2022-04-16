@@ -160,16 +160,6 @@ It makes sense to intersperse these in with operations, which are provided by
 the =Set= cassette, not the =Set_M= metatable.
 
 
-*** fset marker
-
-There is a "right way" to do this compatible with =idest= but we'll circle
-back to get that engineering right.
-
-#!lua
-local F__add = getmetatable(require "qor:core/fn-set"()) . __add
-#/lua
-
-
 *** __len
 
 This one is refreshingly simple now that the only keys are the elements of the
@@ -216,11 +206,30 @@ end
 
 **** isFSet(maybe: table) -> boolean
 
-#!lua
-local function isFSet(maybe)
+  Much of the point of providing function sets is to allow them to compose,
+both with themselves and with literal sets.
 
+
+*** fset marker
+
+There is a "right way" to do this compatible with =idest= but we'll circle
+back to get that engineering right.
+
+#!lua
+local F__add = getmetatable(require "qor:core/fn-set"()) . __add
+#/lua
+
+#!lua
+local function isFset(maybe)
+   local _M = getmetatable(maybe)
+   if _M and _M.__add == F__add then
+      return true
+   else
+      return false
+   end
 end
 #/lua
+
 
 *** Union: __add   set + set
 
@@ -228,6 +237,11 @@ end
 local clone = assert(require "table.clone")
 
 function Set_M.__add(left, right)
+   -- Set union is commutative, but we need to clone to prevent subsequent
+   -- mutation from changing the semantics
+   if isFset(right) then
+      return right + clone(left)
+   end
    local l_isSet, r_isSet;
    left, right, l_isSet, r_isSet = _binOp(left, right)
    local set, other;

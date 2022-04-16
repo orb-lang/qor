@@ -61,6 +61,12 @@ end
 
 
 
+
+
+
+
+
+
 function meta.metatables(tab)
    local dupes = { tab = true }
    local _M = tab
@@ -101,11 +107,7 @@ local function hasmetamethod(mmethod, tab)
    if not M then
       return false
    end
-   if sub(mmethod,1,2) == "__" then
-      return rawget(M, mmethod)
-   else
-      return rawget(M, "__" .. mmethod)
-   end
+   return rawget(M, mmethod) or rawget(M, '__' .. mmethod)
 end
 
 meta.hasmetamethod = hasmetamethod

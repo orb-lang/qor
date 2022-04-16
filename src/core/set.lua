@@ -129,6 +129,10 @@ end
 
 
 
+
+
+
+
 insert = assert(table.insert)
 function Set.remove(set, ...)
    local removed;
@@ -162,11 +166,11 @@ end
 
 
 
-local nkeys = assert(table.nkeys)
+Set_M.__len = assert(table.nkeys)
 
-function Set_M.__len(set)
-   return nkeys(set)
-end
+
+
+
 
 
 
@@ -203,9 +207,41 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+local F__add = getmetatable(require "qor:core/fn-set"()) . __add
+
+
+
+local function isFset(maybe)
+   local _M = getmetatable(maybe)
+   if _M and _M.__add == F__add then
+      return true
+   else
+      return false
+   end
+end
+
+
+
+
+
+
 local clone = assert(require "table.clone")
 
 function Set_M.__add(left, right)
+   -- Set union is commutative, but we need to clone to prevent subsequent
+   -- mutation from changing the semantics
+   if isFset(right) then
+      return right + clone(left)
+   end
    local l_isSet, r_isSet;
    left, right, l_isSet, r_isSet = _binOp(left, right)
    local set, other;
@@ -307,19 +343,6 @@ end
 
 function Set_M.__lt(left, right)
    if #left >= #right then return false end
-   return not_missing(left, right)
-end
-
-
-
-
-
-
-
-
-
-function Set_M.__lte(left, right)
-   if #left > #right then return false end
    return not_missing(left, right)
 end
 

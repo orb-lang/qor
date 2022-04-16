@@ -7,6 +7,7 @@ for k, v in pairs(math) do
 end
 #/lua
 
+
 *** Math.inbounds(value, lower, upper)
 
 Checks if =value= is in bounds in the range =lower..upper=, inclusive. Either
@@ -23,6 +24,24 @@ function Math.inbounds(value, lower, upper)
   return true
 end
 #/lua
+
+
+*** Math.flip()
+
+Conditional wrapper over random.
+
+#!lua
+local random = assert(math.random)
+
+function Math.flip()
+   if random(2) == 1 then
+      return true
+   else
+      return false
+   end
+end
+#/lua
+
 
 *** Math.clamp(value, lower, upper)
 

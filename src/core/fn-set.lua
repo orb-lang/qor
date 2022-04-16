@@ -29,7 +29,54 @@ local FSet, FSet_m = {}, {}
 
 
 
-local __add, __sub, __mod;
+local __add, __sub, __mod, __unm;
+
+
+
+
+
+
+
+local __len;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local __eq, __lt, __lte;
+
+
+
+
+
+
+
 
 
 
@@ -47,7 +94,7 @@ local __add, __sub, __mod;
 
 local function spread(fn)
    return function(_, a)
-      return fn(a)
+      return fn(a) and true or nil
    end
 end
 
@@ -62,7 +109,10 @@ local function new(fn)
                                    __add = __add,
                                    __sub = __sub,
                                    __mod = __mod,
-                                   __newindex = readonly })
+                                   __len = __len,
+                                   __unm = __unm,
+                                   -- comparators, negative
+                                   __newindex = readonly, })
    return fset
 end
 
@@ -72,10 +122,9 @@ end
 
 
 __add = function(left, right)
-   local pred = function(elem)
+   return new(function(elem)
       return left[elem] or right[elem]
-   end
-   return new(pred)
+   end)
 end
 
 
@@ -84,10 +133,9 @@ end
 
 
 __sub = function(left, right)
-   local pred = function(elem)
+   return new(function(elem)
       return (left[elem] and (not right[elem])) or nil
-   end
-   return new(pred)
+   end)
 end
 
 
@@ -96,12 +144,30 @@ end
 
 
 __mod = function(left, right)
-   local pred = function(elem)
+   return new(function(elem)
       return left[elem] and right[elem]
-   end
-   return new(pred)
+   end)
 end
 
+
+
+
+
+
+__unm = function(set)
+   return new(function(elem)
+      return (not elem) or nil
+   end)
+end
+
+
+
+
+
+
+
+
+__len = function() error("can't take the length of a function set") end
 
 
 

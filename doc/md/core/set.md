@@ -128,6 +128,10 @@ Removes any elements which are in the set, returning all the removed elements
 in the parameter order, but with no `nil` values for elements which were not
 removed\.
 
+TBH I'm not persuaded this is a good thing to offer, mutating sets by building
+them up \(for instance in a loop\) is a reasonable pattern but this makes them
+*actually mutable* in a way we shouldn't need to support\.
+
 ```lua
 insert = assert(table.insert)
 function Set.remove(set, ...)
@@ -159,14 +163,10 @@ the `Set` cassette, not the `Set_M` metatable\.
 ### \_\_len
 
 This one is refreshingly simple now that the only keys are the elements of the
-set\.
+set, it's literally just nkeys\.
 
 ```lua
-local nkeys = assert(table.nkeys)
-
-function Set_M.__len(set)
-   return nkeys(set)
-end
+Set_M.__len = assert(table.nkeys)
 ```
 
 
@@ -175,6 +175,10 @@ end
   All operators create a new set, rather than mutating either of the inputs,
 and will accept an array table as either the left or right value of a binary
 operation\.
+
+There are two interesting cases for us \(boring cases being when the
+metamethods match\), when the left or right is an ordinary array table, and
+when the right \(left is handled by fset\) is an fset\.
 
 
 #### \_binOp\(left: Set?, right: Set?\) \-> set, set
@@ -200,12 +204,44 @@ end
 ```
 
 
+#### isFSet\(maybe: table\) \-> boolean
+
+  Much of the point of providing function sets is to allow them to compose,
+both with themselves and with literal sets\.
+
+
+### fset marker
+
+There is a "right way" to do this compatible with `idest` but we'll circle
+back to get that engineering right\.
+
+```lua
+local F__add = getmetatable(require "qor:core/fn-set"()) . __add
+```
+
+```lua
+local function isFset(maybe)
+   local _M = getmetatable(maybe)
+   if _M and _M.__add == F__add then
+      return true
+   else
+      return false
+   end
+end
+```
+
+
 ### Union: \_\_add   set \+ set
 
 ```lua
 local clone = assert(require "table.clone")
 
 function Set_M.__add(left, right)
+   -- Set union is commutative, but we need to clone to prevent subsequent
+   -- mutation from changing the semantics
+   if isFset(right) then
+      return right + clone(left)
+   end
    local l_isSet, r_isSet;
    left, right, l_isSet, r_isSet = _binOp(left, right)
    local set, other;
@@ -307,19 +343,6 @@ Returns `true` if the left set is a proper subset of the right\.
 ```lua
 function Set_M.__lt(left, right)
    if #left >= #right then return false end
-   return not_missing(left, right)
-end
-```
-
-
-### \_lte set <= set
-
-Return `true` if the sets are identical, or if left is a proper subset of
-right\.
-
-```lua
-function Set_M.__lte(left, right)
-   if #left > #right then return false end
    return not_missing(left, right)
 end
 ```

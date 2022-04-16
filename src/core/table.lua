@@ -626,12 +626,24 @@ end
 
 
 
-function Tab.deleterange(tab, start, stop)
+local function deleterange(tab, start, stop)
+   stop = stop or #tab
    if start > stop then return end
    local offset = stop - start + 1
    for i = start, #tab do
       tab[i] = tab[i + offset]
    end
+end
+
+Tab.deleterange = deleterange
+
+
+
+
+
+
+function Tab.truncate(tab, from)
+   return deleterange(tab, from)
 end
 
 
@@ -779,6 +791,30 @@ end
 function Tab.addall(tab, to_add)
    for k, v in pairs (to_add) do
       tab[k] = v
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+local isarray = assert(table.isarray)
+function Tab.keystovalue(tab, keys, val)
+   if isarray(tab) then
+      for _, k in ipairs(keys) do
+         tab[k] = val
+      end
+   else
+      for k in pairs(keys) do
+         tab[k] = val
+      end
    end
 end
 

@@ -13,6 +13,7 @@ end
 
 
 
+
 function Math.inbounds(value, lower, upper)
   if lower and value < lower then
     return false
@@ -22,6 +23,24 @@ function Math.inbounds(value, lower, upper)
   end
   return true
 end
+
+
+
+
+
+
+
+
+local random = assert(math.random)
+
+function Math.flip()
+   if random(2) == 1 then
+      return true
+   else
+      return false
+   end
+end
+
 
 
 
