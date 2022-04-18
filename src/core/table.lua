@@ -317,6 +317,38 @@ end
 
 
 
+function Tab.mutate(tab, fn, pairwise, just_value)
+   local iter;
+   if pairwise then
+      iter = pairs
+   else
+      iter = ipairs
+   end
+   for k, v in iter(tab) do
+      if just_value then
+         tab[k] = fn(v)
+      else
+         tab[k] = fn(v, k)
+      end
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -871,7 +903,10 @@ end
 
 
 
+
+
 function Tab.safeget(tab, key)
+   if type(tab) ~= 'table' then return nil end
    while tab ~= nil do
       local val = rawget(tab, key)
       if val ~= nil then return val end

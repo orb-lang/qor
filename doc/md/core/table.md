@@ -303,6 +303,38 @@ end
 ```
 
 
+### mutate\(tab, fn, pairwise\)
+
+Applies `fn` repeatedly to all values of `tab`, putting the result in\-place\.
+
+`fn` is called as `fn(value, index)`, the opposite of ipairs order, so a
+function can act on just the value\.
+
+If `pairwise` is provided, `pairs` is used to iterate `tab`, this defaults to
+`ipairs`\.  In both cases the value is passed before the key\.
+
+If `just_value` is provided, then `fn` is called only with the value, in case
+a second parameter has some undesireable semantic\.
+
+```lua
+function Tab.mutate(tab, fn, pairwise, just_value)
+   local iter;
+   if pairwise then
+      iter = pairs
+   else
+      iter = ipairs
+   end
+   for k, v in iter(tab) do
+      if just_value then
+         tab[k] = fn(v)
+      else
+         tab[k] = fn(v, k)
+      end
+   end
+end
+```
+
+
 ### \#NYI: copy\(tab, start, end, from\), truncate\(new\_top\)
 
   I'll want efficient implementations of both of these to implement queue
@@ -870,8 +902,11 @@ end
 Retrieves a value for the given key, without any possibility of error
 or side\-effects — \_\_index functions are not called\.
 
+So as to be in fact 'safe' this is checked for the table nature\.
+
 ```lua
 function Tab.safeget(tab, key)
+   if type(tab) ~= 'table' then return nil end
    while tab ~= nil do
       local val = rawget(tab, key)
       if val ~= nil then return val end
