@@ -108,13 +108,15 @@ We do this by making two closures over the table, one for the index:
 
 ```lua
 local function lazy_load_gen(requires)
+   local name = requires[1] or "generic codex you really should name"
+   requires[1] = nil
    return function(tab, key)
       if requires[key] then
          -- put the return on the core table
          tab[key] = require(requires[key])
          return tab[key]
       else
-         error("core doesn't have a module " .. tostring(key))
+         error(name .. " doesn't have a module '" .. tostring(key) .. "'")
       end
    end
 end

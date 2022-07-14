@@ -175,32 +175,36 @@ Tab.hasfield = setmetatable({}, { __index = _hf__index,
 
 
 
+local clone1 = require "table.clone"
+
+Tab.clone1 = clone1
+
+
+
+
+
+
+
+
+
 
 local function _clone(tab, depth)
    depth = depth or 1
-   assert(depth > 0, "depth must be positive " .. tostring(depth))
+   assert(depth > 0, "depth must be positive, got " .. tostring(depth))
+   if depth == 1 then
+      return setmetatable(clone1(tab), getmetatable(tab))
+   end
    local clone = {}
    for k,v in next, tab do
-      if depth > 1 and type(v) == "table" then
+      if type(v) == "table" then
         v = _clone(v, depth - 1)
       end
       clone[k] = v
    end
    return setmetatable(clone, getmetatable(tab))
 end
+
 Tab.clone = _clone
-
-
-
-
-
-
-
-
-
-
-
-Tab.clone1 = require "table.clone"
 
 
 
@@ -330,6 +334,24 @@ function Tab.mutate(tab, fn, pairwise, just_value)
       else
          tab[k] = fn(v, k)
       end
+   end
+end
+
+
+
+
+
+
+
+function Tab.getset(tab, field)
+   local ret = tab[field]
+   if ret == nil then
+      tab[field] = {}
+      return tab[field]
+   elseif type(ret) ~= 'table' then
+      error ("field " .. field .. " is of type " .. type(ret))
+   else
+      return ret
    end
 end
 
@@ -823,6 +845,20 @@ end
 function Tab.addall(tab, to_add)
    for k, v in pairs (to_add) do
       tab[k] = v
+   end
+end
+
+
+
+
+
+
+
+
+function Tab.append(tab, ...)
+   local top = #tab
+   for i = 1, select('#', ...) do
+      tab[top + i] = select(i, ...)
    end
 end
 

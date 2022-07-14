@@ -262,6 +262,7 @@ allows anonymous functions to be registered as dynamic or patched in\.
 The net result is a unique function which can be swapped out in all places in
 which it is used\.
 
+
 ```lua
 local _dynamics_call = setmetatable({}, {__mode = 'k'})
 local _dynamics_registry  = setmetatable({}, {__mode = 'kv'})
@@ -279,6 +280,14 @@ end
 
 fn.dynamic = dynamic
 ```
+
+
+#### \#Todo use upvalue
+
+I'm not in love with the lookup\-from\-weak\-table approach here, the passed
+function could be an upvalue, we'd use the registry as a truth test and store
+the number of the function upvalue, so we can swap it using `setupvalue`
+instead of two weak tables\.
 
 
 ### fn\.patch\_dynamic\(dyn\_fn, fn\)
@@ -307,8 +316,8 @@ A hookable function is registered as a `dynamic` function\.  This means that
 `patch_dynamic` can replace the core function\.  Note that if you pass an
 already `dynamic` function to  `hookable`, you'll end up with a "double
 dynamic" function, which might not be what you want\! `patch_dynamic` will do
-different things to the original \(dynamic\) function and its hookable dynamic
-cousin\.
+different things to the original \(dynamic\) function and the hookable dynamic
+derived from it\.
 
 We offer two hooks, `pre` and `post`, which are hooked with `fn.prehook` and
 `fn.posthook`, respectively\.  Functions may be unhooked by calling
@@ -330,9 +339,9 @@ Note that Lua has no concept of how many parameters are "supposed to" be
 passed to a function, and from `pack`'s perspective there is a difference
 between `return nil` and just `return`\.  So if `f(a, b, c)` sometimes returns
 `d` and sometimes returns nothing with a bare `return` keyword, or just by
-falling off the end of the function, then sometimes you will get `post_f(d, a,, and sometimes just `post_f(a, b, c)`\.  So it's important to design
-hookable
-b, c)` functions so that they return a consistent number of parameters in
+falling off the end of the function, then sometimes you will get `post_f(d, a,
+b, c)`, and sometimes just `post_f(a, b, c)`\.  So it's important to design
+hookable functions so that they return a consistent number of parameters in
 all cases, padded with `nil`s if necessary\.  This is not idiomatic,
 particularly for functions which return an optional second value under some
 circumstances\.

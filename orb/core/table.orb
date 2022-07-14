@@ -167,40 +167,44 @@ Tab.hasfield = setmetatable({}, { __index = _hf__index,
 #/lua
 
 
+*** clone1(tab)
+
+Our LuaJIT distribution comes with a fast JITtable clone function, which is
+limited to shallow clones only and does not copy metatables.
+
+We can =require "table.clone"= it, but it's better made available as =clone1=.
+
+#!lua
+local clone1 = require "table.clone"
+
+Tab.clone1 = clone1
+#/lua
+
+
 *** clone(tab, depth)
 
-Performs a shallow clone of table, attaching metatable if available.
+Performs a /shallow/ clone of table, attaching metatable if available.
 
-Will recurse to =depth= if provided.
-
-This will unroll circular references, which may not be what you want.
+Will recurse to =depth= if provided.  No attempt is made to detect cycles.
 
 #!lua
 local function _clone(tab, depth)
    depth = depth or 1
-   assert(depth > 0, "depth must be positive " .. tostring(depth))
+   assert(depth > 0, "depth must be positive, got " .. tostring(depth))
+   if depth == 1 then
+      return setmetatable(clone1(tab), getmetatable(tab))
+   end
    local clone = {}
    for k,v in next, tab do
-      if depth > 1 and type(v) == "table" then
+      if type(v) == "table" then
         v = _clone(v, depth - 1)
       end
       clone[k] = v
    end
    return setmetatable(clone, getmetatable(tab))
 end
+
 Tab.clone = _clone
-#/lua
-
-
-*** clone1(tab)
-
-Our LuaJIT distribution comes with a fast JITtable clone function, which is
-limited to shallow clones only.
-
-We can =require "table.clone"= it, but it's better made available as =clone1=.
-
-#!lua
-Tab.clone1 = require "table.clone"
 #/lua
 
 
@@ -303,7 +307,7 @@ end
 #/lua
 
 
-*** mutate(tab, fn, pairwise)
+*** mutate(tab, fn, pairwise, just_value)
 
 Applies =fn= repeatedly to all values of =tab=, putting the result in-place.
 
@@ -330,6 +334,24 @@ function Tab.mutate(tab, fn, pairwise, just_value)
       else
          tab[k] = fn(v, k)
       end
+   end
+end
+#/lua
+
+*** getset(synth, key)
+
+Either retrieves the table at =key=, or assigns such a table and returns it.
+
+#!lua
+function Tab.getset(tab, field)
+   local ret = tab[field]
+   if ret == nil then
+      tab[field] = {}
+      return tab[field]
+   elseif type(ret) ~= 'table' then
+      error ("field " .. field .. " is of type " .. type(ret))
+   else
+      return ret
    end
 end
 #/lua
@@ -554,7 +576,7 @@ end
 
   Returns all keys which we can determine may be indexed against the subject
 table.  All keys at the top of the prototype chain are returned before any of
-the keys below it.
+the keys below it, that is, it returns generic keys before specific ones.
 
 =sorting= is tested for truthiness, if present, =keysort= is used on /each
 layer/ of keys before they are returned.  This is forward-compatible with
@@ -823,6 +845,20 @@ Adds all key-value pairs of the =to_add= table to =tab=.
 function Tab.addall(tab, to_add)
    for k, v in pairs (to_add) do
       tab[k] = v
+   end
+end
+#/lua
+
+
+*** append(tab, ...)
+
+Adds all other values to the end of the table.
+
+#!lua
+function Tab.append(tab, ...)
+   local top = #tab
+   for i = 1, select('#', ...) do
+      tab[top + i] = select(i, ...)
    end
 end
 #/lua

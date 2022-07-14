@@ -263,6 +263,7 @@ end
 
 
 
+
 local _dynamics_call = setmetatable({}, {__mode = 'k'})
 local _dynamics_registry  = setmetatable({}, {__mode = 'kv'})
 
@@ -278,6 +279,14 @@ local function dynamic(fn)
 end
 
 fn.dynamic = dynamic
+
+
+
+
+
+
+
+
 
 
 

@@ -88,7 +88,12 @@ end
 
 
 
+
+
+
 function Set_M.__call(set, ...)
+   error
+     "don't use Set(...) to mutate until we can warn about =if Set(elem)!="
    for i = 1, select('#', ...) do
       set[select(i, ...)] = true
    end
@@ -345,10 +350,6 @@ function Set_M.__lt(left, right)
    if #left >= #right then return false end
    return not_missing(left, right)
 end
-
-
-
-
 
 
 

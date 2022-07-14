@@ -76,7 +76,7 @@ end
 #/lua
 
 
-*** set(...) ->, aka Set.insert
+*** set(...) ->, aka Set.insert #disabled
 
   Calling a set adds all the elements to the Set.  As is normal with inserting
 into tables, we do not return the set.
@@ -87,8 +87,13 @@ Set you're setting up.
 There are only two ways to add elements to sets, and this is one, with the
 only other mutable operation being =set.remove(set, ...)=.
 
+I'm turning this off until my type system can yell at me if I call it for its
+return value...
+
 #!lua
 function Set_M.__call(set, ...)
+   error
+     "don't use Set(...) to mutate until we can warn about =if Set(elem)!="
    for i = 1, select('#', ...) do
       set[select(i, ...)] = true
    end
@@ -352,10 +357,6 @@ end
 
 We have an existing repr for Sets, which works just as well here once we
 remove the indirection.
-
-#Todo we should use a sort on keys which is stable across literal values, to
-make normal Sets a useable return form for sessions.  We have one somewhere in
-repr.
 
 #!lua
 local wrap, yield = assert(coroutine.wrap), assert(coroutine.yield)

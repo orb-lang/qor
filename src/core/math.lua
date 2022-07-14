@@ -48,6 +48,40 @@ end
 
 
 
+local floor = assert(math.floor)
+
+local function isposint(arg)
+   if type(arg) ~= 'number' then
+      return nil, "not a number"
+   elseif arg <= 0 then
+      return nil, "not positive"
+   elseif floor(arg) ~= arg then
+      return nil, "not integer"
+   else
+      return arg
+   end
+end
+
+Math.isposint = isposint
+
+
+
+
+
+
+
+
+function Math.posint(num)
+   return assert(isposint(num))
+end
+
+
+
+
+
+
+
+
 
 
 local assertfmt = assert(require "core:_base" . assertfmt)

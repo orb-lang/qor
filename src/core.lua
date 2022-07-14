@@ -46,7 +46,7 @@
 
 
 local _base = require "qor:core/_base"
-local core    = _base.lazyloader {
+local core    = _base.lazyloader { 'core',
 
    cluster    = "qor:core/cluster",
    coro       = "qor:core/coro",

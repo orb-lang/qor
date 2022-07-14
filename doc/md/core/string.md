@@ -319,6 +319,30 @@ end
 ```
 
 
+
+#### String\.linesnl\(str\)
+
+An iterator over all lines, which includes the newline\.
+
+```lua
+function String.linesnl(str)
+   local pos = 1;
+   return function()
+      if not pos then return nil end
+      local nl = find(str, "\n", pos)
+      local rx = pos
+      if nl then
+         pos = nl + 1
+         return sub(str, rx, nl)
+      else
+         pos = nil
+         return sub(str, rx)
+      end
+   end
+end
+```
+
+
 ### linepos\(str, offset\) \-> line, col
 
 Returns the line and column corresponding to the given offset\.
@@ -460,6 +484,22 @@ function String.linepos(str, offset)
    end
 
    return line, col
+end
+```
+
+```lua
+function String.lineat(str, line)
+   local nl_map = _nl_map[str]
+   if not nl_map then
+      -- create the whole thing
+      String.linepos(str, #str)
+      nl_map = assert(_nl_map[str])
+   end
+   local nl_end = nl_map[line]
+   if not nl_end then return "" end
+
+   local nl_prev = nl_map[line - 1] or 0
+   return sub(str, nl_prev + 1, nl_end)
 end
 ```
 

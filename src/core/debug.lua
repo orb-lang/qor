@@ -116,5 +116,26 @@ end
 
 
 
+
+
+
+
+local getlocal = assert(debug.getlocal)
+local insert = assert(table.insert)
+
+function Debug.parameters(fn)
+   local params = {}
+   local ident, i = nil, 1
+   repeat
+      ident = getlocal(fn, i)
+      insert(params, ident)
+      i = i + 1
+   until not ident
+   return params
+end
+
+
+
+
 return Debug
 
