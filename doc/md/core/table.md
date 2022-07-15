@@ -910,7 +910,7 @@ function Tab.safeget(tab, key)
    while tab ~= nil do
       local val = rawget(tab, key)
       if val ~= nil then return val end
-      local M =  (tab)
+      local M = getmetatable(tab)
       if M then
          tab = rawget(M, '__index')
          if type(tab) ~= 'table' then
