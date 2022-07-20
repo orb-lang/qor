@@ -133,6 +133,25 @@ end
 #/lua
 
 
+*** split(str, patt)
+
+Searches =str= for =patt=, returning two strings:
+
+if =patt= is found, the substrings *exclusive of* the found substring,
+otherwise =str, ""=
+
+#!lua
+function String.split(str, patt)
+   local first, last = find(str, patt)
+   if first then
+      return sub(str, 1, first - 1), sub(str, last + 1)
+   else
+      return str, ""
+   end
+end
+#/lua
+
+
 *** findall(str, patt)
 
 Runs =find= repeatedly, returning an array of arrays where =[1]= is the
@@ -441,7 +460,7 @@ Combines these strategies to get the job done.
 #!lua
 local ceil = assert(math.ceil)
 
-function String.linepos(str, offset)
+local function linepos(str, offset)
    local nl_map;
    assert(offset <= #str, "can't find a position longer than the string!")
    if _nl_map[str] then
@@ -484,21 +503,30 @@ function String.linepos(str, offset)
 
    return line, col
 end
+
+String.linepos = linepos
 #/lua
 
+
+*** lineat(str, linum)
+
+Returns the line at the given line number in =str=, as well as the offsets
+into the substring, which may prove useful and are in any case handy.
+
 #!lua
-function String.lineat(str, line)
+function String.lineat(str, linum)
    local nl_map = _nl_map[str]
    if not nl_map then
       -- create the whole thing
       String.linepos(str, #str)
       nl_map = assert(_nl_map[str])
    end
-   local nl_end = nl_map[line]
-   if not nl_end then return "" end
+   local last_col = nl_map[linum]
+   -- we can signal why this doesn't work
+   if not last_col then return "" end
 
-   local nl_prev = nl_map[line - 1] or 0
-   return sub(str, nl_prev + 1, nl_end)
+   local first_col = (nl_map[linum - 1] or 0) + 1
+   return sub(str, first_col, last_col), first_col, last_col
 end
 #/lua
 

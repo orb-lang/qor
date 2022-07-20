@@ -590,7 +590,8 @@ end
 local insert = assert(table.insert)
 
 local function indexed(_M)
-   return (type(_M) == 'table') and _M.__index
+   return (type(_M) == 'table')
+      and (type(_M.__index) == 'table')
 end
 
 local function allkeys(tab, sorting)
@@ -649,6 +650,9 @@ function Tab.allpairs(tab, sort)
    return function()
       i = i + 1
       local k = all_keys[i]
+
+      if k == nil then return end
+
       return k, tab[k]
    end
 end
@@ -946,7 +950,7 @@ function Tab.safeget(tab, key)
    while tab ~= nil do
       local val = rawget(tab, key)
       if val ~= nil then return val end
-      local M =  (tab)
+      local M = getmetatable(tab)
       if M then
          tab = rawget(M, '__index')
          if type(tab) ~= 'table' then

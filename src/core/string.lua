@@ -141,6 +141,25 @@ end
 
 
 
+function String.split(str, patt)
+   local first, last = find(str, patt)
+   if first then
+      return sub(str, 1, first - 1), sub(str, last + 1)
+   else
+      return str, ""
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
 
 
 local function findall(str, patt)
@@ -441,7 +460,7 @@ end
 
 local ceil = assert(math.ceil)
 
-function String.linepos(str, offset)
+local function linepos(str, offset)
    local nl_map;
    assert(offset <= #str, "can't find a position longer than the string!")
    if _nl_map[str] then
@@ -485,20 +504,29 @@ function String.linepos(str, offset)
    return line, col
 end
 
+String.linepos = linepos
 
 
-function String.lineat(str, line)
+
+
+
+
+
+
+
+function String.lineat(str, linum)
    local nl_map = _nl_map[str]
    if not nl_map then
       -- create the whole thing
       String.linepos(str, #str)
       nl_map = assert(_nl_map[str])
    end
-   local nl_end = nl_map[line]
-   if not nl_end then return "" end
+   local last_col = nl_map[linum]
+   -- we can signal why this doesn't work
+   if not last_col then return "" end
 
-   local nl_prev = nl_map[line - 1] or 0
-   return sub(str, nl_prev + 1, nl_end)
+   local first_col = (nl_map[linum - 1] or 0) + 1
+   return sub(str, first_col, last_col), first_col, last_col
 end
 
 
