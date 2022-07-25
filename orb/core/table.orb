@@ -8,7 +8,7 @@ local _base = require "core:core/_base"
 
 *** Type Predicate: table(tab) -> boolean
 
-  Each core extension named after a typ can be used to test a value for that
+  Each core extension named after a type can be used to test a value for that
 primitive type.
 
 #!lua

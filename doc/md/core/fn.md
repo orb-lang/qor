@@ -215,6 +215,21 @@ function fn.compose(f, g)
 end
 ```
 
+
+### spread\(f\)
+
+This comes up especially in making a table callable in an otherwise useful
+function which won't reference that table\.
+
+```lua
+function fn.spread(f)
+   return function(_, ...)
+      return f(...)
+   end
+end
+```
+
+
 Note that we can and maybe should use the same detection technique we use for
 currying, to unwrap intermediates, so that `compose(compose(f,g), h)` becomes
 one function with the line `return h(g(f(...)))`\.
@@ -339,9 +354,9 @@ Note that Lua has no concept of how many parameters are "supposed to" be
 passed to a function, and from `pack`'s perspective there is a difference
 between `return nil` and just `return`\.  So if `f(a, b, c)` sometimes returns
 `d` and sometimes returns nothing with a bare `return` keyword, or just by
-falling off the end of the function, then sometimes you will get `post_f(d, a,
-b, c)`, and sometimes just `post_f(a, b, c)`\.  So it's important to design
-hookable functions so that they return a consistent number of parameters in
+falling off the end of the function, then sometimes you will get `post_f(d, a,, and sometimes just `post_f(a, b, c)`\.  So it's important to design
+hookable
+b, c)` functions so that they return a consistent number of parameters in
 all cases, padded with `nil`s if necessary\.  This is not idiomatic,
 particularly for functions which return an optional second value under some
 circumstances\.

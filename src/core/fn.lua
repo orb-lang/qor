@@ -222,6 +222,21 @@ end
 
 
 
+function fn.spread(f)
+   return function(_, ...)
+      return f(...)
+   end
+end
+
+
+
+
+
+
+
+
+
+
 
 
 

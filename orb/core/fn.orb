@@ -215,6 +215,21 @@ function fn.compose(f, g)
 end
 #/lua
 
+
+*** spread(f)
+
+This comes up especially in making a table callable in an otherwise useful
+function which won't reference that table.
+
+#!lua
+function fn.spread(f)
+   return function(_, ...)
+      return f(...)
+   end
+end
+#/lua
+
+
 Note that we can and maybe should use the same detection technique we use for
 currying, to unwrap intermediates, so that =compose(compose(f,g), h)= becomes
 one function with the line =return h(g(f(...)))=.
