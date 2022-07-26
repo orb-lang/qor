@@ -366,6 +366,17 @@ local sortedpairs = assert(core.table.sortedpairs)
 function Set_M.__repr(set, window, c)
    tabulate = tabulate or require "repr:tabulate"
    Token = Token or require "repr:token"
+   if #set == 0 then
+      -- we have a name for this
+      local sent = false
+      return function()
+         if not sent then
+            sent = true
+            local empty = "#{" .. c.table('∅') .. "}"
+            return empty
+         end
+      end
+   end
 
    return wrap(function()
       yield(Token("#{ ", { color = "base", event = "array"}))

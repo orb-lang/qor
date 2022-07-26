@@ -54,6 +54,7 @@ Tab.keys = keys
 
 function Tab.values(tab)
    assert(type(tab) == "table", "values must receive a table")
+   local vals = {} -- thanks scry
    for _, v in pairs(tab) do
       vals[#vals + 1] = v
    end

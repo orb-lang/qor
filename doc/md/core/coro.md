@@ -184,7 +184,7 @@ Like `yield`, except it first detects if we're inside a not\-main coroutine\.
 If not, `return` the values\.
 
 ```lua
-local running = assert(coroutine.running)
+local running, yield = assert(coroutine.running), assert(coroutine.yield)
 
 function coro.canyield(...)
    local _, main = running()
