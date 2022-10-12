@@ -193,6 +193,18 @@ String.findall = findall
 
 
 
+local gsub = assert(string.gsub)
+function String.count(str, patt)
+   return select(2, gsub(str, patt, ''))
+end
+
+
+
+
+
+
+
+
 
 
 

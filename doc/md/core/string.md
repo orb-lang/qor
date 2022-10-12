@@ -189,6 +189,18 @@ String.findall = findall
 ```
 
 
+### count\(str, patt\)
+
+Count occurrences of `patt` in `str`\.
+
+```lua
+local gsub = assert(string.gsub)
+function String.count(str, patt)
+   return select(2, gsub(str, patt, ''))
+end
+```
+
+
 ### typeformat\(str, \.\.\.\)
 
 Background: I want to start using format in errors and assertions\.
