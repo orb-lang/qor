@@ -216,7 +216,28 @@ end
 ```
 
 
+### prepose\(f, g\)
+
+Returns a function which first falls `f`, then `g`, with the same arguments,
+returning the result of `g`, while ignoring the return value of `f`\.
+
+This pattern is if anything more requent than `compose` in Lua code, due to
+the pervasiveness of mutable objects and methods\.
+
+```lua
+function fn.prepose(f, g)
+   return function(...)
+      f(...)
+      return g(...)
+   end
+end
+```
+
+
 ### spread\(f\)
+
+Spread is the anti\-curry: given a function `f(a)`, it returns `g(_, a)` with
+the same domain and range as `f` for all `a`\.
 
 This comes up especially in making a table callable in an otherwise useful
 function which won't reference that table\.
@@ -354,9 +375,9 @@ Note that Lua has no concept of how many parameters are "supposed to" be
 passed to a function, and from `pack`'s perspective there is a difference
 between `return nil` and just `return`\.  So if `f(a, b, c)` sometimes returns
 `d` and sometimes returns nothing with a bare `return` keyword, or just by
-falling off the end of the function, then sometimes you will get `post_f(d, a,, and sometimes just `post_f(a, b, c)`\.  So it's important to design
-hookable
-b, c)` functions so that they return a consistent number of parameters in
+falling off the end of the function, then sometimes you will get `post_f(d, a,
+b, c)`, and sometimes just `post_f(a, b, c)`\.  So it's important to design
+hookable functions so that they return a consistent number of parameters in
 all cases, padded with `nil`s if necessary\.  This is not idiomatic,
 particularly for functions which return an optional second value under some
 circumstances\.

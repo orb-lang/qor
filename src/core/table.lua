@@ -13,7 +13,10 @@ local _base = require "core:core/_base"
 
 
 local function is_table(_, tab)
-   return type(tab) == 'table'
+   local t = type(tab)
+   return t == 'table'
+          and tab
+          or nil, t
 end
 
 
@@ -165,6 +168,21 @@ end
 
 Tab.hasfield = setmetatable({}, { __index = _hf__index,
                                    __call  = _hf__call })
+
+
+
+
+
+
+
+
+function Tab.nonempty(tab)
+   if #tab > 0 then
+      return tab
+   else
+      return nil
+   end
+end
 
 
 
@@ -344,15 +362,18 @@ end
 
 
 
+
+
+
 function Tab.getset(tab, field)
    local ret = tab[field]
    if ret == nil then
       tab[field] = {}
-      return tab[field]
+      return tab[field], true
    elseif type(ret) ~= 'table' then
       error ("field " .. field .. " is of type " .. type(ret))
    else
-      return ret
+      return ret, nil
    end
 end
 
@@ -655,6 +676,24 @@ function Tab.allpairs(tab, sort)
       if k == nil then return end
 
       return k, tab[k]
+   end
+end
+
+
+
+
+
+
+
+
+
+function Tab.izip(a, b)
+   local top = (#a > #b) and #a or #b
+   local i = 0
+   return function()
+      i = i + 1
+      if i > top then return nil end
+      return i, a[i], b[i]
    end
 end
 

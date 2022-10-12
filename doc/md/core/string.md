@@ -4,14 +4,17 @@
 - [ ] \#Todo core\.stringable: type\(str?\) = 'string' or hasmetamethod \_\_tostring
 
 
-### Type Predicate: string\(str?\) \-> boolean
+### Type Predicate: string\(str?\): str | nil, type\(str\)
 
   Each core extension named after a type can be used to test a value for that
 primitive type\.
 
 ```lua
 local function is_string(_, str)
-   return type(str) == 'string'
+   local t = type(str)
+   return t == 'string'
+          and str
+          or nil, t
 end
 ```
 

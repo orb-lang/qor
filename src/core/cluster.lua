@@ -155,6 +155,22 @@ end
 
 
 
+function cluster.assurewith(instance, field, message, ...)
+   if instance[field] then return instance end
+   local ret, err = instance[message](instance, ...)
+   if ret and instance[field] then return instance end
+   return nil, "unable to create " .. field .. " with :" .. message .. "."
+end
+
+
+
+
+
+
+
+
+
+
 
 
 

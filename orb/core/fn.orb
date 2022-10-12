@@ -216,7 +216,28 @@ end
 #/lua
 
 
+*** prepose(f, g)
+
+Returns a function which first falls =f=, then =g=, with the same arguments,
+returning the result of =g=, while ignoring the return value of =f=.
+
+This pattern is if anything more requent than =compose= in Lua code, due to
+the pervasiveness of mutable objects and methods.
+
+#!lua
+function fn.prepose(f, g)
+   return function(...)
+      f(...)
+      return g(...)
+   end
+end
+#/lua
+
+
 *** spread(f)
+
+Spread is the anti-curry: given a function =f(a)=, it returns =g(_, a)= with
+the same domain and range as =f= for all =a=.
 
 This comes up especially in making a table callable in an otherwise useful
 function which won't reference that table.

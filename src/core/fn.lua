@@ -222,6 +222,27 @@ end
 
 
 
+
+
+
+function fn.prepose(f, g)
+   return function(...)
+      f(...)
+      return g(...)
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
 function fn.spread(f)
    return function(_, ...)
       return f(...)

@@ -10,7 +10,10 @@
 
 
 local function is_string(_, str)
-   return type(str) == 'string'
+   local t = type(str)
+   return t == 'string'
+          and str
+          or nil, t
 end
 
 

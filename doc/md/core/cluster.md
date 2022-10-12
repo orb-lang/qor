@@ -148,6 +148,22 @@ end
 ```
 
 
+### assurewith\(instance, field, message, \.\.\.\): instance | nil, err: s
+
+This checks if the field is present, if not, calls the instance with the
+message and `...`, then checks again\.  This relies on the message producing a
+chainable method\.
+
+```lua
+function cluster.assurewith(instance, field, message, ...)
+   if instance[field] then return instance end
+   local ret, err = instance[message](instance, ...)
+   if ret and instance[field] then return instance end
+   return nil, "unable to create " .. field .. " with :" .. message .. "."
+end
+```
+
+
 ### methodchain\(method, key\_method?\)
 
 

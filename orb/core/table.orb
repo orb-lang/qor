@@ -6,14 +6,17 @@ local _base = require "core:core/_base"
 #/lua
 
 
-*** Type Predicate: table(tab) -> boolean
+*** Type Predicate: table(tab) -> tab | nil, type(tab)
 
   Each core extension named after a type can be used to test a value for that
 primitive type.
 
 #!lua
 local function is_table(_, tab)
-   return type(tab) == 'table'
+   local t = type(tab)
+   return t == 'table'
+          and tab
+          or nil, t
 end
 #/lua
 
@@ -165,6 +168,21 @@ end
 
 Tab.hasfield = setmetatable({}, { __index = _hf__index,
                                    __call  = _hf__call })
+#/lua
+
+
+**** nonempty(tab: t): tab | nil
+
+Returns a table in the event it has (array) contents, otherwise =nil=.
+
+#!lua
+function Tab.nonempty(tab)
+   if #tab > 0 then
+      return tab
+   else
+      return nil
+   end
+end
 #/lua
 
 
@@ -339,20 +357,23 @@ function Tab.mutate(tab, fn, pairwise, just_value)
 end
 #/lua
 
-*** getset(synth, key)
+
+*** getset(synth, key): tab: t, new: true | nil
 
 Either retrieves the table at =key=, or assigns such a table and returns it.
+
+Second value is a sentinel, =true= if we created a table.
 
 #!lua
 function Tab.getset(tab, field)
    local ret = tab[field]
    if ret == nil then
       tab[field] = {}
-      return tab[field]
+      return tab[field], true
    elseif type(ret) ~= 'table' then
       error ("field " .. field .. " is of type " .. type(ret))
    else
-      return ret
+      return ret, nil
    end
 end
 #/lua
@@ -655,6 +676,24 @@ function Tab.allpairs(tab, sort)
       if k == nil then return end
 
       return k, tab[k]
+   end
+end
+#/lua
+
+
+*** izip(tabA, tabB)
+
+Returns =i, val, val= as long as at least one table has values in the compact
+region.
+
+#!lua
+function Tab.izip(a, b)
+   local top = (#a > #b) and #a or #b
+   local i = 0
+   return function()
+      i = i + 1
+      if i > top then return nil end
+      return i, a[i], b[i]
    end
 end
 #/lua
