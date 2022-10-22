@@ -384,6 +384,20 @@ end
 
 
 
+function Tab.nilset(tab, k, v)
+   if tab[k] == nil then
+      tab[k] = v
+   end
+   return;
+end
+
+
+
+
+
+
+
+
 
 
 

@@ -38,55 +38,6 @@ local meta = {}
 
 
 
-function meta.meta(MT, tab)
-   error "this is no longer provided"
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function meta.metatables(tab)
-   local dupes = { tab = true }
-   local _M = tab
-   return function()
-      _M = getmetatable(_M)
-      if (_M == nil) or dupes[_M] then return nil end
-      dupes[_M] = true
-      return _M
-   end
-end
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -110,7 +110,7 @@ end
 ```
 
 
-### readOnly\(tab\)
+### readonly\(tab\), \#Deprecated: readOnly\(tab\)
 
 Makes a table read\-only, will throw an error if assigned to\.
 
@@ -375,6 +375,20 @@ function Tab.getset(tab, field)
    else
       return ret, nil
    end
+end
+```
+
+
+### nilset\(tab, k, v\)
+
+Sets `tab[k]` to `v` unless it has a non\-nil value\.
+
+```lua
+function Tab.nilset(tab, k, v)
+   if tab[k] == nil then
+      tab[k] = v
+   end
+   return;
 end
 ```
 

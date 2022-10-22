@@ -201,6 +201,43 @@ end
 ```
 
 
+### slicecmp\(strA, strB, len, idxA, idxB\)
+
+Compares two strings for `len` starting at the given indices, which default to
+one\.
+
+Returns `true, len ` when they match, `false, i` otherwise, with `i` being
+the count where the divergence happened, so `0` if they are immediately
+different\.  Interpret this as the number of bytes for which two substrings
+`str:sub(idx, idx+i)` would be equal\.
+
+```lua
+function String.slicecmp(strA, strB, len, idxA, idxB)
+   idxA, idxB = idxA or 1, idxB or 1
+   -- asserts
+   local i, same = 0, true
+   local A, B, offside, offedge;
+   repeat
+      A, B = byte(strA, idxA + i), byte(strB, idxB + i)
+      offedge = (not (A or B)) and true or false
+      offside = (A and not B) or (B and not A) or offedge
+      if offside and i < len then
+         same = false
+      elseif not offside then
+         same = same and A == B
+      end
+      i = i + 1
+   until (not same) or i > len
+   return same, i - 1
+     --[[DBG]] --[[
+       , { A = A and string.char(A) or "",
+           B = B and string.char(B) or "",
+           offside = offside,
+           offedge = offedge, } --]]
+end
+```
+
+
 ### typeformat\(str, \.\.\.\)
 
 Background: I want to start using format in errors and assertions\.
