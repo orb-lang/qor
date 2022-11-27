@@ -94,7 +94,7 @@ function N_M.__len(tab)
 end
 
 function N_M.__ipairs(tab)
-   local i = 1
+   local i = 1 -- can be stateless
    return function()
       if i >= tab.n then return nil end
       i = i + 1
@@ -110,9 +110,11 @@ end
 ```
 
 
-### readonly\(tab\), \#Deprecated: readOnly\(tab\)
+### readonly\(tab, err\_msg?\), \#Deprecated: readOnly\(tab\)
 
 Makes a table read\-only, will throw an error if assigned to\.
+
+The text of the error may be provided with `err_msg`\.
 
 ```lua
 local function RO_M__newindex(tab, key, value)
@@ -120,8 +122,16 @@ local function RO_M__newindex(tab, key, value)
          .. "` to read-only table slot `." .. tostring(key) .. "`")
 end
 
-function Tab.readOnly(tab)
-   return setmetatable({}, {__index = tab, __newindex = RO_M__newindex})
+function Tab.readOnly(tab, err_msg)
+   local n_idx;
+   if err_msg then
+      n_idx = function()
+         error(err_msg)
+      end
+   else
+      n_idx = RO_M__newindex
+   end
+   return setmetatable({}, {__index = tab, __newindex = n_idx})
 end
 ```
 

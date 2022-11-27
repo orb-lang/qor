@@ -50,27 +50,54 @@ if, for example, one wants to use a common table to build up several Sets\.
 
 The technique for that is found in the next section\.
 
+
+#### coerce\(tab\)
+
+We accept two types of Set constructors, an array or a 'set\-like'\.
+
+```lua
+local nkeys = table.nkeys
+
+local function coerce(tab)
+   if nkeys(tab) == #tab then
+      -- array
+      local top = #tab
+      local shunt;  -- we need this so we don't clobber number keys
+      for i = 1, top do
+
+         local v = tab[i]
+         if type(v) == 'number' then
+            shunt = shunt or {}
+            shunt[v] = true
+         else
+            tab[v] = true
+         end
+         tab[i] = nil
+      end
+      if shunt then
+         for v in pairs(shunt) do
+            tab[v] = true
+         end
+      end
+      return tab
+   end
+
+   -- check set-ness
+   for _, beTrue in next, tab do
+      if beTrue ~= true then
+         error "table is not set-like (array or all true values)"
+      end
+   end
+
+   return tab
+end
+```
+
 ```lua
 function Set_Build.__call(_new, tab)
    assert(type(tab) == 'table' or not tab, "#1 to Set must be a table or nil")
-   tab = tab or {}
-   local top = #tab
-   local shunt;  -- we need this for number keys
-   for i = 1, top do
-      local v = tab[i]
-      if type(v) == 'number' then
-         shunt = shunt or {}
-         shunt[v] = true
-      else
-         tab[v] = true
-      end
-      tab[i] = nil
-   end
-   if shunt then
-      for v in pairs(shunt) do
-         tab[v] = true
-      end
-   end
+   tab = tab  and coerce(tab) or {}
+
    return setmetatable(tab, Set_M)
 end
 ```

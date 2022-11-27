@@ -145,6 +145,31 @@ fn.curry = curry
 
 
 
+
+
+
+
+
+
+
+
+
+
+function fn.partial(fn, ...)
+   for i = 1, select('#', ...) do
+      fn = curry(fn, select(i, ...))
+   end
+   return fn
+end
+
+
+
+
+
+
+
+
+
 fn.thunk = assert(_base.thunk)
 
 
@@ -174,45 +199,15 @@ end
 
 
 
-fn.iscallable = assert(_base.iscallable)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function fn.partial(fn, ...)
-   for i = 1, select('#', ...) do
-      fn = curry(fn, select(i, ...))
-   end
-   return fn
-end
-
-
-
-
-
-
-
-
 function fn.compose(f, g)
    return function(...)
       return g(f(...))
    end
 end
+
+
+
+
 
 
 
@@ -253,6 +248,30 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+function fn.chain(f)
+   return function(a, ...)
+      f(a, ...)
+      return a
+   end
+end
+
+
+
+
+
+
+
+
+fn.iscallable = assert(_base.iscallable)
 
 
 

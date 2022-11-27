@@ -12,6 +12,8 @@ local _base = {}
 ```
 
 
+## Primitives
+
 ### no\_op\(\)
 
 Sometimes you just need `(fn $)` y'know?

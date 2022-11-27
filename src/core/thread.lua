@@ -22,39 +22,74 @@ local thread = {}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 local select       = select
+local pack         = pack
 local setmetatable = setmetatable
 local create       = coroutine.create
-local isyieldable  = coroutine.isyieldable -- luacheck: ignore
+local isyieldable  = coroutine.isyieldable
 local resume       = coroutine.resume
 local running      = coroutine.running
 local status       = coroutine.status
 local wrap         = coroutine.wrap
 local yield        = coroutine.yield
+
+
+
+
+
+
+
+
+
+
+
+
+
+function thread.observe(co, ...)
+   local rets = pack(resume(co, ...))
+   local ok, stat = rets[1], status(co)
+   if not ok then
+      error(rets[2])
+   else
+      return stat, unpack(rets, 2)
+   end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

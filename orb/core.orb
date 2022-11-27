@@ -47,7 +47,6 @@ So the module is just this:
 #!lua
 local _base = require "qor:core/_base"
 local core    = _base.lazyloader { 'core',
-
    cluster    = "qor:core/cluster",
    coro       = "qor:core/coro",
    fn         = "qor:core/fn",
@@ -62,6 +61,7 @@ local core    = _base.lazyloader { 'core',
    env        = "qor:core/env",
    uv         = "qor:core/uv",
    set        = "qor:core/set",
+   get        = "qor:core/get"
 }
 
 core.unique = _base.unique

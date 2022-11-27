@@ -39,7 +39,7 @@ This operation is idempotent, duels are fought once per pair.
 Roshambo is always decisive.
 
 #!lua
-local Set = require "set:set"
+local Set = use "qor:set"
 local s   = require "status:status"
 s.verbose = true
 #/lua
@@ -147,7 +147,11 @@ function roshambo_sort(roshambo, champ, challenge)
    local victor = fight(roshambo, champ, challenge)
    return victor == champ and true or false
 end
+#/lua
 
+Rodea.
+
+#!lua
 local R = {}
 R.fight = fight
 R.beats = beats

@@ -139,6 +139,31 @@ fn.curry = curry
 ```
 
 
+### partial\(fn, \.\.\.\)
+
+Partial applicator: takes a function, and fills in the given arguments,
+returning another function which accepts additional arguments:
+
+```lua-example
+add5 = fn.partial(function(a,b)
+                  return a + b
+               end, 5)
+return add5(10) -- returns 15
+```
+
+This is just a convenience function, which repeatedly curries the given `fn`
+until the parameters are consumed\.
+
+```lua
+function fn.partial(fn, ...)
+   for i = 1, select('#', ...) do
+      fn = curry(fn, select(i, ...))
+   end
+   return fn
+end
+```
+
+
 ### thunk\(fn, \.\.\.\)
 
 Returns a function which, called, will call the function with the given
@@ -169,40 +194,6 @@ end
 ```
 
 
-### iscallable\(maybe\_fn\)
-
-Returns true for a function, or a table with a `__call` metamethod\.
-
-```lua
-fn.iscallable = assert(_base.iscallable)
-```
-
-
-### partial\(fn, \.\.\.\)
-
-Partial applicator: takes a function, and fills in the given arguments,
-returning another function which accepts additional arguments:
-
-```lua-example
-add5 = fn.partial(function(a,b)
-                  return a + b
-               end, 5)
-return add5(10) -- returns 15
-```
-
-This is just a convenience function, which repeatedly curries the given `fn`
-until the parameters are consumed\.
-
-```lua
-function fn.partial(fn, ...)
-   for i = 1, select('#', ...) do
-      fn = curry(fn, select(i, ...))
-   end
-   return fn
-end
-```
-
-
 ### compose\(f, g\)
 
 Returns a function which calls g on the result of calling f with arguments\.
@@ -214,6 +205,10 @@ function fn.compose(f, g)
    end
 end
 ```
+
+Note that we can, and maybe should, use the same detection technique we use for
+currying, to unwrap intermediates\.  So that `compose(compose(f,g), h)` becomes
+one function with the line `return h(g(f(...)))`\.
 
 
 ### prepose\(f, g\)
@@ -251,9 +246,33 @@ end
 ```
 
 
-Note that we can and maybe should use the same detection technique we use for
-currying, to unwrap intermediates, so that `compose(compose(f,g), h)` becomes
-one function with the line `return h(g(f(...)))`\.
+### chain\(f\)
+
+Returns a function which calls `f(a, ...)` for its side effects, then returns
+`a`\.
+
+We try to provide a consistent fluent interface for subjects which use one,
+this supports the pattern of having a named method which can return useful
+values for e\.g\. extension or introspection, which we can wrap with `chain` to
+return the subject\.
+
+```lua
+function fn.chain(f)
+   return function(a, ...)
+      f(a, ...)
+      return a
+   end
+end
+```
+
+
+### iscallable\(maybe\_fn\)
+
+Returns true for a function, or a table with a `__call` metamethod\.
+
+```lua
+fn.iscallable = assert(_base.iscallable)
+```
 
 
 ### itermap\(fn, iter\)
@@ -375,9 +394,9 @@ Note that Lua has no concept of how many parameters are "supposed to" be
 passed to a function, and from `pack`'s perspective there is a difference
 between `return nil` and just `return`\.  So if `f(a, b, c)` sometimes returns
 `d` and sometimes returns nothing with a bare `return` keyword, or just by
-falling off the end of the function, then sometimes you will get `post_f(d, a,
-b, c)`, and sometimes just `post_f(a, b, c)`\.  So it's important to design
-hookable functions so that they return a consistent number of parameters in
+falling off the end of the function, then sometimes you will get `post_f(d, a,, and sometimes just `post_f(a, b, c)`\.  So it's important to design
+hookable
+b, c)` functions so that they return a consistent number of parameters in
 all cases, padded with `nil`s if necessary\.  This is not idiomatic,
 particularly for functions which return an optional second value under some
 circumstances\.

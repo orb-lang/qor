@@ -21,7 +21,53 @@ local thread = {}
 ```
 
 
+```lua
+local select       = select
+local pack         = pack
+local setmetatable = setmetatable
+local create       = coroutine.create
+local isyieldable  = coroutine.isyieldable
+local resume       = coroutine.resume
+local running      = coroutine.running
+local status       = coroutine.status
+local wrap         = coroutine.wrap
+local yield        = coroutine.yield
+```
+
+
+### observe\(thread, \.\.\.\)
+
+  This replaces the `ok` value of any successful call to a coroutine with its
+status\.  Instead of e\.g\. `true, "value"` we get `'suspended', "value"`\.
+
+There being occasions when suspended vs\. dead is meaningful, this lets us
+smoothly detect the difference between yielded and returned values\.
+
+
+```lua
+function thread.observe(co, ...)
+   local rets = pack(resume(co, ...))
+   local ok, stat = rets[1], status(co)
+   if not ok then
+      error(rets[2])
+   else
+      return stat, unpack(rets, 2)
+   end
+end
+```
+
+For now, I'm leaving this here until I feel like I want it again, if it's
+just a whim or I come up with a better name, we'll cross that stream when we
+bridge it\.
+
+Clearly, to use this we need a nested version\.
+
+Speaking of which:
+
+
 ### nest\(tag\)
+
+\#Original
 
   Assymetric coroutines are the best primitive a single\-threaded language can
 have for cooperative threading\.  They get a bad rap sometimes, exactly because
@@ -43,17 +89,6 @@ that `...` is an anonymous tuple, but a single rvalue, so this is one of those
 cases where it's 'demoted' to the first value, much like `f(a(), b())` will
 use only the first return value of `a` but all of the return values of `b`\.
 
-```lua
-local select       = select
-local setmetatable = setmetatable
-local create       = coroutine.create
-local isyieldable  = coroutine.isyieldable -- luacheck: ignore
-local resume       = coroutine.resume
-local running      = coroutine.running
-local status       = coroutine.status
-local wrap         = coroutine.wrap
-local yield        = coroutine.yield
-```
 
 ##### nest caches
 
@@ -231,9 +266,9 @@ answer, if, for example, we've been passed a coroutine and have two functions
 with which to yield it\.
 
 As a reminder, the only thing this function tells us is if our nest created
-the coroutine\.  It isn't the coroutines which are special, with the exception
-\(an important one\) of the final return value, but rather the nests\.
+the coroutine\.  It isn't the coroutines which are special, with the exceptionan important one\) of the final return value, but rather the nests\.
 
+\(
 ```lua
 function coroutine.ours(co)
    return not not _ours[co]

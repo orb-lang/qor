@@ -12,6 +12,8 @@ local _base = {}
 #/lua
 
 
+** Primitives
+
 *** no_op()
 
 Sometimes you just need =(fn $)= y'know?
