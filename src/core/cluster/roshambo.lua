@@ -39,9 +39,6 @@
 
 
 
-local Set = require "set:set"
-local s   = require "status:status"
-s.verbose = true
 
 
 
@@ -58,132 +55,132 @@ s.verbose = true
 
 
 
-local function beats(roshambo, champ, loser)
-   --needs check for opposite condition,
-   --which is nilled out.
-   if roshambo._beats[loser] and
-      roshambo._beats[loser][champ] then
-      roshambo:pr "reversal of fortune"
-      roshambo._beats[loser] = roshambo._beats[loser] - champ
-      roshambo:pr(roshambo._beats[loser])
-   end
-   champion = roshambo._beats[champ]
-   if champion then
-      champion = champion + Set{loser}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local core, cluster = use ("qor:core", "cluster:cluster")
+local Set = core.set
+
+
+
+
+
+
+
+
+
+
+local new, Roshambo, Rock_M = cluster.order()
+
+cluster.construct(new, function(_new, rock)
+   rock.trials = {}
+   rock.roshambo = {}
+
+   return rock
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local function getSet(rock, scissors)
+   if rock.roshambo[scissors] then
+      return rock.roshambo[scissors]
    else
-      champion = Set{loser}
-   end
-   roshambo._beats[champ] = champion
-   roshambo:pr(champ.." beats "..tostring(roshambo._beats[champ]))
-end
-
-
-
-
-
-
-local function duel(roshambo,champ,challenge)
-   if roshambo._duel_with then
-      roshambo:pr "it's a duel!"
-      local winner, loser = roshambo:_duel_with(champ,challenge)
-      roshambo:beats(winner,loser)
-      return winner, loser
-   else
-      roshambo:pr "victory by fiat"
-      roshambo:beats(champ,challenge)
-      return champ, challenge
+      rock.roshambo[scissors] = Set {}
+      return rock.roshambo[scissors]
    end
 end
 
-
-
-
-
-
-
-
-
-
-
-local function duel_with(roshambo, fn)
-   roshambo._duel_with = fn
+function Roshambo.beats(rock, scissors, paper)
+   assert(scissors ~= nil, "first value can't be nil")
+   assert(paper ~= nil, "second value can't be nil")
+   if rock.roshambo[paper] and rock.roshambo[paper][scissors] then
+      return nil, "contradiction " .. tostring(paper)
+                  .. " beats " .. tostring(scissors)
+   end
+   local losers = getSet(rock, scissors)
+   losers[paper] = true
+   return true
 end
 
 
 
+local insert = table.insert
 
+function Rock_M.__call(rock, scissors, paper)
+   local trial, roshambo = rock.trial, rock.roshambo
+   if roshambo[scissors] and roshambo[scissors][paper] then
+      return scissors
+   elseif roshambo[paper] and roshambo[paper][scissors] then
+      return paper
+   end
+   local victors, vias = {}, {}
+   local victor = nil
 
-
-
-
-local function fight(roshambo, champ, challenge)
-   if roshambo._beats[champ] then
-      if roshambo._beats[champ](challenge) then
-          roshambo:pr(tostring(champ).." wins")
-          return champ, challenge
-      elseif roshambo._beats[challenge] then
-         if roshambo._beats[challenge](champ) then
-            roshambo:pr(tostring(challenge).." wins")
-            return challenge, champ
-         end
-      else --duel here
-         s:verb(tostring(challenge) .. " not found")
-         return duel(roshambo,champ,challenge)
+   for try in pairs(trial) do
+      local contender = try(scissors, paper)
+      if contender ~= nil then
+         insert(victors, contender)
+         insert(vias, try)
+         victor = contender
       end
-   else --duel here as well
-      s:verb(tostring(champ).." not found")
-      return duel(roshambo, champ, challenge)
    end
-end
-
-
-
-
-
-
-
-
-function roshambo_sort(roshambo, champ, challenge)
-   local victor = fight(roshambo, champ, challenge)
-   return victor == champ and true or false
-end
-
-local R = {}
-R.fight = fight
-R.beats = beats
-R.duel_with = duel_with
-R.sort  = roshambo_sort
---- an alias for fight
--- @function __call
--- @param champ
--- @param challenge
--- @within metamethods
-R["__call"] = fight
-R["__index"] = R
-setmetatable(R,{}) -- clu.Meta
-
---- instantiates a roshambo
--- @function Roshambo
--- @param init a optional table of champ/loser key/value pairs.
--- @return an instance of roshambo
-local function Roshambo(init)
-   local rosh = {}
-   rosh._beats = {}
-   if init then
-      if type(init) == "table" then
-         for i,v in pairs(init) do
-            rosh._beats[i] = Set{v}
-         end
+   if not victor then
+      return nil, "which is to win, we do not know"
+   end
+   if #victors == 1 then
+      return victor
+   end
+   if #victors == 2 then
+      if rawequal(victors[1], victors[2]) then
+         return victor
       else
-         error("Roshambo must be initialized with a table")
+         local oneWin, twoWin = roshambo[vias[1]], roshambo[vias[2]]
+         if oneWin and oneWin[vias[2]] then
+            return victors[1]
+         end
+         if twoWin and twoWin[vias[1]] then
+            return victors[2]
+         end
+         return nil, "no tiebreaker for trials with contradictory wins"
       end
    end
-   setmetatable(rosh,R)
-   rosh.foo = "bar"
-   return rosh
+   local same = true
+   for _, contender in ipairs(victors) do
+      same = same and rawequal(victor, contender)
+   end
+   if same then
+      return victor
+   end
+
+   return nil, "can't handle contradictory results \z
+                for " .. #victors .. " trials"
 end
 
 
 
-return Roshambo
+return new
 

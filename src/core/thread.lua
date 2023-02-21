@@ -187,7 +187,6 @@ end
 
 
 
-
 local function for_resume(co, ok, ...)
    if not ok then
       return ok, ...
@@ -300,7 +299,6 @@ end
 
 
 
-
 function thread.complete(ok, co)
    if ok and status(co) == 'dead' then
       return true
@@ -308,6 +306,7 @@ function thread.complete(ok, co)
       return false
    end
 end
+
 
 
 

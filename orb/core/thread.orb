@@ -187,7 +187,6 @@ of the way of a 'default' use of yield/resume.
 This problem is solved with a rather splendid and dense bit of code.
 
 #!lua
-
 local function for_resume(co, ok, ...)
    if not ok then
       return ok, ...
@@ -292,7 +291,6 @@ end
 put the condition/restart system.
 
 
-
 ** Thread Predicates
 
 
@@ -309,6 +307,7 @@ function thread.complete(ok, co)
    end
 end
 #/lua
+
 
 *** onloop()
 

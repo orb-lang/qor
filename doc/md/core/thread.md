@@ -185,7 +185,6 @@ of the way of a 'default' use of yield/resume\.
 This problem is solved with a rather splendid and dense bit of code\.
 
 ```lua
-
 local function for_resume(co, ok, ...)
    if not ok then
       return ok, ...
@@ -266,9 +265,9 @@ answer, if, for example, we've been passed a coroutine and have two functions
 with which to yield it\.
 
 As a reminder, the only thing this function tells us is if our nest created
-the coroutine\.  It isn't the coroutines which are special, with the exceptionan important one\) of the final return value, but rather the nests\.
+the coroutine\.  It isn't the coroutines which are special, with the exception
+\(an important one\) of the final return value, but rather the nests\.
 
-\(
 ```lua
 function coroutine.ours(co)
    return not not _ours[co]
@@ -290,7 +289,6 @@ end
 put the condition/restart system\.
 
 
-
 ## Thread Predicates
 
 
@@ -307,6 +305,7 @@ function thread.complete(ok, co)
    end
 end
 ```
+
 
 ### onloop\(\)
 
